@@ -5,9 +5,9 @@ class BizException(Exception):
 
 
 class Error:
-    def __init__(self):
-        self.message = None
-        self.code = None
+    def __init__(self, biz_e):
+        self.message = biz_e.message
+        self.code = biz_e.code
 
     def to_dict(self):
         return {

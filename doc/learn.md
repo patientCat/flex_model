@@ -51,3 +51,29 @@ https://docs.python.org/zh-cn/3/library/unittest.html
 使用go test 的类似写法，使用xxx_test 进行命名。
 
 ## 定义业务异常
+```python
+class BizException(Exception):
+    def __init__(self, code: str, message: str):
+        self.code = code
+        self.message = message
+```
+
+个人倾向于使用string定义错误码。方便可读性。
+
+定义全局异常处理
+```python
+@app.errorhandler(Exception)
+def error_handler(e):
+    """
+    全局异常捕获
+    """
+    error = Error()
+    if isinstance(e, BizException):
+        error.message = e.message
+        error.code = e.code
+    else:
+        error.message = f"error={e}"
+        error.code = ErrorCode_InternalError
+    response = BizResponse.fail(e)
+    return jsonify(response.dict_msg()), response.status, response.header
+```

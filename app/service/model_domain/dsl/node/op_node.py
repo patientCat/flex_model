@@ -66,3 +66,27 @@ class NotInNode(LeafNode):
 
     def get_op(self):
         return "$nin"
+
+
+class GtNode(LeafNode):
+    def __init__(self, key, op, val):
+        super().__init__(key, op, val)
+
+    def get_op(self):
+        return "gt"
+
+
+class GteNode(LeafNode):
+    def __init__(self, key, op, val):
+        super().__init__(key, op, val)
+
+    def get_op(self):
+        return "gte"
+
+
+class LtNode(LeafNode):
+    def __init__(self, key, op, val):
+        super().__init__(key, op, val)
+
+    def get_op(self):
+        return "gte"
