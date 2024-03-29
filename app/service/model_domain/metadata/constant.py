@@ -1,9 +1,3 @@
-TYPE_NUMBER = "number"
-TYPE_STRING = "string"
-TYPE_BOOL = "boolean"
-TYPE_ARRAY = "array"
-TYPE_OBJECT = "object"
-
 # 长度不超过256，用来存放一些标识，可以建立索引
 FORMAT_SHORT_TEXT = "x-short-text"
 # 存放长文本数据，不可以建立索引
@@ -18,3 +12,7 @@ FORMAT_MANY_TO_ONE = "x-many-to-one"
 FORMAT_ONE_TO_MANY = "x-one-to-many"
 # 多对多关联关系
 FORMAT_MANY_TO_MANY = "x-many-to-many"
+
+
+SCHEMA_KEY_FORMAT = "format"
+SCHEMA_KEY_TYPE = "type"
