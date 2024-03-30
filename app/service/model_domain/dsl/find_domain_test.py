@@ -34,7 +34,7 @@ class TestFindDomain(unittest.TestCase):
             'where': {'name': 'value1'}
         }
 
-        result = self.find_domain_factory.create_find_domain(dict_param)
+        result = self.find_domain_factory.create_domain(dict_param)
         print(result.selector)
         print(result.pagination)
         print(result.where_node.to_dict())

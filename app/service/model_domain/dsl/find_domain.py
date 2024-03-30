@@ -28,7 +28,7 @@ class FindDomainFactory:
         self.pagination_factory = PaginationFactory()
         self.node_factory = NodeFactory()
 
-    def create_find_domain(self, dict_param: dict) -> FindDomain:
+    def create_domain(self, dict_param: dict) -> FindDomain:
         selector = self.selector_factory.create_selector(dict_param)
         pagination = self.pagination_factory.create_pagination(dict_param)
         where_node = self.node_factory.create_node(dict_param)

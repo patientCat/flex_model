@@ -11,6 +11,7 @@ collection = db['my_collection']
 
 # 插入一个文档
 result = collection.insert_one({'name': 'John', 'age': 30})
+print(result.inserted_id)
 
 # 查询文档
 cursor = collection.find({'name': 'John'})
