@@ -1,11 +1,9 @@
 import json
 
-import node_base
+from app.service.model_domain.dsl.node import node_base, op_node, logical_node
 from app.common.error import BizException
 from app.common import errorcode
 from typing import Dict, Optional
-import op_node
-import logical_node
 
 
 def get_first_pair(query: Dict):
@@ -16,18 +14,26 @@ def get_first_pair(query: Dict):
 
 
 class NodeFactory:
+    KEY_WHERE = "where"
+
     def __init__(self, strict: bool = True, ignore_invalid_op: bool = False):
         self.strict = strict
         self.ignore_invalid_op = ignore_invalid_op
         pass
 
-    def create_node(self, query: str) -> node_base.Node:
+    def create_node(self, dict_param: Optional[dict]) -> node_base.WhereNode:
+        if dict_param is None or self.KEY_WHERE not in dict_param:
+            return op_node.EMPTY_NODE
+        else:
+            return self._create_node_from_dict(dict_param[self.KEY_WHERE])
+
+    def _create_node(self, query: str) -> node_base.WhereNode:
         if query is None or query == "":
             return op_node.EMPTY_NODE
         json_query = json.loads(query)
-        return self.create_node_from_dict(json_query)
+        return self._create_node_from_dict(json_query)
 
-    def create_node_from_dict(self, query: Dict) -> node_base.Node:
+    def _create_node_from_dict(self, query: Dict) -> node_base.WhereNode:
         if query is None:
             return op_node.EMPTY_NODE
         pair = get_first_pair(query)
@@ -49,7 +55,7 @@ class NodeFactory:
             continue
         return node_list
 
-    def _create_op_node(self, key: str, obj: Dict) -> Optional[node_base.Node]:
+    def _create_op_node(self, key: str, obj: Dict) -> Optional[node_base.WhereNode]:
         if not isinstance(obj, dict):
             if isinstance(obj, list):
                 raise BizException(errorcode.ErrorCode_InvalidParameter,
@@ -88,7 +94,7 @@ class NodeFactory:
 
         node_list = []
         for query in obj:
-            node = self.create_node_from_dict(query)
+            node = self._create_node_from_dict(query)
             if node is not None:
                 node_list.append(node)
         if len(node_list) == 0:

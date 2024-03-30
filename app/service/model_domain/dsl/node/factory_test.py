@@ -1,23 +1,35 @@
 import unittest
 from factory import NodeFactory
-import op_node
+from app.service.model_domain.dsl.node import op_node
 
 
 class TestFactoryMain(unittest.TestCase):
+    def test_create_simple_node(self):
+        node_factory = NodeFactory()
+        node = node_factory.create_node({'where': {'a': 1}})
+        print(node.to_dict())
+
+    def test_create_empty_node(self):
+        node_factory = NodeFactory()
+        node = node_factory.create_node(None)
+        print(node.to_dict())
+        self.assertIsInstance(node, op_node.EmptyNode)
+
     def test_simple_node(self):
         node_factory = NodeFactory()
-        node = node_factory.create_node("{\"a\":1}")
+        node = node_factory._create_node("{\"a\":1}")
         print(node.to_dict())
 
     def test_and_node(self):
         node_factory = NodeFactory()
-        node = node_factory.create_node("{\"$and\":[{\"time\":{\"$gt\":10000}},{\"time\":{\"$lt\":200000}}]}")
+        node = node_factory._create_node("{\"$and\":[{\"time\":{\"$gt\":10000}},{\"time\":{\"$lt\":200000}}]}")
         print(node.to_dict())
 
     def test_or_node(self):
         node_factory = NodeFactory()
-        node = node_factory.create_node("{\"$or\":[{\"time\":{\"$gt\":10000}},{\"time\":{\"$lt\":200000}}]}")
+        node = node_factory._create_node("{\"$or\":[{\"time\":{\"$gt\":10000}},{\"time\":{\"$lt\":200000}}]}")
         print(node.to_dict())
+
 
 """
 测试子方法失效

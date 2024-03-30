@@ -5,7 +5,7 @@ from abc import abstractmethod, ABCMeta
 """
 
 
-class Node(metaclass=ABCMeta):
+class WhereNode(metaclass=ABCMeta):
     def __init__(self):
         pass
 

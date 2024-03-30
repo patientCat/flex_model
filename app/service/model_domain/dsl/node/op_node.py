@@ -1,8 +1,8 @@
-from node_base import Node
+from app.service.model_domain.dsl.node.node_base import WhereNode
 from abc import abstractmethod
 
 
-class LeafNode(Node):
+class LeafNode(WhereNode):
     def __init__(self, key, op, val):
         super().__init__()
         self.key = key
@@ -73,7 +73,7 @@ class GtNode(LeafNode):
         super().__init__(key, op, val)
 
     def get_op(self):
-        return "gt"
+        return "$gt"
 
 
 class GteNode(LeafNode):
@@ -81,7 +81,7 @@ class GteNode(LeafNode):
         super().__init__(key, op, val)
 
     def get_op(self):
-        return "gte"
+        return "$gte"
 
 
 class LtNode(LeafNode):
@@ -89,4 +89,12 @@ class LtNode(LeafNode):
         super().__init__(key, op, val)
 
     def get_op(self):
-        return "gte"
+        return "$lt"
+
+
+class LteNode(LeafNode):
+    def __init__(self, key, op, val):
+        super().__init__(key, op, val)
+
+    def get_op(self):
+        return "$lte"

@@ -1,5 +1,14 @@
+from enum import Enum
+from typing import Union
+
+
+class ErrorCode(Enum):
+    InternalError = "InternalError"
+    InvalidParameter = "InvalidParameter"
+
+
 class BizException(Exception):
-    def __init__(self, code: str, message: str):
+    def __init__(self, code: Union[str, ErrorCode], message: str):
         self.code = code
         self.message = message
 

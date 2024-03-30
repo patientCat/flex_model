@@ -1,9 +1,9 @@
-from node_base import Node
+from app.service.model_domain.dsl.node.node_base import WhereNode
 from typing import List
 from abc import abstractmethod
 
 
-class ContainerNode(Node):
+class ContainerNode(WhereNode):
     def __init__(self, node_list: List):
         super().__init__()
         self.node_list = node_list
