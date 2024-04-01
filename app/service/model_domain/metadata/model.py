@@ -5,9 +5,16 @@ from dataclasses import dataclass
 
 
 class ModelName:
-    def __init__(self, name, namespace):
+    def __init__(self, name: str, ns: str = "default"):
+        self.namespace = ns
         self.name = name
-        self.namespace = namespace
+
+    def collection_name(self) -> str:
+        if self.namespace is None or self.namespace == "":
+            return self.name
+        else:
+            return f"{self.namespace}_{self.name}"
+
 
 
 @dataclass

@@ -1,7 +1,7 @@
 from abc import abstractmethod
 
 from app.common.error import BizException, ErrorCode
-from app.service.model_domain.metadata.model import ModelContext
+from app.service.model_domain.metadata.model import ModelContext, ModelName
 from app.service.tenant.tenant import TenantContext, DatabaseInfo
 
 
@@ -9,12 +9,12 @@ class ContextHolder:
     pass
 
     @abstractmethod
-    def model_context(self) -> ModelContext:
+    def get_model_context(self, model_name: ModelName) -> ModelContext:
         pass
 
     # 通过模型上下文，拿到数据库上下文
     @abstractmethod
-    def database_info(self, model_ctx: ModelContext) -> DatabaseInfo:
+    def get_database_info(self, tenant_id: str, model_ctx: ModelContext) -> DatabaseInfo:
         pass
 
 
@@ -49,13 +49,13 @@ class TestContextHolder(ContextHolder):
         self.tenant_context = TenantContext.create_from_json(self.example_tenant)
 
     @abstractmethod
-    def model_context(self):
+    def get_model_context(self, model_name: ModelName) -> ModelContext:
         return self.model_context_
 
     @abstractmethod
-    def database_info(self, model_ctx: ModelContext) -> DatabaseInfo:
+    def get_database_info(self, tenant_id, model_ctx: ModelContext) -> DatabaseInfo:
         database_name = model_ctx.database_identity.database_name
-        db_context_ = self.tenant_context.database_info(database_name)
+        db_context_ = self.tenant_context.get_database_info(tenant_id, database_name)
         if db_context_ is None:
             raise BizException(ErrorCode.InternalError,
                                f"database_name={database_name} not exist in tenant={self.tenant_context.id}")

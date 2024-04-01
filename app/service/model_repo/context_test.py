@@ -1,39 +1,36 @@
-from context import DbContext, Table
-from pymongo import MongoClient
 import unittest
+from unittest.mock import Mock
+
+from pymongo import MongoClient
+
+from app.service.model_domain.metadata.model import ModelName
+from app.service.tenant.tenant import DatabaseInfo
+from context import MongoDbContext
 
 
-class ContextTest(unittest.TestCase):
-    def test_collection_name(self):
-        test_db_context = DbContext('mongodb://localhost:27017/', "my_database", Table("my_collection"))
-        self.assertEqual("default_my_collection", test_db_context.table.collection_name())
+class TestMongoDbContext(unittest.TestCase):
+    def setUp(self):
+        self.database_info = Mock(spec=DatabaseInfo)
+        self.database_info.get_db_url.return_value = "mongodb://localhost:27017/"
+        self.database_info.get_db_name.return_value = "test_db"
 
-        test_db_context = DbContext('mongodb://localhost:27017/', "my_database", Table("my_collection", use_ns=False))
-        self.assertEqual("my_collection", test_db_context.table.collection_name())
+        self.model_name = Mock(spec=ModelName)
+        self.model_name.collection_name.return_value = "test_collection"
+
+        self.mongo_db_context = MongoDbContext(self.database_info, self.model_name)
+
+    def test_create_client(self):
+        client = self.mongo_db_context.create_client()
+        self.assertIsInstance(client, MongoClient)
+
+    def test_database_name(self):
+        db_name = self.mongo_db_context.database_name()
+        self.assertEqual(db_name, "test_db")
+
+    def test_table_name(self):
+        table_name = self.mongo_db_context.table_name()
+        self.assertEqual(table_name, "test_collection")
 
 
-db_context = DbContext('mongodb://localhost:27017/', "my_database", Table("my_collection"))
-# 连接到MongoDB服务器
-client = MongoClient(db_context.db_url)
-
-# 选择一个数据库
-db = client[db_context.database_name]
-
-# 选择一个集合（类似于表）
-collection = db[db_context.table.collection_name()]
-
-# 插入一个文档
-result = collection.insert_one({'name': 'John', 'age': 30})
-
-# 查询文档
-cursor = collection.find({'name': 'John'})
-
-# 遍历查询结果并打印
-for doc in cursor:
-    print(doc)
-
-# 更新文档
-collection.update_one({'name': 'John'}, {'$set': {'age': 31}})
-
-# 删除文档
-collection.delete_one({'name': 'John'})
+if __name__ == '__main__':
+    unittest.main()

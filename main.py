@@ -2,6 +2,9 @@
 from types import SimpleNamespace
 
 from flask import Flask, jsonify, request
+
+from app.api.context import ContextHolder
+from app.common.utils import CustomNamespace
 from app.model.biz_response import BizResponse, Error
 from app.model.param.test_response import TestResponse
 from app.common.error import BizException
@@ -20,7 +23,8 @@ def hello():
     return jsonify(success.dict_msg()), success.status, success.header
 
 
-runtime_service = RuntimeService()
+context_holder = ContextHolder()
+runtime_service = RuntimeService(context=context_holder)
 
 
 @app.post("/findOne")
@@ -41,8 +45,8 @@ def findMany():
 @app.post("/createOne")
 def createOne():
     body = request.get_json(force=True)
-    json_body = SimpleNamespace(**body)
-    req = create.CreateOneRequest(json_body.model_name, json_body.param)
+    print(f'body={body}')
+    req = create.CreateOneRequest(**body)
     response = runtime_service.createOne(req)
     success = BizResponse.success(response)
     return jsonify(success.dict_msg()), success.status, success.header
