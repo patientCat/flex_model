@@ -1,0 +1,7 @@
+localhost:8080
+
+### Send POST request with json body
+GET https://localhost:8080/findOne
+
+
+```json

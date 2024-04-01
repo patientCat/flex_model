@@ -1,7 +1,5 @@
 import unittest
 
-from werkzeug.exceptions import BadRequest
-
 from app.common.error import BizException
 from field import ColumnFormat, ColumnType, SchemaColumn
 

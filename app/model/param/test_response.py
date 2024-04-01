@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from ..biz_response import dict_response
+from app.model.biz_response import dict_response
 
 
 @dataclass

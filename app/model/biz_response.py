@@ -1,4 +1,3 @@
-import json
 from app.common.error import Error
 
 

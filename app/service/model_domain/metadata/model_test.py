@@ -50,12 +50,12 @@ class TestModelClass(unittest.TestCase):
 
     def test_schema_column_list(self):
         expected_result = ["_id", "short_text", "show_number", "json_column", "array_column"]
-        actual_result = [col.name for col in list(self.example_model.schema_column_list())]
+        actual_result = [col.id for col in list(self.example_model.schema_column_list())]
         self.assertEqual(actual_result, expected_result)
 
     def test_schema_name(self):
-        self.assertEqual(self.example_model.schema_column("_id").name, "_id")
-        self.assertEqual(self.example_model.schema_column("short_text").name, "short_text")
+        self.assertEqual(self.example_model.schema_column("_id").id, "_id")
+        self.assertEqual(self.example_model.schema_column("short_text").id, "short_text")
 
 
 if __name__ == '__main__':
