@@ -22,7 +22,9 @@ class BizResponse:
         return resmsg
 
     def dict_msg(self):
-        return self.message.dict_msg()
+        return {
+            "Response": self.message.dict_msg()
+        }
 
 
 def dict_response(cls):

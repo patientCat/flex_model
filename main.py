@@ -1,18 +1,18 @@
 # save this as main.py
-from types import SimpleNamespace
+import logging
+import traceback
 
 from flask import Flask, jsonify, request
 
 from app.api.context import ContextHolder
-from app.common.utils import CustomNamespace
-from app.model.biz_response import BizResponse, Error
-from app.model.param.test_response import TestResponse
-from app.common.error import BizException, ErrorCode
-from app.common.errorcode import *
 from app.api.runtime import RuntimeService
+from app.common.error import BizException, ErrorCode
+from app.model.biz_response import BizResponse, Error
 from app.model.param import find, create
+from app.model.param.test_response import TestResponse
 
 app = Flask(__name__)
+logger = logging.getLogger(__name__)
 
 
 @app.route("/")
@@ -30,8 +30,7 @@ runtime_service = RuntimeService(context=context_holder)
 @app.post("/findOne")
 def findOne():
     body = request.get_json(force=True)
-    json_body = SimpleNamespace(**body)
-    req = find.FindOneRequest(json_body.model_name, json_body.param)
+    req = find.FindOneRequest(**body)
     response = runtime_service.findOne(req)
     success = BizResponse.success(response)
     return jsonify(success.dict_msg()), success.status, success.header
@@ -57,6 +56,8 @@ def error_handler(e):
     """
     全局异常捕获
     """
+    logger.error("error=%s", e)
+    logger.error("traceback=%s", traceback.format_exc())
     if isinstance(e, BizException):
         message = e.message
         code = e.code.value

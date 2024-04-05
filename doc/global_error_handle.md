@@ -1,10 +1,23 @@
-# 学习Python3
+# 全局Response返回和异常处理
+
+## 前言
+主要谈在Python中，
+1. 如何进行统一Response处理。
+2. 如何进行全局异常处理。
 
 ## 定义全局Response
 ### BizResponse
 根据Flask所需参数，定义status，message，header
 
-其中message 即我们接口的返回体，一般返回Json类型格式
+返回的header，我们很少关心
+
+返回的status，按照业务返回即可。一般成功返回200。错误根据服务端错误和客户端错误自行确定，项目初期，可以区分下即可。
+
+返回的message 即我们接口的返回体，一般返回Json类型格式
+这里是我们重点关心的地方，要保证有统一的返回结构体。
+
+
+
 app/model/biz_response.py
 
 ### 定义装饰器

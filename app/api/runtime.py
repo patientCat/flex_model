@@ -12,7 +12,8 @@ class RuntimeService:
         self.context = context
 
     def findOne(self, req: FindOneRequest) -> FindOneResponse:
-        return "findOne"
+        resp = FindOneResponse(record={"x":1}, total= 5)
+        return resp
 
     def createOne(self, req: CreateOneRequest) -> CreateOneResponse:
         # 1 validate by schema

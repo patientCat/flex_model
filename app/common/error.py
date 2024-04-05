@@ -20,6 +20,6 @@ class Error:
 
     def dict_msg(self):
         return {
-            "message": self.message,
-            "code": self.code
+            "Message": self.message,
+            "Code": self.code
         }

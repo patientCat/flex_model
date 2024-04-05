@@ -12,6 +12,10 @@ class CreateOneRequest:
 
 
 @dataclass
-@dict_response
 class CreateOneResponse:
     id: str
+
+    def dict_msg(self):
+        return {
+            "Id": self.id,
+        }
