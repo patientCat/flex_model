@@ -7,7 +7,7 @@ from app.api.context import ContextHolder
 from app.common.utils import CustomNamespace
 from app.model.biz_response import BizResponse, Error
 from app.model.param.test_response import TestResponse
-from app.common.error import BizException
+from app.common.error import BizException, ErrorCode
 from app.common.errorcode import *
 from app.api.runtime import RuntimeService
 from app.model.param import find, create
@@ -57,14 +57,13 @@ def error_handler(e):
     """
     全局异常捕获
     """
-    error = Error()
     if isinstance(e, BizException):
-        error.message = e.message
-        error.code = e.code
+        message = e.message
+        code = e.code.value
     else:
-        error.message = f"error={e}"
-        error.code = ErrorCode_InternalError
-    response = BizResponse.fail(e)
+        message = f"error={e}"
+        code = ErrorCode.InternalError.value
+    response = BizResponse.fail(Error(message, code))
     return jsonify(response.dict_msg()), response.status, response.header
 
 

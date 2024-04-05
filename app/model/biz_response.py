@@ -9,15 +9,15 @@ class BizResponse:
         pass
 
     @staticmethod
-    def success(message) -> "BizResponse":
+    def success(response) -> "BizResponse":
         resmsg = BizResponse()
-        resmsg.message = message
+        resmsg.message = response
         return resmsg
 
     @staticmethod
     def fail(error: Error) -> "BizResponse":
         resmsg = BizResponse()
-        resmsg.data = error
+        resmsg.message = error
         resmsg.status = 400
         return resmsg
 
