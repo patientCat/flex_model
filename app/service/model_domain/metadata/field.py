@@ -59,7 +59,7 @@ class SchemaColumn(MetaColumn):
         try:
             return ColumnFormat(_format)
         except ValueError:
-            raise BizException(errorcode.ErrorCode_InvalidParameter, f"Invalid format for {_format}")
+            raise BizException(ErrorCode.InvalidParameter, f"Invalid format for {_format}")
 
     @property
     def type(self) -> ColumnType:
@@ -67,7 +67,7 @@ class SchemaColumn(MetaColumn):
         try:
             return ColumnType(_type)
         except ValueError:
-            raise BizException(errorcode.ErrorCode_InvalidParameter, f"Invalid type for {_type}")
+            raise BizException(ErrorCode.InvalidParameter, f"Invalid type for {_type}")
 
     def is_relation(self) -> bool:
         return self.format in RELATION_FORMAT_LIST

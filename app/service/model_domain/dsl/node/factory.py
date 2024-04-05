@@ -1,8 +1,7 @@
 import json
 
 from app.service.model_domain.dsl.node import node_base, op_node, logical_node
-from app.common.error import BizException
-from app.common import errorcode
+from app.common.error import BizException, ErrorCode
 from typing import Dict, Optional
 
 
@@ -58,7 +57,7 @@ class NodeFactory:
     def _create_op_node(self, key: str, obj: Dict) -> Optional[node_base.WhereNode]:
         if not isinstance(obj, dict):
             if isinstance(obj, list):
-                raise BizException(errorcode.ErrorCode_InvalidParameter,
+                raise BizException(ErrorCode.InvalidParameter,
                                    f"invalid type {obj}, type={type(obj)} is not dict or single_val")
             else:
                 return op_node.EqNode(key, "$eq", obj)
@@ -85,11 +84,11 @@ class NodeFactory:
         if self.ignore_invalid_op:
             return None
         else:
-            raise BizException(errorcode.ErrorCode_InvalidParameter, f"op={op} is invalid")
+            raise BizException(ErrorCode.InvalidParameter, f"op={op} is invalid")
 
     def _process_logical_node(self, logical_key, obj):
         if not isinstance(obj, list):
-            raise BizException(errorcode.ErrorCode_InvalidParameter,
+            raise BizException(ErrorCode.InvalidParameter,
                                f"logical node expect list type but get {type(obj)}")
 
         node_list = []
@@ -107,4 +106,4 @@ class NodeFactory:
 
         if self.ignore_invalid_op:
             return None
-        raise BizException(errorcode.ErrorCode_InvalidParameter, f"invalid logical node = {logical_key}")
+        raise BizException(ErrorCode.InvalidParameter, f"invalid logical node = {logical_key}")

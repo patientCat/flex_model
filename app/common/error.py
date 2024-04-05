@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import Union
 
 
 class ErrorCode(Enum):
@@ -14,12 +13,14 @@ class BizException(Exception):
 
 
 class Error:
-    def __init__(self, msg:str, code:str):
+    def __init__(self, msg: str, code: str):
         self.message = msg
         self.code = code
 
     def dict_msg(self):
         return {
-            "Message": self.message,
-            "Code": self.code
+            "Error": {
+                "Message": self.message,
+                "Code": self.code
+            }
         }
