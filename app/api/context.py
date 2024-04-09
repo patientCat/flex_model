@@ -1,7 +1,10 @@
 from abc import abstractmethod
 
+from loguru import logger
+
+from app.common import utils
 from app.common.error import BizException, ErrorCode
-from app.service.model_domain.metadata.model import ModelContext, ModelName
+from app.service.model_domain.metadata.model import ModelContext, ModelNameCtx
 from app.service.tenant.tenant import TenantContext, DatabaseInfo
 
 
@@ -9,7 +12,7 @@ class ContextHolder:
     pass
 
     @abstractmethod
-    def get_model_context(self, model_name: ModelName) -> ModelContext:
+    def get_model_context(self, tenant_id: str, model_name: ModelNameCtx) -> ModelContext:
         pass
 
     # 通过模型上下文，拿到数据库上下文
@@ -34,9 +37,8 @@ class TestContextHolder(ContextHolder):
         "name": "tenant",
         "database_map": {
             "test_database": {
-                "host": "localhost",
-                "port": 27017,
-                "database_name": "test_database",
+                "db_url": "mongodb://localhost:27017/",
+                "database_name": "test_db",
                 "user": "",
                 "password": ""
             }
@@ -45,18 +47,19 @@ class TestContextHolder(ContextHolder):
 
     def __init__(self):
         super().__init__()
-        self.model_context_ = ModelContext.create_from_schema(self.example_schema)
-        self.tenant_context = TenantContext.create_from_json(self.example_tenant)
+        self.__model_context: ModelContext = ModelContext.create_from_schema(self.example_schema)
+        self.__tenant_context: TenantContext = TenantContext.create_from_json(self.example_tenant)
 
     @abstractmethod
-    def get_model_context(self, model_name: ModelName) -> ModelContext:
-        return self.model_context_
+    def get_model_context(self, tenant_id, model_name: ModelNameCtx) -> ModelContext:
+        return self.__model_context
 
     @abstractmethod
     def get_database_info(self, tenant_id, model_ctx: ModelContext) -> DatabaseInfo:
         database_name = model_ctx.database_identity.database_name
-        db_context_ = self.tenant_context.get_database_info(tenant_id, database_name)
+        logger.info("tenant_context={}", utils.toJSON(self.__tenant_context))
+        db_context_ = self.__tenant_context.get_database_info(database_name)
         if db_context_ is None:
             raise BizException(ErrorCode.InternalError,
-                               f"database_name={database_name} not exist in tenant={self.tenant_context.id}")
+                               f"database_name={database_name} not exist in tenant={self.__tenant_context.id}")
         return db_context_

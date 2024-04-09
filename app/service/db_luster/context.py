@@ -2,17 +2,17 @@ from abc import abstractmethod
 
 from pymongo import MongoClient
 
-from app.service.model_domain.metadata.model import ModelName
+from app.service.model_domain.metadata.model import ModelNameCtx
 from app.service.tenant.tenant import DatabaseInfo
 
 
 class DbContext:
     @abstractmethod
-    def database_name(self):
+    def database_name(self) -> str:
         pass
 
     @abstractmethod
-    def table_name(self):
+    def col_name(self) -> str:
         pass
 
     @abstractmethod
@@ -21,16 +21,16 @@ class DbContext:
 
 
 class MongoDbContext(DbContext):
-    def __init__(self, database_info : DatabaseInfo, model_name: ModelName):
+    def __init__(self, database_info: DatabaseInfo, model_name: ModelNameCtx):
         super().__init__()
-        self._database_info = database_info
+        self.__database_info:DatabaseInfo = database_info
         self.model_name = model_name
 
     def create_client(self):
-        return MongoClient(self._database_info.get_db_url())
+        return MongoClient(self.__database_info.db_url)
 
     def database_name(self):
-        return self._database_info.get_db_name()
+        return self.__database_info.database_name
 
-    def table_name(self):
+    def col_name(self):
         return self.model_name.collection_name()

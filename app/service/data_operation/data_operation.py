@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from app.service.model_domain.metadata.model import ModelContext, ModelName
+from app.service.model_domain.metadata.model import ModelContext, ModelNameCtx
 
 """
 根据模型对数据库进行增删查改

@@ -1,9 +1,8 @@
 from abc import ABC, abstractmethod
 from enum import Enum
 
-from app.common.error import BizException
+from app.common.error import BizException, ErrorCode
 from app.service.model_domain.metadata import constant
-from app.common import errorcode
 
 
 class ColumnFormat(Enum):

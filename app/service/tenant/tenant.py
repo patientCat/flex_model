@@ -1,21 +1,15 @@
+from dataclasses import dataclass
+from typing import Optional
+
 from app.common import utils
 
 
+@dataclass
 class DatabaseInfo:
-    def __init__(self, id: str = "", host: str = "", port: int = "27017", database_name: str = "", user: str = "",
-                 password: str = ""):
-        self.id = id
-        self.host = host
-        self.port = port
-        self.database_name = database_name
-        self.user = user
-        self.password = password
-
-    def get_db_url(self):
-        pass
-
-    def get_db_name(self):
-        return self.database_name
+    db_url: str
+    database_name: str
+    user: str
+    password: str
 
 
 class TenantContext:
@@ -36,10 +30,15 @@ class TenantContext:
             tenant_ctx.database_map = namespace.database_map
         return tenant_ctx
 
-    def database_info(self, database_name: str) -> DatabaseInfo:
-        database = self.database_map.get(database_name, None)
+    def get_database_info(self, database_name: str) -> Optional[DatabaseInfo]:
+        database: Optional[dict] = self.database_map.get(database_name, None)
         print(f"database:{database}")
         if database is None:
             return None
         else:
-            return DatabaseInfo("id", **database)
+            return DatabaseInfo(
+                db_url=database.get("db_url"),
+                database_name=database.get("database_name"),
+                user=database.get("user"),
+                password=database.get("password"),
+            )

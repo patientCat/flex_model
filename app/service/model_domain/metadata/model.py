@@ -1,11 +1,12 @@
+from dataclasses import dataclass
+from typing import Dict, List
+
 from app.common.error import ErrorCode, BizException
 from app.service.model_domain.metadata import field
-from typing import Dict, List
-from dataclasses import dataclass
 
 
-class ModelName:
-    def __init__(self, name: str, ns: str = "default"):
+class ModelNameCtx:
+    def __init__(self, name: str, ns: str = None):
         self.namespace = ns
         self.name = name
 
@@ -16,7 +17,6 @@ class ModelName:
             return f"{self.namespace}_{self.name}"
 
 
-
 @dataclass
 class DatabaseIdentity:
     database_name: str
@@ -24,8 +24,8 @@ class DatabaseIdentity:
 
 
 class ModelContext:
-    def __init__(self, model_name: ModelName, database_identity: DatabaseIdentity, key_2_schema_column_map: dict):
-        self.model_name: ModelName = model_name
+    def __init__(self, model_name: ModelNameCtx, database_identity: DatabaseIdentity, key_2_schema_column_map: dict):
+        self.model_name: ModelNameCtx = model_name
         self.database_identity: DatabaseIdentity = database_identity
         self.key_2_schema_column_map: Dict[str, field.SchemaColumn] = key_2_schema_column_map
 
@@ -35,7 +35,7 @@ class ModelContext:
         if model_name is None or model_name == "":
             raise BizException(ErrorCode.InternalError, "x-model-name not set")
         namespace = json_schema.get("x-namespace")
-        model_name = ModelName(model_name, namespace)
+        model_name = ModelNameCtx(model_name, namespace)
         database_name = json_schema.get("x-database-name")
         if database_name is None or database_name == "":
             raise BizException(ErrorCode.InternalError, "x-database-name not set")
@@ -46,7 +46,8 @@ class ModelContext:
         for k, v in properties.items():
             column = field.SchemaColumn(k, v)
             key_2_schema_column[k] = column
-        return ModelContext(model_name=model_name, database_identity=database_id, key_2_schema_column_map=key_2_schema_column)
+        return ModelContext(model_name=model_name, database_identity=database_id,
+                            key_2_schema_column_map=key_2_schema_column)
 
     def schema_column_list(self) -> List[field.SchemaColumn]:
         # return value of key_2_schema_column_map

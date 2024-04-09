@@ -77,9 +77,21 @@ class BizResponse:
         return {
             "Response": self.message.dict_msg()
         }
+
+@dataclass
+class TestResponse:
+    id: str
+    
+    def dict_msg(self):
+        # 手动改为大写开头的格式
+        return {
+            "Id": self.id,
+        }
+
 ```
 所以在BizResponse中，直接使用message的dict_msg()方法，不用关心具体的类型。
 同时这也意味着我们所有的返回Response，都应该实现这个方法。
+[详细示例请看](/app/model/biz_response_test.py)
 
 到此为止，我们就能完全统一我们的返回结构体。
 
