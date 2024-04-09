@@ -23,6 +23,11 @@ class PaginationFactory:
 
         return self._create_pagination(limit, offset)
 
+    def create_one_pagination(self) -> Pagination:
+        limit = 1
+        offset = 0
+        return self._create_pagination(limit, offset)
+
     def _create_pagination(self, limit: Optional[int], offset: Optional[int]) -> Pagination:
         if limit is None:
             limit = 10

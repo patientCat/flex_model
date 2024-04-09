@@ -14,6 +14,24 @@ class FindOneRequest:
 @dataclass
 class FindOneResponse:
     record: dict
+
+    def dict_msg(self):
+        return {
+            "Record": self.record,
+        }
+
+
+class FindManyRequest:
+    def __init__(self, **kwargs):
+        self.model_name: str = kwargs.get('ModelName')
+        self.model_namespace: str = kwargs.get('ModelNamespace')
+        self.tenant_id: str = kwargs.get('TenantId')
+        self.param: dict = kwargs.get('Param')
+
+
+@dataclass
+class FindManyResponse:
+    record: dict
     total: int
 
     def dict_msg(self):

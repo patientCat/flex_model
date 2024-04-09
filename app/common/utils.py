@@ -10,8 +10,9 @@ class CustomNamespace:
 
 
 def toJSON(obj):
+    if obj is None:
+        return None
     return json.dumps(
         obj,
         default=lambda o: o.__dict__,
-        sort_keys=True,
-        indent=4)
+        )

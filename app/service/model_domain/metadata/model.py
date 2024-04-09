@@ -10,6 +10,7 @@ class ModelNameCtx:
         self.namespace = ns
         self.name = name
 
+    @property
     def collection_name(self) -> str:
         if self.namespace is None or self.namespace == "":
             return self.name

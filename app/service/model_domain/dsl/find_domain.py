@@ -30,6 +30,6 @@ class FindDomainFactory:
 
     def create_domain(self, dict_param: dict) -> FindDomain:
         selector = self.selector_factory.create_selector(dict_param)
-        pagination = self.pagination_factory.create_pagination(dict_param)
+        pagination = self.pagination_factory.create_one_pagination()
         where_node = self.node_factory.create_node(dict_param)
         return FindDomain(selector, pagination, where_node)

@@ -2,6 +2,7 @@
 import traceback
 
 from flask import Flask, jsonify, request
+from flask_restful import reqparse, Api, Resource
 from loguru import logger
 
 from app.api.context import TestContextHolder
@@ -12,8 +13,7 @@ from app.model.param import find, create
 from app.model.param.test_response import TestResponse
 
 app = Flask(__name__)
-
-
+api = Api(app)
 
 
 @app.route("/")
@@ -27,31 +27,46 @@ def hello():
 context_holder = TestContextHolder()
 runtime_service = RuntimeService(context=context_holder)
 
-
-@app.post("/findOne")
-def findOne():
-    body = request.get_json(force=True)
-    req = find.FindOneRequest(**body)
-    response = runtime_service.findOne(req)
-    success = BizResponse.success(response)
-    return jsonify(success.dict_msg()), success.status, success.header
+parser = reqparse.RequestParser()
+parser.add_argument('ModelName', type=str, required=True)
+parser.add_argument('TenantId', type=str, required=True)
+parser.add_argument('Param', type=dict, required=True)
 
 
-@app.post("/findMany")
-def findMany():
-    return "findMany"
+class FindOne(Resource):
+    def post(self):
+        args = parser.parse_args()
+        req = find.FindOneRequest(**args)
+        response = runtime_service.findOne(req)
+        success = BizResponse.success(response)
+        return success.dict_msg(), 200
 
 
-@app.post("/createOne")
-def createOne():
-    body = request.get_json(force=True)
-    logger.info('body={}'.format(str(body)))
-    req = create.CreateOneRequest(**body)
-    response = runtime_service.createOne(req)
-    logger.info('response={}'.format(str(response)))
-    success = BizResponse.success(response)
-    return jsonify(success.dict_msg()), success.status, success.header
+class FindMany(Resource):
+    def post(self):
+        args = parser.parse_args()
+        req = find.FindOneRequest(**args)
+        response = runtime_service.findMany(req)
+        success = BizResponse.success(response)
+        return success.dict_msg(), 200
 
+
+class CreateOne(Resource):
+    def post(self):
+        args = parser.parse_args()
+        req = create.CreateOneRequest(**args)
+        response = runtime_service.createOne(req)
+        success = BizResponse.success(response)
+        return success.dict_msg(), 201
+
+class CreateMany(Resource):
+    def post(self):
+        args = parser.parse_args()
+        logger.info("args={}", args)
+        req = create.CreateManyRequest(**args)
+        response = runtime_service.createMany(req)
+        success = BizResponse.success(response)
+        return success.dict_msg(), 201
 
 @app.errorhandler(Exception)
 def error_handler(e):
@@ -69,6 +84,11 @@ def error_handler(e):
     response = BizResponse.fail(Error(message, code))
     return jsonify(response.dict_msg()), response.status, response.header
 
+
+api.add_resource(FindOne, '/FindOne')
+api.add_resource(FindMany, '/FindMany')
+api.add_resource(CreateOne, '/CreateOne')
+api.add_resource(CreateMany, '/CreateMany')
 
 if __name__ == '__main__':
     app.run(port=8080, debug=True)

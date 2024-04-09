@@ -9,13 +9,16 @@ from app.service.model_domain.metadata.model import ModelContext
 
 
 class TestFindDomain(unittest.TestCase):
-    example_schema = {"type": "object",
-                      "properties": {
-                          "id": {"type": "integer", "x-format": "x-short-text"},
-                          "name": {"type": "number", "x-format": "x-number"},
-                          "relation": {"type": "number", "x-format": "x-many-to-one"}
-                      }
-                      }
+    example_schema = {
+        "x-model-name":"test-model",
+        "x-database-name":"test-database",
+        "type": "object",
+        "properties": {
+          "id": {"type": "integer", "x-format": "x-short-text"},
+          "name": {"type": "number", "x-format": "x-number"},
+          "relation": {"type": "number", "x-format": "x-many-to-one"}
+        }
+      }
 
     def setUp(self):
         self.model_context = ModelContext.create_from_schema(self.example_schema)

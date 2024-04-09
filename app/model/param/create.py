@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 
-from app.model.biz_response import dict_response
 
 
 class CreateOneRequest:
@@ -17,4 +16,21 @@ class CreateOneResponse:
     def dict_msg(self):
         return {
             "Id": self.id,
+        }
+
+
+class CreateManyRequest:
+    def __init__(self, **kwargs):
+        self.model_name: str = kwargs.get('ModelName')
+        self.tenant_id: str = kwargs.get('TenantId')
+        self.param: dict = kwargs.get('Param')
+
+
+@dataclass
+class CreateManyResponse:
+    id_list: list
+
+    def dict_msg(self):
+        return {
+            "IdList": self.id_list
         }

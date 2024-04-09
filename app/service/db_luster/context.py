@@ -21,10 +21,10 @@ class DbContext:
 
 
 class MongoDbContext(DbContext):
-    def __init__(self, database_info: DatabaseInfo, model_name: ModelNameCtx):
+    def __init__(self, database_info: DatabaseInfo, collection_name: str):
         super().__init__()
         self.__database_info:DatabaseInfo = database_info
-        self.model_name = model_name
+        self.__collection_name = collection_name
 
     def create_client(self):
         return MongoClient(self.__database_info.db_url)
@@ -33,4 +33,4 @@ class MongoDbContext(DbContext):
         return self.__database_info.database_name
 
     def col_name(self):
-        return self.model_name.collection_name()
+        return self.__collection_name
