@@ -1,7 +1,6 @@
 import unittest
-from enum import Enum
 
-from app.common.error import ErrorCode, BizException, Error
+from app.common.error import *
 
 
 class TestErrorCode(unittest.TestCase):
@@ -15,8 +14,20 @@ class TestBizException(unittest.TestCase):
         try:
             raise BizException(ErrorCode.InternalError, "An internal error occurred")
         except BizException as e:
-            self.assertEqual(e.code, ErrorCode.InternalError)
+            self.assertEqual(e.code, ErrorCode.InternalError.value)
             self.assertEqual(e.message, "An internal error occurred")
+
+    def test_replace_holder(self):
+        msg = replace_placeholders('{0}, {1}', 'hello', 'world')
+        print(msg)
+
+    def test_ez_error_code_exception(self):
+        try:
+            raise BizException(ezcode=EzErrorCodeEnum.InvalidKeyNotFound, arg_list=["hello", "world"])
+        except BizException as e:
+            print(e.message)
+            print(e.code)
+            self.assertTrue(e.code == ErrorCode.InvalidParameter.value)
 
 
 class TestError(unittest.TestCase):

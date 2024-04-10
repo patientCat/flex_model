@@ -1,4 +1,4 @@
-from app.service.model_domain.dsl.node.node_base import WhereNode
+from app.domain.lowcode_model.dsl.node.node_base import WhereNode
 from typing import List
 from abc import abstractmethod
 

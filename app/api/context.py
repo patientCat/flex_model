@@ -4,8 +4,8 @@ from loguru import logger
 
 from app.common import utils
 from app.common.error import BizException, ErrorCode
-from app.service.model_domain.metadata.model import ModelContext, ModelNameCtx
-from app.service.tenant.tenant import TenantContext, DatabaseInfo
+from app.domain.lowcode_model.model_ctx.model import ModelContext, ModelNameCtx
+from app.domain.tenant.tenant import TenantContext, DatabaseInfo
 
 
 class ContextHolder:
@@ -58,8 +58,8 @@ class TestContextHolder(ContextHolder):
     def get_database_info(self, tenant_id, model_ctx: ModelContext) -> DatabaseInfo:
         database_name = model_ctx.database_identity.database_name
         logger.info("tenant_context={}", utils.toJSON(self.__tenant_context))
-        db_context_ = self.__tenant_context.get_database_info(database_name)
-        if db_context_ is None:
+        database_info = self.__tenant_context.get_database_info(database_name)
+        if database_info is None:
             raise BizException(ErrorCode.InternalError,
                                f"database_name={database_name} not exist in tenant={self.__tenant_context.id}")
-        return db_context_
+        return database_info

@@ -13,6 +13,9 @@ collection = db['my_collection']
 result = collection.insert_one({'name': 'John', 'age': 30})
 print(result.inserted_id)
 
+# 查询count
+total = collection.count_documents({'name': 'John12'})
+print(total)
 # 查询文档
 cursor = collection.find({'name': 'John'})
 

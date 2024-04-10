@@ -1,6 +1,6 @@
 import unittest
 from factory import NodeFactory
-from app.service.model_domain.dsl.node import op_node
+from app.domain.lowcode_model.dsl.node import op_node
 
 
 class TestFactoryMain(unittest.TestCase):

@@ -1,6 +1,6 @@
 import json
 
-from app.service.model_domain.dsl.node import node_base, op_node, logical_node
+from app.domain.lowcode_model.dsl.node import node_base, op_node, logical_node
 from app.common.error import BizException, ErrorCode
 from typing import Dict, Optional
 

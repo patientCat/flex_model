@@ -6,13 +6,13 @@ from loguru import logger
 from app.api.context import ContextHolder
 from app.common import utils
 from app.common.error import BizException, ErrorCode
-from app.model.param.create import CreateOneRequest, CreateOneResponse, CreateManyRequest, CreateManyResponse
-from app.model.param.find import FindOneRequest, FindOneResponse, FindManyRequest, FindManyResponse
-from app.service.db_luster.context import MongoDbContext
-from app.service.db_luster.mongo import reposervice
-from app.service.model_domain.dsl.create_domain import CreateDomainFactory
-from app.service.model_domain.dsl.find_domain import FindDomainFactory
-from app.service.model_domain.metadata.model import ModelNameCtx
+from app.domain.database_ctx.context import MongoDbContext
+from app.domain.database_ctx.mongo import reposervice
+from app.domain.lowcode_model.dsl.dsl_domain import DomainFactory
+from app.domain.lowcode_model.model_ctx.model import ModelNameCtx
+from app.model.param.runtime import UpdateOneRequest, UpdateOneResponse, UpdateManyResponse, UpdateManyRequest, \
+    FindOneRequest, FindOneResponse, FindManyRequest, FindManyResponse, CreateOneRequest, CreateOneResponse, \
+    CreateManyResponse, CreateManyRequest
 
 
 class RuntimeService:
@@ -41,11 +41,11 @@ class RuntimeService:
         dbcontext = self._get_database_context(model_context, model_name_ctx, req)
 
         # 4. 获取Factory
-        find_domain = FindDomainFactory(model_context).create_domain(req.param)
-        create_repo = reposervice.FindRepoService(dbcontext, find_domain)
-        record = create_repo.apply()
+        mongo_repo = reposervice.MongoRepoService(dbcontext)
+        find_domain = DomainFactory(model_context).find_domain(req.param)
+        record, total = mongo_repo.apply_find(find_domain)
         logger.info("record={}".format(record))
-        resp = FindOneResponse(record=record)
+        resp = FindOneResponse(record=record, total=total)
         return resp
 
     def findMany(self, req: FindManyRequest) -> FindManyResponse:
@@ -55,11 +55,11 @@ class RuntimeService:
         dbcontext = self._get_database_context(model_context, model_name_ctx, req)
 
         # 4. 获取Factory
-        find_domain = FindDomainFactory(model_context).create_domain(req.param)
-        create_repo = reposervice.FindRepoService(dbcontext, find_domain)
-        record = create_repo.apply()
-        logger.info("record={}".format(record))
-        resp = FindManyResponse(record={"x": 1}, total=5)
+        mongo_repo = reposervice.MongoRepoService(dbcontext)
+        find_many_domain = DomainFactory(model_context).find_many_domain(req.param)
+        record, total = mongo_repo.apply_find_many(find_many_domain)
+        logger.info("record_list={}, total={}".format(record, total))
+        resp = FindManyResponse(record=record, total=total)
         return resp
 
     def createOne(self, req: CreateOneRequest) -> CreateOneResponse:
@@ -70,9 +70,9 @@ class RuntimeService:
         db_context = self._get_database_context(model_context, model_name_ctx, req)
 
         # 4. 获取Factory
-        create_domain = CreateDomainFactory(model_context).create_domain(req.param)
-        create_repo = reposervice.CreateRepoService(db_context, create_domain)
-        insert_id = create_repo.apply(create_domain)
+        domain = DomainFactory(model_context).domain(req.param)
+        mongo_repo = reposervice.MongoRepoService(db_context)
+        insert_id = mongo_repo.apply_create(domain)
         resp = CreateOneResponse(id=insert_id)
         return resp
 
@@ -84,8 +84,36 @@ class RuntimeService:
         db_context = self._get_database_context(model_context, model_name_ctx, req)
 
         # 4. 获取Factory
-        create_many_domain = CreateDomainFactory(model_context).create_many_domain(req.param)
-        create_repo = reposervice.CreateRepoService(db_context)
-        insert_id_list = create_repo.apply_many(create_many_domain)
+        create_many_domain = DomainFactory(model_context).create_many_domain(req.param)
+        mongo_repo = reposervice.MongoRepoService(db_context)
+        insert_id_list = mongo_repo.apply_many(create_many_domain)
         resp = CreateManyResponse(id_list=insert_id_list)
+        return resp
+
+    def updateOne(self, req: UpdateOneRequest) -> UpdateOneResponse:
+        # 1. TODO validate by schema
+        model_context, model_name_ctx = self._get_model_context(req.tenant_id, req.model_name)
+
+        # 3. 获取database_info
+        db_context = self._get_database_context(model_context, model_name_ctx, req)
+
+        # 4. 获取Factory
+        domain = DomainFactory(model_context).update_domain(req.param)
+        mongo_repo = reposervice.MongoRepoService(db_context)
+        count = mongo_repo.apply_update(domain)
+        resp = UpdateOneResponse(count=count)
+        return resp
+    
+    def updateMany(self, req: UpdateManyRequest) -> UpdateManyResponse:
+        # 1. TODO validate by schema
+        model_context, model_name_ctx = self._get_model_context(req.tenant_id, req.model_name)
+
+        # 3. 获取database_info
+        db_context = self._get_database_context(model_context, model_name_ctx, req)
+
+        # 4. 获取Factory
+        domain = DomainFactory(model_context).update_many_domain(req.param)
+        mongo_repo = reposervice.MongoRepoService(db_context)
+        count = mongo_repo.apply_update_many(domain)
+        resp = UpdateManyResponse(count=count)
         return resp

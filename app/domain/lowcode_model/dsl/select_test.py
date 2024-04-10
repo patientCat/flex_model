@@ -2,9 +2,9 @@ import unittest
 from typing import Dict, Union
 from unittest.mock import MagicMock
 
-from app.service.model_domain.metadata.field import SchemaColumn
-from ..metadata import model
-from .select import Selector, SelectorFactory
+from app.domain.lowcode_model.model_ctx.field import SchemaColumn
+from ..model_ctx import model
+from .dsl_param import Selector, SelectorFactory
 
 
 class TestSelector(unittest.TestCase):

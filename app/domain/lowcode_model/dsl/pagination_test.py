@@ -1,4 +1,4 @@
-from .pagination import PaginationFactory
+from .find_option import PaginationFactory
 
 import unittest
 from app.common.error import BizException, ErrorCode

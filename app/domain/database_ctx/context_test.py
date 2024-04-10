@@ -3,8 +3,8 @@ from unittest.mock import Mock
 
 from pymongo import MongoClient
 
-from app.service.model_domain.metadata.model import ModelNameCtx
-from app.service.tenant.tenant import DatabaseInfo
+from app.domain.lowcode_model.model_ctx.model import ModelNameCtx
+from app.domain.tenant.tenant import DatabaseInfo
 from context import MongoDbContext
 
 
