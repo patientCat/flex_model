@@ -50,7 +50,6 @@ curl -X POST -H "Content-Type: application/json" 'http://127.0.0.1:8080/FindMany
         "limit": 3,
         "offset": 0,
         "where": {
-            "name": "foo"
         }
     }
 }'
@@ -111,7 +110,7 @@ curl -X POST  -H "Content-Type: application/json" 'http://127.0.0.1:8080/UpdateO
     "TenantId": "tnt_test",
     "Param": {
       "where": {
-        "name": "foo"
+        "name": "123"
       },
       "data":{
         "name": "foo",
@@ -127,7 +126,7 @@ curl -X POST  -H "Content-Type: application/json" 'http://127.0.0.1:8080/UpdateM
     "TenantId": "tnt_test",
     "Param": {
       "where": {
-        "name": "foo"
+        "name": "123"
       },
       "data":{
         "name": "foo",

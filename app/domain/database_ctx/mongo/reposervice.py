@@ -41,7 +41,10 @@ def do_update(collection, query, data, update_many=False) -> int:
     update = {
         "$set": data
     }
-    result = collection.update_many(query, update)
+    if update_many:
+        result = collection.update_many(query, update)
+    else:
+        result = collection.update_one(query, update)
     return result.modified_count
 
 
