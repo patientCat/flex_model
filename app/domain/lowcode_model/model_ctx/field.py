@@ -17,6 +17,7 @@ class ColumnFormat(Enum):
     def get_enum_value(self):
         return getattr(self, "_enum_value", None)
 
+
 class ColumnType(Enum):
     NUMBER = "number"
     STRING = "string"

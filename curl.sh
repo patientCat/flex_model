@@ -81,7 +81,7 @@ curl -X POST  -H "Content-Type: application/json" 'http://127.0.0.1:8080/CreateO
     "Param": {
       "data":{
         "name": "foo",
-        "age": 1
+        "age": "1"
       }
     }
 }'
@@ -98,7 +98,7 @@ curl -X POST  -H "Content-Type: application/json" 'http://127.0.0.1:8080/CreateM
       },
       {
         "name": "bar",
-        "age": 2
+        "age": "2"
       }]
     }
 }'

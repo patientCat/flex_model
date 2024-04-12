@@ -19,6 +19,7 @@ class EzErrorCodeEnum(Enum):
     InvalidKeyNotFound = EzErrorCode("InvalidParameter", "key {0} not found, please refer to {1}")
     InvalidTypeOfValue = EzErrorCode("InvalidParameter",
                                      "key {0} value type error, type should be {1}, please refer to {2}")
+    SchemaValidFail = EzErrorCode("InvalidParameter", "key {0}, error info :{1}, please check your param")
 
 
 def replace_placeholders(template, *args):

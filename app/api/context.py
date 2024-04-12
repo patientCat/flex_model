@@ -4,7 +4,7 @@ from loguru import logger
 
 from app.common import utils
 from app.common.error import BizException, ErrorCode
-from app.domain.lowcode_model.model_ctx.model import ModelContext, ModelNameCtx
+from app.domain.lowcode_model.model_ctx.model import ModelContext, ModelNameContext
 from app.domain.tenant.tenant import TenantContext, DatabaseInfo
 
 
@@ -12,7 +12,7 @@ class ContextHolder:
     pass
 
     @abstractmethod
-    def get_model_context(self, tenant_id: str, model_name: ModelNameCtx) -> ModelContext:
+    def get_model_context(self, tenant_id: str, model_name: ModelNameContext) -> ModelContext:
         pass
 
     # 通过模型上下文，拿到数据库上下文
@@ -28,7 +28,8 @@ class TestContextHolder(ContextHolder):
         "type": "object",
         "properties": {
             "id": {"type": "integer", "x-format": "x-short-text"},
-            "name": {"type": "number", "x-format": "x-number"},
+            "name": {"type": "string", "x-format": "x-short-text"},
+            "age": {"type": "number", "x-format": "x-number"},
             "relation": {"type": "number", "x-format": "x-many-to-one"}
         }
     }
@@ -51,7 +52,7 @@ class TestContextHolder(ContextHolder):
         self.__tenant_context: TenantContext = TenantContext.create_from_json(self.example_tenant)
 
     @abstractmethod
-    def get_model_context(self, tenant_id, model_name: ModelNameCtx) -> ModelContext:
+    def get_model_context(self, tenant_id, model_name: ModelNameContext) -> ModelContext:
         return self.__model_context
 
     @abstractmethod

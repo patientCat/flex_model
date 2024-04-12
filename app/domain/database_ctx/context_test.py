@@ -3,7 +3,7 @@ from unittest.mock import Mock
 
 from pymongo import MongoClient
 
-from app.domain.lowcode_model.model_ctx.model import ModelNameCtx
+from app.domain.lowcode_model.model_ctx.model import ModelNameContext
 from app.domain.tenant.tenant import DatabaseInfo
 from context import MongoDbContext
 
@@ -14,7 +14,7 @@ class TestMongoDbContext(unittest.TestCase):
         self.database_info.db_url = "mongodb://localhost:27017/"
         self.database_info.database_name = "test_db"
 
-        self.model_name: ModelNameCtx = ModelNameCtx("test_collection")
+        self.model_name: ModelNameContext = ModelNameContext("test_collection")
 
         self.mongo_db_context = MongoDbContext(self.database_info, self.model_name.collection_name)
 
