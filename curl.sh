@@ -134,3 +134,40 @@ curl -X POST  -H "Content-Type: application/json" 'http://127.0.0.1:8080/UpdateM
       }
     }
 }'
+
+### DeleteOne
+curl -X POST  -H "Content-Type: application/json" 'http://127.0.0.1:8080/DeleteOne' \
+-d '{
+    "ModelName": "luke_test",
+    "TenantId": "tnt_test",
+    "Param": {
+      "where": {
+        "name": "foo"
+      }
+    }
+}'
+
+### DeleteOne check unique
+curl -X POST  -H "Content-Type: application/json" 'http://127.0.0.1:8080/DeleteOne' \
+-d '{
+    "ModelName": "luke_test",
+    "TenantId": "tnt_test",
+    "Param": {
+      "where": {
+        "name": "foo"
+      },
+      "unique":true
+    }
+}'
+
+### DeleteMany
+curl -X POST  -H "Content-Type: application/json" 'http://127.0.0.1:8080/DeleteMany' \
+-d '{
+    "ModelName": "luke_test",
+    "TenantId": "tnt_test",
+    "Param": {
+      "where": {
+        "name": "123"
+      }
+    }
+}'

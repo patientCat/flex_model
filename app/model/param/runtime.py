@@ -100,3 +100,32 @@ class UpdateManyResponse:
         return {
             "Count": self.count
         }
+
+class DeleteOneRequest(BaseRequest):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
+@dataclass
+class DeleteOneResponse:
+    count: int
+
+    def dict_msg(self):
+        return {
+            "Count": self.count,
+        }
+
+
+class DeleteManyRequest(BaseRequest):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
+@dataclass
+class DeleteManyResponse:
+    count: int
+
+    def dict_msg(self):
+        return {
+            "Count": self.count
+        }

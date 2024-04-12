@@ -27,4 +27,4 @@ for doc in cursor:
 collection.update_one({'name': 'John'}, {'$set': {'age': 31}})
 
 # 删除文档
-#collection.delete_one({'name': 'John'})
+collection.delete_one({'name': 'John'})

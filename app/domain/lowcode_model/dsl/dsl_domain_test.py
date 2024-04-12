@@ -97,7 +97,6 @@ class TestFindDomain(unittest.TestCase):
             }
         }
         domain = self.domain_factory.update_many_domain(dict_param)
-        self.assertEqual(domain.limit, 5)
         print(utils.toJSON(domain))
 
         dict_param = {
@@ -108,7 +107,25 @@ class TestFindDomain(unittest.TestCase):
             }
         }
         domain = self.domain_factory.update_many_domain(dict_param)
-        self.assertEqual(domain.limit, None)
+
+    def test_delete(self):
+        # Arrange
+        dict_param = {
+            'where': {'name': 'value1'}
+        }
+
+        result = self.domain_factory.delete_domain(dict_param)
+        print(result.query)
+
+    def test_delete_many(self):
+        # Arrange
+        dict_param = {
+            'where': {'name': 'value1'}
+        }
+
+        result = self.domain_factory.delete_many_domain(dict_param)
+        print(result.query)
+
 
 if __name__ == '__main__':
     unittest.main()

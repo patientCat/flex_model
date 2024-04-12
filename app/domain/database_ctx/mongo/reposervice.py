@@ -4,9 +4,10 @@ from typing import Optional
 import pymongo
 from bson import json_util
 
+from app.common.error import BizException, ErrorCode
 from app.domain.database_ctx import context
 from app.domain.lowcode_model.dsl.dsl_domain import FindDomain, CreateDomain, CreateManyDomain, FindManyDomain, \
-    UpdateDomain, UpdateManyDomain
+    UpdateDomain, UpdateManyDomain, DeleteDomain, DeleteManyDomain
 
 
 def remove_oid_and_date(obj):
@@ -46,6 +47,19 @@ def do_update(collection, query, data, update_many=False) -> int:
     else:
         result = collection.update_one(query, update)
     return result.modified_count
+
+
+def do_delete(collection, query, unique: bool, delete_many: bool):
+    if unique is True:
+        count = collection.count_documents(filter=query)
+        if count > 1:
+            raise BizException(ErrorCode.InvalidParameter, "to delete record not unique")
+
+    if delete_many:
+        result = collection.delete_many(filter=query)
+    else:
+        result = collection.delete_one(filter=query)
+    return result.deleted_count
 
 
 class MongoRepoService:
@@ -125,4 +139,19 @@ class MongoRepoService:
         query = update_domain.query
         data = update_domain.data
         count = do_update(collection, query, data, update_many=True)
+        return count
+
+    def apply_delete(self, domain: DeleteDomain):
+        client, db, collection = self._connect_to_db()
+
+        query = domain.query
+        unique = domain.unique
+        count = do_delete(collection, query, unique=unique, delete_many=False)
+        return count
+
+    def apply_delete_many(self, domain: DeleteManyDomain):
+        client, db, collection = self._connect_to_db()
+
+        query = domain.query
+        count = do_delete(collection, query, unique=False, delete_many=True)
         return count

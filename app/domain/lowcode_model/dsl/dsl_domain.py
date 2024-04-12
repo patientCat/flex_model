@@ -61,6 +61,25 @@ class UpdateManyDomain:
         return self.__data
 
 
+class DeleteDomain:
+    def __init__(self, where: WhereNode, unique: bool = False):
+        self.where = where
+        self.unique = unique
+
+    @property
+    def query(self):
+        return self.where.to_dict()
+
+
+class DeleteManyDomain:
+    def __init__(self, where: WhereNode):
+        self.where = where
+
+    @property
+    def query(self):
+        return self.where.to_dict()
+
+
 class DomainFactory:
     def __init__(self, model_context: ModelContext):
         self.model_context = model_context
@@ -72,6 +91,7 @@ class DomainFactory:
     KEY_DATA = "data"
     KEY_WHERE = "where"
     KEY_LIMIT = "limit"
+    KEY_UNIQUE = "unique"
 
     ERROR_INVALID_DATALIST_VALUE = "value `data` should be List[dict], reference : {'datalist':[{'foo':'bar'}]}"
     ERROR_PARAM_IS_NONE = "param can not be none"
@@ -79,12 +99,21 @@ class DomainFactory:
     EXAMPLE_CREATE_MANY = '{"data":[{"name":"foo", "age":18}]}'
     EXAMPLE_UPDATE_ONE = '{"where":{"name":"foo"}, "data":{"name":"foo", "age":18}}'
     EXAMPLE_UPDATE_MANY = '{"where":{"name":"foo"}, "data":{"name":"foo", "age":18}}'
+    EXAMPLE_DELETE_ONE = '{"where":{"name":"foo"}, "checkUnique":true}'
+    EXAMPLE_DELETE_MANY = '{"where":{"name":"foo"}}'
 
     def __with_count(self, dict_param: dict) -> bool:
         return dict_param.get(self.KEY_WITH_COUNT, False)
 
     def __limit(self, dict_param: dict) -> Optional[int]:
         return dict_param.get(self.KEY_LIMIT, None)
+
+    def __get_unique(self, dict_param: dict) -> bool:
+        value = dict_param.get(self.KEY_UNIQUE, False)
+        if value is None:
+            return False
+        else:
+            return value
 
     def find_domain(self, dict_param: dict) -> FindDomain:
         selector = self.selector_factory.create_selector(dict_param)
@@ -159,3 +188,24 @@ class DomainFactory:
         # todo filter key by model_context
         where_node = self.node_factory.create_node(dict_param)
         return UpdateManyDomain(where=where_node, data=data)
+
+    def delete_domain(self, dict_param):
+        example = self.EXAMPLE_DELETE_ONE
+        if dict_param is None:
+            raise BizException(ErrorCode.InvalidParameter, self.ERROR_PARAM_IS_NONE)
+        if self.KEY_WHERE not in dict_param:
+            raise BizException(ezcode=EzErrorCodeEnum.InvalidKeyNotFound,
+                               arg_list=[self.KEY_WHERE, example])
+        where_node = self.node_factory.create_node(dict_param)
+        unique = self.__get_unique(dict_param)
+        return DeleteDomain(where=where_node, unique=unique)
+
+    def delete_many_domain(self, dict_param):
+        example = self.EXAMPLE_DELETE_MANY
+        if dict_param is None:
+            raise BizException(ErrorCode.InvalidParameter, self.ERROR_PARAM_IS_NONE)
+        if self.KEY_WHERE not in dict_param:
+            raise BizException(ezcode=EzErrorCodeEnum.InvalidKeyNotFound,
+                               arg_list=[self.KEY_WHERE, example])
+        where_node = self.node_factory.create_node(dict_param)
+        return DeleteManyDomain(where=where_node)
