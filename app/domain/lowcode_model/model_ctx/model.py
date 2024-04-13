@@ -53,7 +53,8 @@ class MetadataContext:
             raise BizException(ErrorCode.InvalidParameter, validation_result.error_message)
 
     def validate_on_create_many(self, param: Dict):
-        data: Dict = param.get("data")
+        data: List = param.get("data")
+        print(data)
         validation_result = self.__json_schema_checker.validate_on_create_many(data)
         if validation_result.is_valid:
             return

@@ -45,16 +45,18 @@ def __get_err_msg(validation_error: jsonschema.exceptions.ValidationError) -> st
     return error_msg
 
 
-def _validate_on_create_fail_first(data: Union[List, Dict], json_schema: dict, format_checker) -> ValidationResult:
+def _validate_on_create_fail_first(data: Dict, json_schema: dict, format_checker, idx=None) -> ValidationResult:
     try:
         jsonschema.validate(instance=data, schema=json_schema, format_checker=format_checker)
         return ValidationResult(is_valid=True, error_message=None)
     except jsonschema.exceptions.ValidationError as e:
         error_msg = __get_err_msg(e)
+        if idx is not None:
+            error_msg = "idx = '{0}', {1}".format(idx, error_msg)
         return ValidationResult(is_valid=False, error_message=error_msg)
 
 
-def _validate_on_create_all(data: Union[List, Dict], validator):
+def _validate_on_create_all(data: Union[List, Dict], validator, idx=None):
     rtn_list = []
     error_list = validator.iter_errors(instance=data)
     for e in sorted(error_list, key=str):
@@ -63,10 +65,13 @@ def _validate_on_create_all(data: Union[List, Dict], validator):
     if len(rtn_list) == 0:
         return ValidationResult(is_valid=True, error_message=None)
     else:
-        return ValidationResult(is_valid=False, error_message="\n".join(rtn_list))
+        error_msg = "\n".join(rtn_list)
+        if idx is not None:
+            error_msg = "idx = '{0}', {1}".format(idx, error_msg)
+        return ValidationResult(is_valid=False, error_message=error_msg)
 
 
-def _get_many_schema(json_schema:dict) -> dict:
+def _get_many_schema(json_schema: dict) -> dict:
     new_json_schema = {}
     properties = json_schema.get("properties")
     required = json_schema.get("required")
@@ -80,18 +85,17 @@ def _get_many_schema(json_schema:dict) -> dict:
 
     return json_schema
 
+
 class JsonSchemaChecker:
 
     def __init__(self, json_schema: dict, fail_first: bool = True):
         self.fail_first = fail_first
         self.format_checker = Draft202012Validator.FORMAT_CHECKER
         self.json_schema = json_schema.copy()
-        self.json_schema_create_many = _get_many_schema(json_schema.copy())
         # Remove required field
         self.json_schema_update = remove_required_key(json_schema.copy())
 
         self.validator = jsonschema.Draft202012Validator(self.json_schema)
-        self.validator_create_many = jsonschema.Draft202012Validator(self.json_schema_create_many)
         self.validator.format_checker = self.format_checker
         self.update_validator = jsonschema.Draft202012Validator(self.json_schema_update)
         self.update_validator.format_checker = self.format_checker
@@ -103,10 +107,16 @@ class JsonSchemaChecker:
             return _validate_on_create_all(data, self.validator)
 
     def validate_on_create_many(self, data: list) -> ValidationResult:
-        if self.fail_first:
-            return _validate_on_create_fail_first(data, self.json_schema_create_many, self.format_checker)
-        else:
-            return _validate_on_create_all(data, self.validator_create_many)
+        for idx, value in enumerate(data):
+            if self.fail_first:
+                validation_result = _validate_on_create_fail_first(value, self.json_schema, self.format_checker, idx=idx)
+                if not validation_result.is_valid:
+                    return validation_result
+            else:
+                validation_result = _validate_on_create_all(value, self.validator, idx=idx)
+                if not validation_result.is_valid:
+                    return validation_result
+        return ValidationResult(is_valid=False, error_message=None)
 
     def validate_on_update(self, data: dict):
         if self.fail_first:
