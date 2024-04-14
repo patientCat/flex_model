@@ -40,7 +40,10 @@ class RuntimeService:
         model_name_ctx = model_context.model_name_ctx
         logger.info("get_database_ctx, model_name_ctx={}", utils.toJSON(model_name_ctx))
         database_info = self.context.get_database_info(req.project_id, model_context)
-        logger.info("get_database_ctx, database_info={}", utils.toJSON(database_info))
+        if database_info is None:
+            logger.error(f"get_database_info_fail_with_project_id={req.project_id}")
+            raise BizException(ErrorCode.InvalidParameter, "project_id relate database_info is not exist")
+        logger.info("get_database_ctx, database_info={}",database_info.to_json())
         dbcontext = MongoDbContext(database_info, model_name_ctx.collection_name)
         return dbcontext
 
@@ -74,7 +77,7 @@ class RuntimeService:
 
     def create_one(self, req: CreateOneRequest) -> CreateOneResponse:
         model_context: ModelContext = self._get_model_context(req.project_id, req.model_name)
-        metadata_ctx: MetadataContext = model_context.metadata_ctx
+        metadata_ctx: MetadataContext = model_context.get_master_metadata_ctx(req.project_id)
         metadata_ctx.validate_on_create(req.param)
 
         # 3. 获取database_info
@@ -89,7 +92,7 @@ class RuntimeService:
 
     def create_many(self, req: CreateManyRequest) -> CreateManyResponse:
         model_context = self._get_model_context(req.project_id, req.model_name)
-        metadata_ctx: MetadataContext = model_context.metadata_ctx
+        metadata_ctx: MetadataContext = model_context.get_master_metadata_ctx(req.project_id)
         metadata_ctx.validate_on_create_many(req.param)
 
         # 3. 获取database_info
@@ -104,7 +107,7 @@ class RuntimeService:
 
     def update_one(self, req: UpdateOneRequest) -> UpdateOneResponse:
         model_context = self._get_model_context(req.project_id, req.model_name)
-        metadata_ctx: MetadataContext = model_context.metadata_ctx
+        metadata_ctx: MetadataContext = model_context.get_master_metadata_ctx(req.project_id)
         metadata_ctx.validate_on_update(req.param)
 
         # 3. 获取database_info
@@ -119,7 +122,7 @@ class RuntimeService:
 
     def update_many(self, req: UpdateManyRequest) -> UpdateManyResponse:
         model_context = self._get_model_context(req.project_id, req.model_name)
-        metadata_ctx: MetadataContext = model_context.metadata_ctx
+        metadata_ctx: MetadataContext = model_context.get_master_metadata_ctx(req.project_id)
         metadata_ctx.validate_on_update(req.param)
 
         # 3. 获取database_info

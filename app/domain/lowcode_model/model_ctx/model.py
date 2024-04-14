@@ -98,7 +98,7 @@ class ModelContext:
     def model_name_ctx(self) -> ModelNameContext:
         return self.__model_name_ctx
 
-    def metadata_ctx(self, project_id) -> MetadataContext:
+    def get_master_metadata_ctx(self, project_id) -> MetadataContext:
         name = self.__model_name_ctx.name
         return self.__metadata_ctx_pool.get_by_name(project_id, name)
 

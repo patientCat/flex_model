@@ -107,7 +107,7 @@ class TestModelClass(unittest.TestCase):
         self.assertEqual(actual_result, expected_result)
 
     def test_schema_field(self):
-        print(self.example_model.metadata_ctx.__dict__)
+        print(self.example_model.get_master_metadata_ctx.__dict__)
 
     def test_schema_name(self):
         self.assertEqual(self.example_model.schema_column("_id").id, "_id")

@@ -1,10 +1,16 @@
 from dataclasses import dataclass
 
+from app.common.error import BizException, ErrorCode
+
 
 class BaseRequest:
     def __init__(self, **kwargs):
         self.model_name: str = kwargs.get('ModelName')
+        if self.model_name is None:
+            raise BizException(ErrorCode.InvalidParameter, 'ModelName is None')
         self.project_id: str = kwargs.get('ProjectId')
+        if self.project_id is None:
+            raise BizException(ErrorCode.InvalidParameter, 'ProjectId is None')
         self.param: dict = kwargs.get('Param')
 
 

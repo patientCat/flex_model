@@ -29,9 +29,10 @@ class ContextHolderImpl(ContextHolder):
     # 通过模型标识获取model_context
     @abstractmethod
     def get_model_context(self, project_id: str, model_name: ModelNameContext) -> ModelContext:
-        return ModelContext.create(model_name_ctx= model_name, model_repo=self.model_repo)
+        return ModelContext.create(model_name_ctx=model_name, model_repo=self.model_repo)
 
     # 通过模型上下文，拿到数据库上下文
     @abstractmethod
     def get_database_info(self, project_id: str, model_ctx: ModelContext) -> DatabaseInfo:
+        print(f"project_id = {project_id}")
         return ProjectContext(project_repo=self.project_repo).get_database_info(project_id=project_id)

@@ -18,7 +18,7 @@ api.add_resource(HelloWorld,
 ```python
 parser = reqparse.RequestParser()
 parser.add_argument('ModelName', type=str, required=True)
-parser.add_argument('TenantId', type=str, required=True)
+parser.add_argument('ProjectId', type=str, required=True)
 parser.add_argument('Param', type=dict, required=True)
 args = parser.parse_args()
 ```

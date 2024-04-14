@@ -16,7 +16,7 @@ class TestAPI(unittest.TestCase):
     def test_find_one(self):
         payload = {
             "ModelName": "luke_test",
-            "ProjectId": "tnt_test",
+            "ProjectId": "default",
             "Param": {
                 "select": {
                     "id": 1,
@@ -30,12 +30,13 @@ class TestAPI(unittest.TestCase):
             }
         }
         response = requests.post(f'{self.url}/FindOne', json=payload, headers=self.headers)
+        print(response.json())
         self.assertEqual(response.status_code, 200)
 
     def test_find_one_with_count(self):
         payload = {
             "ModelName": "luke_test",
-            "ProjectId": "tnt_test",
+            "ProjectId": "default",
             "Param": {
                 "select": {
                     "id": 1,
@@ -55,7 +56,7 @@ class TestAPI(unittest.TestCase):
     def test_find_many(self):
         payload = {
             "ModelName": "luke_test",
-            "ProjectId": "tnt_test",
+            "ProjectId": "default",
             "Param": {
                 "select": {
                     "id": 1,
@@ -75,7 +76,7 @@ class TestAPI(unittest.TestCase):
     def test_create_one(self):
         payload = {
             "ModelName": "luke_test",
-            "ProjectId": "tnt_test",
+            "ProjectId": "default",
             "Param": {
                 "select": {
                     "id": 1,
@@ -95,7 +96,7 @@ class TestAPI(unittest.TestCase):
     def test_create_many(self):
         payload = {
             "ModelName": "luke_test",
-            "ProjectId": "tnt_test",
+            "ProjectId": "default",
             "Param": {
                 "select": {
                     "id": 1,
@@ -115,7 +116,7 @@ class TestAPI(unittest.TestCase):
     def test_update_one(self):
         payload = {
             "ModelName": "luke_test",
-            "ProjectId": "tnt_test",
+            "ProjectId": "default",
             "Param": {
                 "select": {
                     "id": 1,
@@ -135,7 +136,7 @@ class TestAPI(unittest.TestCase):
     def test_update_many(self):
         payload = {
             "ModelName": "luke_test",
-            "ProjectId": "tnt_test",
+            "ProjectId": "default",
             "Param": {
                 "select": {
                     "id": 1,
@@ -155,7 +156,7 @@ class TestAPI(unittest.TestCase):
     def test_delete_one(self):
         payload = {
             "ModelName": "luke_test",
-            "ProjectId": "tnt_test",
+            "ProjectId": "default",
             "Param": {
                 "select": {
                     "id": 1,
@@ -175,7 +176,7 @@ class TestAPI(unittest.TestCase):
     def test_delete_many(self):
         payload = {
             "ModelName": "luke_test",
-            "ProjectId": "tnt_test",
+            "ProjectId": "default",
             "Param": {
                 "select": {
                     "id": 1,
