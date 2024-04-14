@@ -15,3 +15,10 @@
 > 当然，这里不是必须的。取决于每个人自己的想法。
 > 
 > 当你经历过一次将项目mongo迁移到mysql，或者需要替换orm框架的一次经历后，也许你的看法会改变。
+
+
+## 最佳实践
+
+[定义持久化对象模型](/app/repo/po.py)
+[定义操作持久化对象模型接口](/app/repo/interface.py)
+[具体实现](/app/repo/sqlalchemy_impl.py)

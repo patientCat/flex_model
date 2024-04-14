@@ -2,6 +2,9 @@ import json
 from dataclasses import dataclass
 from datetime import datetime
 
+"""
+定义持久化对象模型
+"""
 
 class ProjectPO:
     __tablename__ = 'project'

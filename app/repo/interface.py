@@ -2,6 +2,10 @@ from typing import Optional
 
 from app.repo.po import ModelContextPO, ProjectPO
 
+"""
+定义操作持久化对象接口
+"""
+
 
 class ModelRepo(object):
     def __init__(self, repo_name) -> None:
