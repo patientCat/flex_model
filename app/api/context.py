@@ -5,7 +5,7 @@ from loguru import logger
 from app.common import utils
 from app.common.error import BizException, ErrorCode
 from app.domain.lowcode_model.model_ctx.model import ModelContext, ModelNameContext
-from app.domain.tenant.tenant import TenantContext, DatabaseInfo
+from app.domain.project_ctx.project import ProjectContext, DatabaseInfo
 
 
 class ContextHolder:
@@ -22,17 +22,69 @@ class ContextHolder:
 
 
 class TestContextHolder(ContextHolder):
-    example_schema = {
-        "x-model-name": "test_model",
-        "x-database-name": "test_database",
+    user_schema = {
+        "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
         "properties": {
-            "id": {"type": "integer", "x-format": "x-short-text"},
-            "name": {"type": "string", "x-format": "x-short-text"},
-            "age": {"type": "number", "x-format": "x-number"},
-            "relation": {"type": "number", "x-format": "x-many-to-one"}
-        }
+            "id": {
+                "type": "string",
+                "format": "x-short-text"
+            },
+            "name": {
+                "type": "string",
+                "format": "x-short-text"
+            },
+            "age": {
+                "type": "number",
+                "format": "x-number"
+            },
+            "email": {
+                "type": "string",
+                "format": "email"
+            }
+        },
+        "required": [
+            "id",
+            "name",
+            "age",
+            "email"
+        ]
     }
+
+    profile_schema = {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+            "id": {
+                "type": "string",
+                "format": "x-short-text"
+            },
+            "biography": {
+                "type": "string",
+                "format": "x-short-text"
+            },
+            "userId": {
+                "type": "string",
+                "format": "x-short-text"
+            },
+            "user": {
+                "type": "virtual",
+                "x-relation": {
+                    "field": "userId",
+                    "reference": {
+                        "field": "id",
+                        "model_name": "user"
+                    }
+                }
+            }
+        },
+        "required": [
+            "id",
+            "biography",
+            "userId"
+        ]
+    }
+
 
     example_tenant = {
         "name": "tenant",
@@ -49,7 +101,7 @@ class TestContextHolder(ContextHolder):
     def __init__(self):
         super().__init__()
         self.__model_context: ModelContext = ModelContext.create_from_schema(self.example_schema)
-        self.__tenant_context: TenantContext = TenantContext.create_from_json(self.example_tenant)
+        self.__tenant_context: ProjectContext = ProjectContext.create_from_json(self.example_tenant)
 
     @abstractmethod
     def get_model_context(self, tenant_id, model_name: ModelNameContext) -> ModelContext:

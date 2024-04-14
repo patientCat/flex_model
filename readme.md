@@ -20,7 +20,13 @@
 
 [快速了解schema](/doc/learn/learn_about_schema.md)
 
+#### 定义查询协议
+这里是广义的SQL（Structured Query Language，结构化查询语言）
 
+通过定义一套通用的增，删，查，改协议，来简单操作我们的‘数据库’。
+
+> 为什么不用Odata，要自研呢？ OData过于复杂。更加适合构建复杂系统。对于低码平台来说，往往构建的平台比较简单。
+> 因此，协议最好简单，且容易使用。这里对标Prisma，实现了一套简单的通用协议。
 
 ## Python3工程学习
 [Json和python字典深入学习](/doc/learn/json_and_dict.md)
@@ -28,3 +34,5 @@
 [如何进行统一全局Response结构和处理全局业务异常](/doc/learn/global_error_handle.md)
 
 [使用flask-restful进行controller处理](/doc/learn/flask-restful.md)
+
+[使用sqlalchemy进行数据库处理](/doc/learn/learn_repo.md)

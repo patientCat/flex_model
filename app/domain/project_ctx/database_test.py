@@ -4,8 +4,8 @@ from unittest.mock import Mock
 from pymongo import MongoClient
 
 from app.domain.lowcode_model.model_ctx.model import ModelNameContext
-from app.domain.tenant.tenant import DatabaseInfo
-from context import MongoDbContext
+from app.domain.project_ctx.project import DatabaseInfo
+from database import MongoDbContext
 
 
 class TestMongoDbContext(unittest.TestCase):

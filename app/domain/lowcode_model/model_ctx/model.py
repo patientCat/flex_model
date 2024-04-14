@@ -1,10 +1,9 @@
-from dataclasses import dataclass
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 from app.common.error import ErrorCode, BizException
-from app.domain.database_ctx.context import DatabaseIdentity
 from app.domain.lowcode_model.model_ctx import field
 from app.domain.lowcode_model.model_ctx.json_schema import JsonSchemaChecker
+from app.repo.interface import ModelRepo
 
 
 # ModelNameCtx 模型标识上下文
@@ -70,37 +69,33 @@ class MetadataContext:
             raise BizException(ErrorCode.InvalidParameter, validation_result.error_message)
 
 
+class MetadataContextPool:
+    def __init__(self, model_repo: ModelRepo):
+        self.__metadata_context_pool = dict()
+        self.__model_repo = model_repo
+
+    def get_by_name(self, project_id, name) -> MetadataContext:
+        if name in self.__metadata_context_pool:
+            return self.__metadata_context_pool[name]
+        else:
+            model = self.__model_repo.get_model_by_name(project_id=project_id, model_name=name)
+            # TODO 处理缓存
+            return model
+
+
 class ModelContext:
-    def __init__(self, model_name_ctx: ModelNameContext, database_identity: DatabaseIdentity,
-                 metadata_ctx: MetadataContext):
+    def __init__(self, model_name_ctx: ModelNameContext,
+                 metadata_ctx_pool: MetadataContextPool):
         self.__model_name_ctx: ModelNameContext = model_name_ctx
-        self.__database_identity: DatabaseIdentity = database_identity
-        self.__metadata_ctx = metadata_ctx
-
-    @staticmethod
-    def create_from_schema(json_schema: dict):
-        model_name = json_schema.get("x-model-name")
-        if model_name is None or model_name == "":
-            raise BizException(ErrorCode.InternalError, "x-model-name not set")
-        model_name_ctx = ModelNameContext(model_name)
-        database_name = json_schema.get("x-database-name")
-        if database_name is None or database_name == "":
-            raise BizException(ErrorCode.InternalError, "x-database-name not set")
-        database_id = DatabaseIdentity(database_name, "mongo")
-
-        metadata_ctx = MetadataContext(json_schema)
-        return ModelContext(model_name_ctx=model_name_ctx, database_identity=database_id,
-                            metadata_ctx=metadata_ctx)
+        self.__metadata_ctx_pool = metadata_ctx_pool
 
     @property
     def model_name_ctx(self) -> ModelNameContext:
         return self.__model_name_ctx
 
-    @property
-    def metadata_ctx(self) -> MetadataContext:
-        # return value of key_2_schema_column_map
-        return self.__metadata_ctx
+    def metadata_ctx(self, project_id) -> MetadataContext:
+        name = self.__model_name_ctx.name
+        return self.__metadata_ctx_pool.get_by_name(project_id, name)
 
-    @property
-    def database_identity(self) -> DatabaseIdentity:
-        return self.__database_identity
+    def get_metadata_ctx_by_name(self, project_id, model_name: str) -> MetadataContext:
+        return self.__metadata_ctx_pool.get_by_name(project_id, model_name)

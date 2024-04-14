@@ -1,17 +1,31 @@
 from typing import Optional
 
-from app.repo.po.tenant_po import TenantPO
+from app.repo.po import ModelContextPO, ProjectPO
 
 
-class RepoInterface(object):
+class ModelRepo(object):
     def __init__(self, repo_name) -> None:
         self._repo = repo_name
 
     def init(self) -> None:
         pass
 
-    def get_tenant_by_tenant_id(self, tenant_id) -> Optional[TenantPO]:
+    def get_model_by_name(self, project_id, model_name) -> Optional[ModelContextPO]:
         pass
 
-    def create_tenant(self, tenantPo: TenantPO) -> None:
+    def create_model(self, model_ctx: ModelContextPO) -> None:
+        pass
+
+
+class ProjectRepo(object):
+    def __init__(self, repo_name) -> None:
+        self._repo = repo_name
+
+    def init(self) -> None:
+        pass
+
+    def get_project_by_project_id(self, project_id) -> Optional[ProjectPO]:
+        pass
+
+    def create_project(self, project: ProjectPO) -> None:
         pass

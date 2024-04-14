@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 from pymongo import MongoClient
 
-from app.domain.tenant.tenant import DatabaseInfo
+from app.domain.project_ctx.project import DatabaseInfo
 
 
 ### 数据库标识上下文

@@ -2,7 +2,7 @@ import unittest
 
 from app.common.error import BizException, ErrorCode
 from app.domain.lowcode_model.model_ctx.model import ModelContext
-from app.domain.tenant.tenant import DatabaseInfo
+from app.domain.project_ctx.project import DatabaseInfo
 from .context import TestContextHolder
 
 
