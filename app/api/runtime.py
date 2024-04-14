@@ -1,6 +1,6 @@
 from loguru import logger
 
-from app.api.context import ContextHolder
+from app.api.context import ContextHolder, ContextHolderImpl
 from app.common import utils
 from app.common.error import BizException, ErrorCode
 from app.domain.project_ctx.database import MongoDbContext
@@ -10,31 +10,42 @@ from app.domain.lowcode_model.model_ctx.model import ModelNameContext, ModelCont
 from app.model.param.runtime import UpdateOneRequest, UpdateOneResponse, UpdateManyResponse, UpdateManyRequest, \
     FindOneRequest, FindOneResponse, FindManyRequest, FindManyResponse, CreateOneRequest, CreateOneResponse, \
     CreateManyResponse, CreateManyRequest, DeleteOneRequest, DeleteOneResponse, DeleteManyRequest, DeleteManyResponse
+from app.repo import instance
+from app.repo.interface import ModelRepo, ProjectRepo
 
 
 class RuntimeService:
-    def __init__(self, context: ContextHolder):
+    def __init__(self, context: ContextHolder, project_repo: ProjectRepo, model_repo: ModelRepo):
         self.context = context
+        self.project_repo: ProjectRepo
+        self.model_context_repo: ModelRepo
 
-    def _get_model_context(self, tenant_id: str, model_name: str) -> ModelContext:
+    @staticmethod
+    def create() -> "RuntimeService":
+        instance.init()
+        context = ContextHolderImpl(instance.PROJECT_REPO, instance.MODEL_REPO)
+        return RuntimeService(context, instance.PROJECT_REPO, instance.MODEL_REPO)
+
+    def _get_model_context(self, project_id: str, model_name: str) -> ModelContext:
         model_name_ctx = ModelNameContext(model_name)
         logger.info("model_name_ctx={}", utils.toJSON(model_name_ctx))
 
-        model_context = self.context.get_model_context(tenant_id, model_name_ctx)
+        model_context = self.context.get_model_context(project_id, model_name_ctx)
         if model_context is None:
             raise BizException(ErrorCode.InvalidParameter, f"name={model_name_ctx.name}_model_context is None")
-        logger.info("model_context={}", utils.toJSON(model_context))
+        logger.info("model_context={}", model_context)
         return model_context
 
-    def _get_database_context(self, model_context:ModelContext, req):
+    def _get_database_context(self, model_context: ModelContext, req):
         model_name_ctx = model_context.model_name_ctx
-        logger.info("model_name_ctx={}", utils.toJSON(model_name_ctx))
-        database_info = self.context.get_database_info(req.tenant_id, model_context)
+        logger.info("get_database_ctx, model_name_ctx={}", utils.toJSON(model_name_ctx))
+        database_info = self.context.get_database_info(req.project_id, model_context)
+        logger.info("get_database_ctx, database_info={}", utils.toJSON(database_info))
         dbcontext = MongoDbContext(database_info, model_name_ctx.collection_name)
         return dbcontext
 
     def find_one(self, req: FindOneRequest) -> FindOneResponse:
-        model_context  = self._get_model_context(req.tenant_id, req.model_name)
+        model_context = self._get_model_context(req.project_id, req.model_name)
 
         # 3. 获取database_info
         dbcontext = self._get_database_context(model_context, req)
@@ -48,7 +59,7 @@ class RuntimeService:
         return resp
 
     def find_many(self, req: FindManyRequest) -> FindManyResponse:
-        model_context = self._get_model_context(req.tenant_id, req.model_name)
+        model_context = self._get_model_context(req.project_id, req.model_name)
 
         # 3. 获取database_info
         dbcontext = self._get_database_context(model_context, req)
@@ -62,8 +73,8 @@ class RuntimeService:
         return resp
 
     def create_one(self, req: CreateOneRequest) -> CreateOneResponse:
-        model_context:ModelContext = self._get_model_context(req.tenant_id, req.model_name)
-        metadata_ctx:MetadataContext = model_context.metadata_ctx
+        model_context: ModelContext = self._get_model_context(req.project_id, req.model_name)
+        metadata_ctx: MetadataContext = model_context.metadata_ctx
         metadata_ctx.validate_on_create(req.param)
 
         # 3. 获取database_info
@@ -77,8 +88,8 @@ class RuntimeService:
         return resp
 
     def create_many(self, req: CreateManyRequest) -> CreateManyResponse:
-        model_context = self._get_model_context(req.tenant_id, req.model_name)
-        metadata_ctx:MetadataContext = model_context.metadata_ctx
+        model_context = self._get_model_context(req.project_id, req.model_name)
+        metadata_ctx: MetadataContext = model_context.metadata_ctx
         metadata_ctx.validate_on_create_many(req.param)
 
         # 3. 获取database_info
@@ -92,8 +103,8 @@ class RuntimeService:
         return resp
 
     def update_one(self, req: UpdateOneRequest) -> UpdateOneResponse:
-        model_context = self._get_model_context(req.tenant_id, req.model_name)
-        metadata_ctx:MetadataContext = model_context.metadata_ctx
+        model_context = self._get_model_context(req.project_id, req.model_name)
+        metadata_ctx: MetadataContext = model_context.metadata_ctx
         metadata_ctx.validate_on_update(req.param)
 
         # 3. 获取database_info
@@ -107,8 +118,8 @@ class RuntimeService:
         return resp
 
     def update_many(self, req: UpdateManyRequest) -> UpdateManyResponse:
-        model_context = self._get_model_context(req.tenant_id, req.model_name)
-        metadata_ctx:MetadataContext = model_context.metadata_ctx
+        model_context = self._get_model_context(req.project_id, req.model_name)
+        metadata_ctx: MetadataContext = model_context.metadata_ctx
         metadata_ctx.validate_on_update(req.param)
 
         # 3. 获取database_info
@@ -122,7 +133,7 @@ class RuntimeService:
         return resp
 
     def delete_one(self, req: DeleteOneRequest) -> DeleteOneResponse:
-        model_context = self._get_model_context(req.tenant_id, req.model_name)
+        model_context = self._get_model_context(req.project_id, req.model_name)
 
         # 3. 获取database_info
         db_context = self._get_database_context(model_context, req)
@@ -135,7 +146,7 @@ class RuntimeService:
         return resp
 
     def delete_many(self, req: DeleteManyRequest) -> DeleteManyResponse:
-        model_context = self._get_model_context(req.tenant_id, req.model_name)
+        model_context = self._get_model_context(req.project_id, req.model_name)
 
         # 3. 获取database_info
         db_context = self._get_database_context(model_context, req)

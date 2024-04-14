@@ -5,7 +5,6 @@ from flask import Flask, jsonify
 from flask_restful import reqparse, Api, Resource
 from loguru import logger
 
-from app.api.context import TestContextHolder
 from app.api.runtime import RuntimeService
 from app.common.error import BizException, ErrorCode
 from app.model.biz_response import BizResponse, Error
@@ -24,8 +23,7 @@ def hello():
     return jsonify(success.dict_msg()), success.status, success.header
 
 
-context_holder = TestContextHolder()
-runtime_service = RuntimeService(context=context_holder)
+runtime_service = RuntimeService.create()
 
 parser = reqparse.RequestParser()
 parser.add_argument('ModelName', type=str, required=True)

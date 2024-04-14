@@ -1,4 +1,3 @@
-import copy
 import json
 from datetime import datetime
 from typing import Optional
@@ -16,6 +15,7 @@ from app.repo.po import ModelContextPO, ProjectPO
 # 创建基类
 Base = declarative_base()
 
+db_path = 'sqlite:///database.db'
 
 def copy_value(from_cls, to_cls):
     for k, v in from_cls.__dict__.items():
@@ -29,7 +29,6 @@ class _ProjectPO(Base):
     connection_info = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
 
 
 class ConnectionInfoHolder:
@@ -62,7 +61,7 @@ class SqlModelRepo(ModelRepo):
         self.engine = None
 
     def init(self) -> None:
-        self.engine = create_engine('sqlite:///sqlalchemy_example.db')
+        self.engine = create_engine(db_path)
         Base.metadata.create_all(self.engine)
 
     def get_model_by_name(self, project_id, model_name) -> Optional[ModelContextPO]:
@@ -90,15 +89,15 @@ class SqlProjectRepo(ProjectRepo):
         self.engine = None
 
     def init(self) -> None:
-        self.engine = create_engine('sqlite:///sqlalchemy_example.db')
+        self.engine = create_engine(db_path)
         Base.metadata.create_all(self.engine)
 
     def get_project_by_project_id(self, project_id) -> Optional[ProjectPO]:
         Session = sessionmaker(bind=self.engine)
         session = Session()
         project = (session.query(_ProjectPO)
-                    .filter(_ProjectPO.project_id == project_id)
-                    .first())
+                   .filter(_ProjectPO.project_id == project_id)
+                   .first())
         session.close()
 
         return project

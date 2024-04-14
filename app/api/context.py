@@ -6,113 +6,32 @@ from app.common import utils
 from app.common.error import BizException, ErrorCode
 from app.domain.lowcode_model.model_ctx.model import ModelContext, ModelNameContext
 from app.domain.project_ctx.project import ProjectContext, DatabaseInfo
+from app.repo.interface import ModelRepo, ProjectRepo
 
 
 class ContextHolder:
-    pass
 
     @abstractmethod
-    def get_model_context(self, tenant_id: str, model_name: ModelNameContext) -> ModelContext:
+    def get_model_context(self, project_id: str, model_name: ModelNameContext) -> ModelContext:
         pass
 
     # 通过模型上下文，拿到数据库上下文
     @abstractmethod
-    def get_database_info(self, tenant_id: str, model_ctx: ModelContext) -> DatabaseInfo:
+    def get_database_info(self, project_id: str, model_ctx: ModelContext) -> DatabaseInfo:
         pass
 
 
-class TestContextHolder(ContextHolder):
-    user_schema = {
-        "$schema": "http://json-schema.org/draft-07/schema#",
-        "type": "object",
-        "properties": {
-            "id": {
-                "type": "string",
-                "format": "x-short-text"
-            },
-            "name": {
-                "type": "string",
-                "format": "x-short-text"
-            },
-            "age": {
-                "type": "number",
-                "format": "x-number"
-            },
-            "email": {
-                "type": "string",
-                "format": "email"
-            }
-        },
-        "required": [
-            "id",
-            "name",
-            "age",
-            "email"
-        ]
-    }
+class ContextHolderImpl(ContextHolder):
+    def __init__(self, project_repo: ProjectRepo, model_repo: ModelRepo):
+        self.project_repo = project_repo
+        self.model_repo = model_repo
 
-    profile_schema = {
-        "$schema": "http://json-schema.org/draft-07/schema#",
-        "type": "object",
-        "properties": {
-            "id": {
-                "type": "string",
-                "format": "x-short-text"
-            },
-            "biography": {
-                "type": "string",
-                "format": "x-short-text"
-            },
-            "userId": {
-                "type": "string",
-                "format": "x-short-text"
-            },
-            "user": {
-                "type": "virtual",
-                "x-relation": {
-                    "field": "userId",
-                    "reference": {
-                        "field": "id",
-                        "model_name": "user"
-                    }
-                }
-            }
-        },
-        "required": [
-            "id",
-            "biography",
-            "userId"
-        ]
-    }
-
-
-    example_tenant = {
-        "name": "tenant",
-        "database_map": {
-            "test_database": {
-                "db_url": "mongodb://localhost:27017/",
-                "database_name": "test_db",
-                "user": "",
-                "password": ""
-            }
-        }
-    }
-
-    def __init__(self):
-        super().__init__()
-        self.__model_context: ModelContext = ModelContext.create_from_schema(self.example_schema)
-        self.__tenant_context: ProjectContext = ProjectContext.create_from_json(self.example_tenant)
-
+    # 通过模型标识获取model_context
     @abstractmethod
-    def get_model_context(self, tenant_id, model_name: ModelNameContext) -> ModelContext:
-        return self.__model_context
+    def get_model_context(self, project_id: str, model_name: ModelNameContext) -> ModelContext:
+        return ModelContext.create(model_name_ctx= model_name, model_repo=self.model_repo)
 
+    # 通过模型上下文，拿到数据库上下文
     @abstractmethod
-    def get_database_info(self, tenant_id, model_ctx: ModelContext) -> DatabaseInfo:
-        database_name = model_ctx.database_identity.database_name
-        logger.info("tenant_context={}", utils.toJSON(self.__tenant_context))
-        database_info = self.__tenant_context.get_database_info(database_name)
-        if database_info is None:
-            raise BizException(ErrorCode.InternalError,
-                               f"database_name={database_name} not exist in tenant={self.__tenant_context.id}")
-        return database_info
+    def get_database_info(self, project_id: str, model_ctx: ModelContext) -> DatabaseInfo:
+        return ProjectContext(project_repo=self.project_repo).get_database_info(project_id=project_id)

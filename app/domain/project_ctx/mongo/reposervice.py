@@ -8,6 +8,7 @@ from app.common.error import BizException, ErrorCode
 from app.domain.project_ctx import database
 from app.domain.lowcode_model.dsl.dsl_domain import FindDomain, CreateDomain, CreateManyDomain, FindManyDomain, \
     UpdateDomain, UpdateManyDomain, DeleteDomain, DeleteManyDomain
+from app.domain.project_ctx.database import DbContext
 
 
 def remove_oid_and_date(obj):
@@ -63,8 +64,8 @@ def do_delete(collection, query, unique: bool, delete_many: bool):
 
 
 class MongoRepoService:
-    def __init__(self, db_context: context):
-        self.db_context: context.DbContext = db_context
+    def __init__(self, db_context: DbContext):
+        self.db_context: DbContext = db_context
 
     def _connect_to_db(self):
         # 连接到MongoDB服务器

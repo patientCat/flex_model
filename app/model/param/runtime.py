@@ -4,7 +4,7 @@ from dataclasses import dataclass
 class BaseRequest:
     def __init__(self, **kwargs):
         self.model_name: str = kwargs.get('ModelName')
-        self.tenant_id: str = kwargs.get('TenantId')
+        self.project_id: str = kwargs.get('ProjectId')
         self.param: dict = kwargs.get('Param')
 
 

@@ -4,12 +4,16 @@ from typing import Optional
 from app.repo.interface import ProjectRepo
 
 
-@dataclass
 class DatabaseInfo:
-    db_url: str
-    database_name: str
-    user: str
-    password: str
+    def __init__(self, db_url: str, db_name: str, user: str, password: str):
+        self.__db_url: str = db_url
+        self.database_name: str = db_name
+        self.user: str = user
+        self.password: str = password
+
+    @property
+    def db_url(self) -> str:
+        return self.db_url
 
 
 class ProjectContext:

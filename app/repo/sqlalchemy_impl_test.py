@@ -17,7 +17,7 @@ class TestModelSqlRepoInterface(unittest.TestCase):
         model_ctx.namespace = "default"
         self.repo.create_model(model_ctx)
 
-        # 使用get_tenant_by_tenant_id方法获取租户
+        # 使用get_tenant_by_project_id方法获取租户
         rtn_model = self.repo.get_model_by_name(project_id="test_project_id", model_name="test")
         print(vars(rtn_model))
 
@@ -26,6 +26,9 @@ class TestProjectSqlRepoInterface(unittest.TestCase):
     def setUp(self):
         self.repo = SqlProjectRepo()
         self.repo.init()
+
+    def test_set_up(self):
+        self.setUp()
 
     def test_create_project(self):
         # 创建一个新的project

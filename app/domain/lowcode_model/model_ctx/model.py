@@ -89,6 +89,11 @@ class ModelContext:
         self.__model_name_ctx: ModelNameContext = model_name_ctx
         self.__metadata_ctx_pool = metadata_ctx_pool
 
+    @staticmethod
+    def create(model_name_ctx: ModelNameContext, model_repo: ModelRepo) -> "ModelContext":
+        pool = MetadataContextPool(model_repo=model_repo)
+        return ModelContext(model_name_ctx, pool)
+
     @property
     def model_name_ctx(self) -> ModelNameContext:
         return self.__model_name_ctx
