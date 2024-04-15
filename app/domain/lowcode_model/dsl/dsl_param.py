@@ -1,8 +1,9 @@
 from dataclasses import dataclass
-from typing import Dict, Union, Optional
+from typing import Dict, Union, Optional, List
 
 from app.common.error import BizException, ErrorCode
-from app.domain.lowcode_model.model_ctx import model
+from app.domain.lowcode_model.model_ctx import model, field
+from app.domain.lowcode_model.model_ctx.model import MetadataContext
 
 """
 dsl option
@@ -55,9 +56,11 @@ class SelectorFactory:
 
     def select_all(self) -> Dict[str, Union[int, Dict]]:
         new_select_dict: Dict[str, Union[int, Dict[str, 1]]] = {}
-        for key, column in self.model_context.key_2_schema_column_map.items():
+        master_metadata_ctx: MetadataContext = self.model_context.get_master_metadata_ctx()
+        column_list: List[field.SchemaColumn] = master_metadata_ctx.column_list
+        for column in column_list:
             if not column.is_relation():
-                new_select_dict[key] = 1
+                new_select_dict[column.key] = 1
 
         return new_select_dict
 

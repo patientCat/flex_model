@@ -1,6 +1,8 @@
 import json
 from typing import Dict, List, Optional
 
+import loguru
+
 from app.common.error import ErrorCode, BizException, EzErrorCodeEnum
 from app.domain.lowcode_model.model_ctx import field
 from app.domain.lowcode_model.model_ctx.json_schema import JsonSchemaChecker
@@ -10,9 +12,10 @@ from app.repo.po import ModelPO
 
 # ModelNameCtx 模型标识上下文
 class ModelNameContext:
-    def __init__(self, name: str, ns: str = None):
+    def __init__(self, *, name: str, project_id: str, ns: str = None):
         self.namespace = ns
         self.name = name
+        self.project_id = project_id
 
     @property
     def collection_name(self) -> str:
@@ -58,6 +61,7 @@ class MetadataContext:
         if data is None:
             return
         validation_result = self.__json_schema_checker.validate_on_create_many(data)
+        loguru.logger.info(f"Validation result: {validation_result}")
         if validation_result.is_valid:
             return
         else:
@@ -115,9 +119,9 @@ class ModelContext:
     def model_name_ctx(self) -> ModelNameContext:
         return self.__model_name_ctx
 
-    def get_master_metadata_ctx(self, project_id) -> MetadataContext:
+    def get_master_metadata_ctx(self) -> MetadataContext:
         name = self.__model_name_ctx.name
-        return self.__metadata_ctx_pool.get_by_name(project_id, name)
+        return self.__metadata_ctx_pool.get_by_name(self.__model_name_ctx.project_id, name)
 
-    def get_metadata_ctx_by_name(self, project_id, model_name: str) -> MetadataContext:
-        return self.__metadata_ctx_pool.get_by_name(project_id, model_name)
+    def get_metadata_ctx_by_name(self, model_name: str) -> MetadataContext:
+        return self.__metadata_ctx_pool.get_by_name(self.__model_name_ctx.project_id, model_name)

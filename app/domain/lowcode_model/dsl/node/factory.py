@@ -84,7 +84,7 @@ class NodeFactory:
         if self.ignore_invalid_op:
             return None
         else:
-            raise BizException(ErrorCode.InvalidParameter, f"op={op} is invalid")
+            raise BizException(ErrorCode.InvalidParameter, f"op='{op}' is invalid, please start with '$' or check the op")
 
     def _process_logical_node(self, logical_key, obj):
         if not isinstance(obj, list):

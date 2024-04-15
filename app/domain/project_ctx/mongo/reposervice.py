@@ -1,6 +1,7 @@
 import json
 from typing import Optional
 
+import loguru
 import pymongo
 from bson import json_util
 
@@ -81,7 +82,7 @@ class MongoRepoService:
 
     def apply_create(self, create_domain: CreateDomain) -> str:
         client, db, collection = self._connect_to_db()
-
+        loguru.logger.info(f"create data={create_domain.data}")
         result = collection.insert_one(create_domain.data)
         return str(result.inserted_id)
 
@@ -131,6 +132,8 @@ class MongoRepoService:
 
         query = update_domain.query
         data = update_domain.data
+        loguru.logger.info(f"query={query}_data={data}")
+
         count = do_update(collection, query, data)
         return count
 
@@ -139,6 +142,7 @@ class MongoRepoService:
 
         query = update_domain.query
         data = update_domain.data
+        loguru.logger.info(f"query={query}_data={data}")
         count = do_update(collection, query, data, update_many=True)
         return count
 

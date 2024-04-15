@@ -150,6 +150,7 @@ class DomainFactory:
             raise BizException(ezcode=EzErrorCodeEnum.InvalidKeyNotFound,
                                arg_list=[self.KEY_DATA, self.EXAMPLE_CREATE_MANY])
         data:list = dict_param[self.KEY_DATA]
+        print(f"data={data}")
         if not isinstance(data, list):
             raise BizException(ErrorCode.InvalidParameter, self.ERROR_INVALID_DATALIST_VALUE)
         metadata_ctx.validate_on_create_many(data)

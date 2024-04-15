@@ -1,3 +1,5 @@
+from bson import ObjectId
+
 from app.domain.lowcode_model.dsl.node.node_base import WhereNode
 from abc import abstractmethod
 
@@ -14,7 +16,15 @@ class LeafNode(WhereNode):
         pass
 
     def to_dict(self):
-        return {self.key: {self.get_op(): self.val}}
+        if self.key == "_id":
+            val = self.val
+            if self.op == "$in" or self.op == "$nin":
+                object_val = [ObjectId(id_str) for id_str in val]
+            else:
+                object_val = ObjectId(val)
+            return {self.key: {self.get_op(): object_val}}
+        else:
+            return {self.key: {self.get_op(): self.val}}
 
 
 """

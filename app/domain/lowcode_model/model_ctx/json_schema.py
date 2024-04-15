@@ -119,7 +119,7 @@ class JsonSchemaChecker:
                 validation_result = _validate_on_create_all(value, self.validator, idx=idx)
                 if not validation_result.is_valid:
                     return validation_result
-        return ValidationResult(is_valid=False, error_message=None)
+        return ValidationResult(is_valid=True, error_message=None)
 
     def validate_on_update(self, data: dict):
         if self.fail_first:

@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from enum import Enum
 
+import loguru
+
 from app.common.error import BizException, ErrorCode
 from app.domain.lowcode_model.model_ctx import constant
 
@@ -18,6 +20,7 @@ class ColumnFormat(Enum):
     LONG_TEXT = "x-long-text"
     NUMBER = "x-number"
     JSON = "x-json"
+    EMAIL = "email"
     MANY_TO_ONE = "x-many-to-one"
     ONE_TO_MANY = "x-one-to-many"
     MANY_TO_MANY = "x-many-to-many"
@@ -62,12 +65,13 @@ class SchemaColumn(MetaColumn):
         return self.key
 
     @property
-    def format(self) -> ColumnFormat:
+    def format(self) -> str:
         _format = self.json_val.get(constant.SCHEMA_KEYS["FORMAT"], "")
         try:
-            return ColumnFormat(_format)
+            return ColumnFormat(_format).value
         except ValueError:
-            raise BizException(ErrorCode.InvalidParameter, f"Invalid format for {_format}")
+            loguru.logger.error(f"Invalid format for {_format}")
+            return _format
 
     @property
     def type(self) -> ColumnType:
@@ -78,4 +82,7 @@ class SchemaColumn(MetaColumn):
             raise BizException(ErrorCode.InvalidParameter, f"Invalid type for {_type}")
 
     def is_relation(self) -> bool:
-        return self.format in RELATION_FORMAT_LIST
+        if self.format in RELATION_FORMAT_LIST:
+            return True
+        else:
+            return False

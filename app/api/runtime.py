@@ -27,7 +27,7 @@ class RuntimeService:
         return RuntimeService(context, instance.PROJECT_REPO, instance.MODEL_REPO)
 
     def _get_model_context(self, project_id: str, model_name: str) -> ModelContext:
-        model_name_ctx = ModelNameContext(model_name)
+        model_name_ctx = ModelNameContext(name=model_name, project_id=project_id)
         logger.info("model_name_ctx={}", utils.toJSON(model_name_ctx))
 
         model_context = self.context.get_model_context(project_id, model_name_ctx)
@@ -77,7 +77,7 @@ class RuntimeService:
 
     def create_one(self, req: CreateOneRequest) -> CreateOneResponse:
         model_context: ModelContext = self._get_model_context(req.project_id, req.model_name)
-        metadata_ctx: MetadataContext = model_context.get_master_metadata_ctx(req.project_id)
+        metadata_ctx: MetadataContext = model_context.get_master_metadata_ctx()
         if metadata_ctx is None:
             raise BizException(
                 code=ErrorCode.InvalidParameter,
@@ -99,7 +99,7 @@ class RuntimeService:
 
     def create_many(self, req: CreateManyRequest) -> CreateManyResponse:
         model_context = self._get_model_context(req.project_id, req.model_name)
-        metadata_ctx: MetadataContext = model_context.get_master_metadata_ctx(req.project_id)
+        metadata_ctx: MetadataContext = model_context.get_master_metadata_ctx()
         if metadata_ctx is None:
             raise BizException(
                 code=ErrorCode.InvalidParameter,
@@ -119,7 +119,7 @@ class RuntimeService:
 
     def update_one(self, req: UpdateOneRequest) -> UpdateOneResponse:
         model_context = self._get_model_context(req.project_id, req.model_name)
-        metadata_ctx: MetadataContext = model_context.get_master_metadata_ctx(req.project_id)
+        metadata_ctx: MetadataContext = model_context.get_master_metadata_ctx()
         metadata_ctx.validate_on_update(req.param)
 
         # 3. 获取database_info
@@ -134,7 +134,7 @@ class RuntimeService:
 
     def update_many(self, req: UpdateManyRequest) -> UpdateManyResponse:
         model_context = self._get_model_context(req.project_id, req.model_name)
-        metadata_ctx: MetadataContext = model_context.get_master_metadata_ctx(req.project_id)
+        metadata_ctx: MetadataContext = model_context.get_master_metadata_ctx()
         metadata_ctx.validate_on_update(req.param)
 
         # 3. 获取database_info
