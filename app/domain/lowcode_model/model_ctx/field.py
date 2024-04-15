@@ -6,7 +6,15 @@ from app.domain.lowcode_model.model_ctx import constant
 
 
 class ColumnFormat(Enum):
+    """
+    x-short-text
+    maxLength less than 256
+    """
     SHORT_TEXT = "x-short-text"
+    """
+    x-long-text
+    maxLength less than 512K
+    """
     LONG_TEXT = "x-long-text"
     NUMBER = "x-number"
     JSON = "x-json"

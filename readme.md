@@ -29,6 +29,8 @@
 > 因此，协议最好简单，且容易使用。这里对标Prisma，实现了一套简单的通用协议。
 
 ## Python3工程学习
+[如何编写更加现代的python3]()
+
 [Json和python字典深入学习](/doc/learn/json_and_dict.md)
 
 [如何进行统一全局Response结构和处理全局业务异常](/doc/learn/global_error_handle.md)

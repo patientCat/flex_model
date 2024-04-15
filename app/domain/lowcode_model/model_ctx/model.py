@@ -1,9 +1,11 @@
-from typing import Dict, List
+import json
+from typing import Dict, List, Optional
 
-from app.common.error import ErrorCode, BizException
+from app.common.error import ErrorCode, BizException, EzErrorCodeEnum
 from app.domain.lowcode_model.model_ctx import field
 from app.domain.lowcode_model.model_ctx.json_schema import JsonSchemaChecker
 from app.repo.interface import ModelRepo
+from app.repo.po import ModelPO
 
 
 # ModelNameCtx 模型标识上下文
@@ -43,17 +45,18 @@ class MetadataContext:
     def column_list(self) -> List[field.SchemaColumn]:
         return self.__column_list
 
-    def validate_on_create(self, param: Dict):
-        data = param.get("data")
+    def validate_on_create(self, data: Dict):
+        if data is None:
+            return
         validation_result = self.__json_schema_checker.validate_on_create(data)
         if validation_result.is_valid:
             return
         else:
             raise BizException(ErrorCode.InvalidParameter, validation_result.error_message)
 
-    def validate_on_create_many(self, param: Dict):
-        data: List = param.get("data")
-        print(data)
+    def validate_on_create_many(self, data: list):
+        if data is None:
+            return
         validation_result = self.__json_schema_checker.validate_on_create_many(data)
         if validation_result.is_valid:
             return
@@ -62,6 +65,8 @@ class MetadataContext:
 
     def validate_on_update(self, param: Dict):
         data = param.get("data")
+        if data is None:
+            raise BizException(ezcode=EzErrorCodeEnum.InvalidKeyNotFound, arg_list=["data", '[{"foo":"bar"}]'])
         validation_result = self.__json_schema_checker.validate_on_update(data)
         if validation_result.is_valid:
             return
@@ -74,13 +79,25 @@ class MetadataContextPool:
         self.__metadata_context_pool = dict()
         self.__model_repo = model_repo
 
-    def get_by_name(self, project_id, name) -> MetadataContext:
+    def get_by_name(self, project_id, name) -> Optional[MetadataContext]:
         if name in self.__metadata_context_pool:
             return self.__metadata_context_pool[name]
-        else:
-            model = self.__model_repo.get_model_by_name(project_id=project_id, model_name=name)
-            # TODO 处理缓存
-            return model
+
+        model: ModelPO = self.__model_repo.get_model_by_name(project_id=project_id, model_name=name)
+        if model is None:
+            raise BizException(
+                code=ErrorCode.InvalidParameter,
+                message=f"get_model_by_name_is_none_project_id={project_id}_model_name={name}"
+            )
+        if model.schema is None:
+            raise BizException(
+                code=ErrorCode.InvalidParameter,
+                message=f"model_schema_is_none_project_id={project_id}_model_name={name}"
+            )
+        json_schema = json.loads(model.schema)
+        metadata_ctx = MetadataContext(json_schema=json_schema)
+        self.__metadata_context_pool[name] = metadata_ctx
+        return metadata_ctx
 
 
 class ModelContext:

@@ -61,7 +61,9 @@ Profile Schema
             "format": "x-short-text"
         },
         "user": {
-            "type": "virtual",
+            "type": "object",
+            "properties": {},
+            "format": "x-many-one",
             "x-relation": {
                 "field": "userId",
                 "reference": {
@@ -73,8 +75,7 @@ Profile Schema
     },
     "required": [
         "id",
-        "biography",
-        "userId"
+        "biography"
     ]
 }
 

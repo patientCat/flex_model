@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Optional, List, Dict, Union
 
 import jsonschema
+import loguru
 from jsonschema.validators import Draft202012Validator
 
 
@@ -32,7 +33,8 @@ class ValidationResult:
     error_message: Optional[str]
 
 
-error_template = "key = '{0}', error info : {1}"
+Error_Template = "key = '{0}', error info : {1}"
+Base_Validate_Msg = "data schema validate fail: "
 
 
 def __get_err_msg(validation_error: jsonschema.exceptions.ValidationError) -> str:
@@ -41,7 +43,7 @@ def __get_err_msg(validation_error: jsonschema.exceptions.ValidationError) -> st
     if json_path == "$":
         return emsg
     key = get_key_from_json_path(json_path)
-    error_msg = error_template.format(key, emsg)
+    error_msg = Error_Template.format(key, emsg)
     return error_msg
 
 
@@ -50,10 +52,11 @@ def _validate_on_create_fail_first(data: Dict, json_schema: dict, format_checker
         jsonschema.validate(instance=data, schema=json_schema, format_checker=format_checker)
         return ValidationResult(is_valid=True, error_message=None)
     except jsonschema.exceptions.ValidationError as e:
+        loguru.logger.exception(e)
         error_msg = __get_err_msg(e)
         if idx is not None:
             error_msg = "idx = '{0}', {1}".format(idx, error_msg)
-        return ValidationResult(is_valid=False, error_message=error_msg)
+        return ValidationResult(is_valid=False, error_message=Base_Validate_Msg + error_msg)
 
 
 def _validate_on_create_all(data: Union[List, Dict], validator, idx=None):
@@ -68,7 +71,7 @@ def _validate_on_create_all(data: Union[List, Dict], validator, idx=None):
         error_msg = "\n".join(rtn_list)
         if idx is not None:
             error_msg = "idx = '{0}', {1}".format(idx, error_msg)
-        return ValidationResult(is_valid=False, error_message=error_msg)
+        return ValidationResult(is_valid=False, error_message=Base_Validate_Msg + error_msg)
 
 
 def _get_many_schema(json_schema: dict) -> dict:

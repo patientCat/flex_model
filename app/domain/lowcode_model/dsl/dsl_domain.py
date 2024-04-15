@@ -4,7 +4,7 @@ from app.common.error import ErrorCode, BizException, EzErrorCodeEnum
 from app.domain.lowcode_model.dsl.dsl_param import Selector, SelectorFactory, Pagination, PaginationFactory
 from app.domain.lowcode_model.dsl.node.factory import NodeFactory
 from app.domain.lowcode_model.dsl.node.node_base import WhereNode
-from app.domain.lowcode_model.model_ctx.model import ModelContext
+from app.domain.lowcode_model.model_ctx.model import ModelContext, MetadataContext
 
 
 class FindDomain:
@@ -129,7 +129,7 @@ class DomainFactory:
         with_count = self.__with_count(dict_param)
         return FindManyDomain(selector, pagination, where_node, with_count)
 
-    def create_domain(self, dict_param: Optional[dict]) -> CreateDomain:
+    def create_domain(self, *, dict_param: Optional[dict], metadata_ctx: MetadataContext) -> CreateDomain:
         if dict_param is None:
             raise BizException(ErrorCode.InvalidParameter, self.ERROR_PARAM_IS_NONE)
         if self.KEY_DATA not in dict_param:
@@ -138,18 +138,21 @@ class DomainFactory:
         data = dict_param[self.KEY_DATA]
         if not isinstance(data, dict):
             raise BizException(ErrorCode.InvalidParameter, self.ERROR_PARAM_IS_NONE)
+
+        metadata_ctx.validate_on_create(data)
         # todo filter key by model_context
         return CreateDomain(data=data)
 
-    def create_many_domain(self, dict_param: Optional[dict]) -> CreateManyDomain:
+    def create_many_domain(self, *,  dict_param: Optional[dict], metadata_ctx: MetadataContext) -> CreateManyDomain:
         if dict_param is None:
             raise BizException(ErrorCode.InvalidParameter, self.ERROR_PARAM_IS_NONE)
         if self.KEY_DATA not in dict_param:
             raise BizException(ezcode=EzErrorCodeEnum.InvalidKeyNotFound,
                                arg_list=[self.KEY_DATA, self.EXAMPLE_CREATE_MANY])
-        data = dict_param[self.KEY_DATA]
+        data:list = dict_param[self.KEY_DATA]
         if not isinstance(data, list):
             raise BizException(ErrorCode.InvalidParameter, self.ERROR_INVALID_DATALIST_VALUE)
+        metadata_ctx.validate_on_create_many(data)
         # todo filter key by model_context
         return CreateManyDomain(datalist=data)
 

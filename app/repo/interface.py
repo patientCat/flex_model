@@ -1,6 +1,6 @@
 from typing import Optional
 
-from app.repo.po import ModelContextPO, ProjectPO
+from app.repo.po import ModelPO, ProjectPO
 
 """
 定义操作持久化对象接口
@@ -14,10 +14,10 @@ class ModelRepo(object):
     def init(self) -> None:
         pass
 
-    def get_model_by_name(self, project_id, model_name) -> Optional[ModelContextPO]:
+    def get_model_by_name(self, project_id, model_name) -> Optional[ModelPO]:
         pass
 
-    def create_model(self, model_ctx: ModelContextPO) -> None:
+    def create_model(self, model_ctx: ModelPO) -> None:
         pass
 
 

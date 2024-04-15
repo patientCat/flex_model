@@ -1,6 +1,6 @@
 import unittest
 
-from app.repo.po import ModelContextPO, ProjectPO
+from app.repo.po import ModelPO, ProjectPO
 from app.repo.sqlalchemy_impl import SqlModelRepo, SqlProjectRepo
 
 
@@ -11,7 +11,7 @@ class TestModelSqlRepoInterface(unittest.TestCase):
 
     def test_get_model(self):
         # 创建一个新的租户
-        model_ctx = ModelContextPO()
+        model_ctx = ModelPO()
         model_ctx.model_name = "test"
         model_ctx.project_id = "test_project_id"
         model_ctx.namespace = "default"

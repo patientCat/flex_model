@@ -12,10 +12,30 @@ class TestAPI(unittest.TestCase):
         self.url = 'http://127.0.0.1:8080'
         self.headers = {'Content-Type': 'application/json'}
 
+    def test_base_crud(self):
+        user_model_name = "user"
+        project_id = "default"
+
+        print("step1: create")
+        insert_id = self.create_one(model_name=user_model_name, project_id=project_id, data ={"name":"luke", "age":20})
+        print(f"step1: create success, insert_id: {insert_id}")
+
+    def create_one(self, *, model_name, project_id, data:dict) -> str:
+
+        payload = {
+            "ModelName": model_name,
+            "ProjectId": project_id,
+            "Param": {
+                "data":data
+            }
+        }
+        response = requests.post(f'{self.url}/CreateOne', json=payload, headers=self.headers)
+        self.assertEqual(response.status_code, 201)
+        return response.json().get("Response").get("Id")
 
     def test_find_one(self):
         payload = {
-            "ModelName": "luke_test",
+            "ModelName": "user",
             "ProjectId": "default",
             "Param": {
                 "select": {
@@ -25,7 +45,6 @@ class TestAPI(unittest.TestCase):
                 "limit": 10,
                 "offset": 0,
                 "where": {
-                    "name": "foo"
                 }
             }
         }
@@ -192,6 +211,7 @@ class TestAPI(unittest.TestCase):
         }
         response = requests.post(f'{self.url}/FindOne', json=payload, headers=self.headers)
         self.assertEqual(response.status_code, 200)
+
 
 if __name__ == '__main__':
     unittest.main()

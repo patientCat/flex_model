@@ -1,21 +1,25 @@
 import json
+import logging
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import create_engine, and_
+from sqlalchemy import Column, Integer, String, DateTime, UniqueConstraint, create_engine
+from sqlalchemy import and_
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 from app.repo.interface import ProjectRepo, ModelRepo
-
-from sqlalchemy import Column, Integer, String, DateTime, UniqueConstraint
-from sqlalchemy.ext.declarative import declarative_base
-
-from app.repo.po import ModelContextPO, ProjectPO
+from app.repo.po import ModelPO, ProjectPO
 
 # 创建基类
 Base = declarative_base()
 
-db_path = 'sqlite:///database.db'
+Db_Path = 'sqlite:///database.db'
+Engine = create_engine(Db_Path, echo=True)
+
+# 配置日志记录器
+logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
+
 
 def copy_value(from_cls, to_cls):
     for k, v in from_cls.__dict__.items():
@@ -39,7 +43,7 @@ class ConnectionInfoHolder:
         return self.info_map.get('db_url')
 
 
-class _ModelContextPO(Base):
+class _ModelPO(Base):
     __tablename__ = 'model'
     id = Column(Integer, primary_key=True)
     model_name = Column(String)
@@ -61,22 +65,22 @@ class SqlModelRepo(ModelRepo):
         self.engine = None
 
     def init(self) -> None:
-        self.engine = create_engine(db_path)
+        self.engine = Engine
         Base.metadata.create_all(self.engine)
 
-    def get_model_by_name(self, project_id, model_name) -> Optional[ModelContextPO]:
+    def get_model_by_name(self, project_id, model_name) -> Optional[ModelPO]:
         Session = sessionmaker(bind=self.engine)
         session = Session()
-        model = (session.query(_ModelContextPO)
-                 .filter(and_(_ModelContextPO.project_id == project_id, _ModelContextPO.model_name == model_name))
+        model = (session.query(_ModelPO)
+                 .filter(and_(_ModelPO.project_id == project_id, _ModelPO.model_name == model_name))
                  .first())
         session.close()
         return model
 
-    def create_model(self, model_ctx: ModelContextPO) -> None:
+    def create_model(self, model_ctx: ModelPO) -> None:
         Session = sessionmaker(bind=self.engine)
         session = Session()
-        _model_ctx: _ModelContextPO = _ModelContextPO()
+        _model_ctx: _ModelPO = _ModelPO()
         copy_value(model_ctx, _model_ctx)
         session.add(_model_ctx)
         session.commit()
@@ -89,7 +93,7 @@ class SqlProjectRepo(ProjectRepo):
         self.engine = None
 
     def init(self) -> None:
-        self.engine = create_engine(db_path)
+        self.engine = Engine
         Base.metadata.create_all(self.engine)
 
     def get_project_by_project_id(self, project_id) -> Optional[ProjectPO]:

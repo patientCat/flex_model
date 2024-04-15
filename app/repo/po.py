@@ -6,6 +6,7 @@ from datetime import datetime
 定义持久化对象模型
 """
 
+
 class ProjectPO:
     __tablename__ = 'project'
     id: int
@@ -24,7 +25,7 @@ class ConnectionInfoHolder:
 
 
 @dataclass
-class ModelContextPO:
+class ModelPO:
     __tablename__ = 'model'
     id: int
     model_name: str

@@ -27,7 +27,7 @@ def replace_placeholders(template, *args):
 
 
 class BizException(Exception):
-    def __init__(self, code: ErrorCode = None, message: str = None, ezcode: EzErrorCodeEnum = None,
+    def __init__(self, code: ErrorCode = None, message: str = None, *, ezcode: EzErrorCodeEnum = None,
                  arg_list: list = None):
         self.__code = None
         if code is not None:

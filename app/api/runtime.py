@@ -43,7 +43,7 @@ class RuntimeService:
         if database_info is None:
             logger.error(f"get_database_info_fail_with_project_id={req.project_id}")
             raise BizException(ErrorCode.InvalidParameter, "project_id relate database_info is not exist")
-        logger.info("get_database_ctx, database_info={}",database_info.to_json())
+        logger.info("get_database_ctx, database_info={}", database_info.to_json())
         dbcontext = MongoDbContext(database_info, model_name_ctx.collection_name)
         return dbcontext
 
@@ -78,13 +78,20 @@ class RuntimeService:
     def create_one(self, req: CreateOneRequest) -> CreateOneResponse:
         model_context: ModelContext = self._get_model_context(req.project_id, req.model_name)
         metadata_ctx: MetadataContext = model_context.get_master_metadata_ctx(req.project_id)
-        metadata_ctx.validate_on_create(req.param)
+        if metadata_ctx is None:
+            raise BizException(
+                code=ErrorCode.InvalidParameter,
+                message=f"metadata_ctx not exist, model_name={req.model_name}, project_id={req.project_id}"
+            )
+        domain = DomainFactory(model_context).create_domain(
+            dict_param=req.param,
+            metadata_ctx=metadata_ctx
+        )
 
         # 3. 获取database_info
         db_context = self._get_database_context(model_context, req)
 
         # 4. 获取Factory
-        domain = DomainFactory(model_context).create_domain(req.param)
         mongo_repo = reposervice.MongoRepoService(db_context)
         insert_id = mongo_repo.apply_create(domain)
         resp = CreateOneResponse(id=insert_id)
@@ -93,13 +100,18 @@ class RuntimeService:
     def create_many(self, req: CreateManyRequest) -> CreateManyResponse:
         model_context = self._get_model_context(req.project_id, req.model_name)
         metadata_ctx: MetadataContext = model_context.get_master_metadata_ctx(req.project_id)
-        metadata_ctx.validate_on_create_many(req.param)
-
+        if metadata_ctx is None:
+            raise BizException(
+                code=ErrorCode.InvalidParameter,
+                message=f"metadata_ctx not exist, model_name={req.model_name}, project_id={req.project_id}"
+            )
+        create_many_domain = DomainFactory(model_context).create_many_domain(
+            dict_param=req.param, metadata_ctx=metadata_ctx
+        )
         # 3. 获取database_info
         db_context = self._get_database_context(model_context, req)
 
         # 4. 获取Factory
-        create_many_domain = DomainFactory(model_context).create_many_domain(req.param)
         mongo_repo = reposervice.MongoRepoService(db_context)
         insert_id_list = mongo_repo.apply_create_many(create_many_domain)
         resp = CreateManyResponse(id_list=insert_id_list)
