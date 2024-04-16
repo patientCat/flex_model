@@ -28,8 +28,20 @@
 > 为什么不用Odata，要自研呢？ OData过于复杂。更加适合构建复杂系统。对于低码平台来说，往往构建的平台比较简单。
 > 因此，协议最好简单，且容易使用。这里对标Prisma，实现了一套简单的通用协议。
 
+
+### 实现自动化测试用例
+目前的项目是一个微服务项目。不可避免的会依赖一些其诸如数据库。因此我们的项目除了单元测试以外，还需要进行集成测试。
+
+所以这里提供最基础的自动测试用例。
+
+/autotest
+
+后续可以接入流水线，作为部署后的自动化测试。
+
+
 ## Python3工程学习
 [如何编写更加现代的python3]()
+
 
 [Json和python字典深入学习](/doc/learn/json_and_dict.md)
 
@@ -38,3 +50,5 @@
 [使用flask-restful进行controller处理](/doc/learn/flask-restful.md)
 
 [使用sqlalchemy进行数据库处理](/doc/learn/learn_repo.md)
+
+[如何接入流水线]()

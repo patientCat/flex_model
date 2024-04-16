@@ -10,8 +10,8 @@ from app.domain.lowcode_model.model_ctx.model import ModelContext
 
 class TestFindDomain(unittest.TestCase):
     example_schema = {
-        "x-model-name": "test-model",
-        "x-database-name": "test-database",
+        "x-model-name": "autotest-model",
+        "x-database-name": "autotest-database",
         "type": "object",
         "properties": {
             "id": {"type": "integer", "x-format": "x-short-text"},

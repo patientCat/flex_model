@@ -33,7 +33,7 @@ class MetadataContext:
 
     @property
     def __dict__(self) -> dict:
-        return {"json_schema": self.__json_schema, "test": True}
+        return {"json_schema": self.__json_schema, "autotest": True}
 
     @staticmethod
     def get_column_list_from_schema(json_schema: dict) -> list:

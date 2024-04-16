@@ -12,13 +12,13 @@ class TestModelSqlRepoInterface(unittest.TestCase):
     def test_get_model(self):
         # 创建一个新的租户
         model_ctx = ModelPO()
-        model_ctx.model_name = "test"
+        model_ctx.model_name = "autotest"
         model_ctx.project_id = "test_project_id"
         model_ctx.namespace = "default"
         self.repo.create_model(model_ctx)
 
         # 使用get_tenant_by_project_id方法获取租户
-        rtn_model = self.repo.get_model_by_name(project_id="test_project_id", model_name="test")
+        rtn_model = self.repo.get_model_by_name(project_id="test_project_id", model_name="autotest")
         print(vars(rtn_model))
 
 

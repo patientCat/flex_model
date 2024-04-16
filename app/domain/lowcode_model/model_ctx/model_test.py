@@ -61,7 +61,7 @@ class TestModelClass(unittest.TestCase):
         self.schema = example_schema = {
             "x-model-name": "quick_start",
             "x-namespace": "namespace1",
-            "x-database-name": "test",
+            "x-database-name": "autotest",
             "type": "object",
             "properties": {
                 "_id": {

@@ -12,7 +12,7 @@ class TestToString(unittest.TestCase):
                 self.a = a
                 self.b = b
 
-        test_obj = TestClass(1, "test")
+        test_obj = TestClass(1, "autotest")
         print(test_obj)
 
         @to_string
