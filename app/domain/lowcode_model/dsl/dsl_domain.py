@@ -115,21 +115,21 @@ class DomainFactory:
         else:
             return value
 
-    def find_domain(self, dict_param: dict) -> FindDomain:
+    def find_domain(self, *, dict_param: dict) -> FindDomain:
         selector = self.selector_factory.create_selector(dict_param)
         pagination = self.pagination_factory.create_one_pagination()
         where_node = self.node_factory.create_node(dict_param)
         with_count = self.__with_count(dict_param)
         return FindDomain(selector, pagination, where_node, with_count)
 
-    def find_many_domain(self, dict_param: dict) -> FindManyDomain:
+    def find_many_domain(self, *, dict_param: dict) -> FindManyDomain:
         selector = self.selector_factory.create_selector(dict_param)
         pagination = self.pagination_factory.create_pagination(dict_param)
         where_node = self.node_factory.create_node(dict_param)
         with_count = self.__with_count(dict_param)
         return FindManyDomain(selector, pagination, where_node, with_count)
 
-    def create_domain(self, *, dict_param: Optional[dict], metadata_ctx: MetadataContext) -> CreateDomain:
+    def create_domain(self, *, dict_param: Optional[dict], metadata_ctx: MetadataContext = None) -> CreateDomain:
         if dict_param is None:
             raise BizException(ErrorCode.InvalidParameter, self.ERROR_PARAM_IS_NONE)
         if self.KEY_DATA not in dict_param:
@@ -139,25 +139,28 @@ class DomainFactory:
         if not isinstance(data, dict):
             raise BizException(ErrorCode.InvalidParameter, self.ERROR_PARAM_IS_NONE)
 
-        metadata_ctx.validate_on_create(data)
+        if metadata_ctx is not None:
+            metadata_ctx.validate_on_create(data)
         # todo filter key by model_context
         return CreateDomain(data=data)
 
-    def create_many_domain(self, *,  dict_param: Optional[dict], metadata_ctx: MetadataContext) -> CreateManyDomain:
+    def create_many_domain(self, *, dict_param: Optional[dict],
+                           metadata_ctx: MetadataContext = None) -> CreateManyDomain:
         if dict_param is None:
             raise BizException(ErrorCode.InvalidParameter, self.ERROR_PARAM_IS_NONE)
         if self.KEY_DATA not in dict_param:
             raise BizException(ezcode=EzErrorCodeEnum.InvalidKeyNotFound,
                                arg_list=[self.KEY_DATA, self.EXAMPLE_CREATE_MANY])
-        data:list = dict_param[self.KEY_DATA]
+        data: list = dict_param[self.KEY_DATA]
         print(f"data={data}")
         if not isinstance(data, list):
             raise BizException(ErrorCode.InvalidParameter, self.ERROR_INVALID_DATALIST_VALUE)
-        metadata_ctx.validate_on_create_many(data)
+        if metadata_ctx is not None:
+            metadata_ctx.validate_on_create_many(data)
         # todo filter key by model_context
         return CreateManyDomain(datalist=data)
 
-    def update_domain(self, dict_param) -> UpdateDomain:
+    def update_domain(self, *, dict_param) -> UpdateDomain:
         example = self.EXAMPLE_UPDATE_ONE
         if dict_param is None:
             raise BizException(ErrorCode.InvalidParameter, self.ERROR_PARAM_IS_NONE)
@@ -175,7 +178,7 @@ class DomainFactory:
         where_node = self.node_factory.create_node(dict_param)
         return UpdateDomain(where=where_node, data=data)
 
-    def update_many_domain(self, dict_param) -> UpdateManyDomain:
+    def update_many_domain(self, *, dict_param) -> UpdateManyDomain:
         example = self.EXAMPLE_UPDATE_MANY
         if dict_param is None:
             raise BizException(ErrorCode.InvalidParameter, self.ERROR_PARAM_IS_NONE)
@@ -193,7 +196,7 @@ class DomainFactory:
         where_node = self.node_factory.create_node(dict_param)
         return UpdateManyDomain(where=where_node, data=data)
 
-    def delete_domain(self, dict_param):
+    def delete_domain(self, *, dict_param):
         example = self.EXAMPLE_DELETE_ONE
         if dict_param is None:
             raise BizException(ErrorCode.InvalidParameter, self.ERROR_PARAM_IS_NONE)
@@ -204,7 +207,7 @@ class DomainFactory:
         unique = self.__get_unique(dict_param)
         return DeleteDomain(where=where_node, unique=unique)
 
-    def delete_many_domain(self, dict_param):
+    def delete_many_domain(self, *, dict_param):
         example = self.EXAMPLE_DELETE_MANY
         if dict_param is None:
             raise BizException(ErrorCode.InvalidParameter, self.ERROR_PARAM_IS_NONE)

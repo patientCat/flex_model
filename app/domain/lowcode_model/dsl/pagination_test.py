@@ -1,7 +1,7 @@
-from .find_option import PaginationFactory
 
 import unittest
 from app.common.error import BizException, ErrorCode
+from app.domain.lowcode_model.dsl.dsl_param import PaginationFactory
 
 
 class TestPaginationFactory(unittest.TestCase):
@@ -18,14 +18,14 @@ class TestPaginationFactory(unittest.TestCase):
         param_dict = {"limit": -5, "offset": 10}
         with self.assertRaises(BizException) as context:
             self.factory.create_pagination(param_dict)
-        self.assertEqual(context.exception.code, ErrorCode.InvalidParameter)
+        self.assertEqual(context.exception.code, ErrorCode.InvalidParameter.value)
         self.assertEqual(context.exception.message, PaginationFactory.ERROR_MESSAGE_INVALID_LIMIT)
 
     def test_create_pagination_with_invalid_offset(self):
         param_dict = {"limit": 5, "offset": -10}
         with self.assertRaises(BizException) as context:
             self.factory.create_pagination(param_dict)
-        self.assertEqual(context.exception.code, ErrorCode.InvalidParameter)
+        self.assertEqual(context.exception.code, ErrorCode.InvalidParameter.value)
         self.assertEqual(context.exception.message, PaginationFactory.ERROR_MESSAGE_INVALID_OFFSET)
 
     def test_create_pagination_with_default_values(self):
@@ -47,13 +47,13 @@ class TestPaginationFactory(unittest.TestCase):
     def test_create_pagination_invalid_limit(self):
         with self.assertRaises(BizException) as context:
             self.factory._create_pagination(-1, 10)
-        self.assertEqual(context.exception.code, ErrorCode.InvalidParameter)
+        self.assertEqual(context.exception.code, ErrorCode.InvalidParameter.value)
         self.assertEqual(context.exception.message, PaginationFactory.ERROR_MESSAGE_INVALID_LIMIT)
 
     def test_create_pagination_invalid_offset(self):
         with self.assertRaises(BizException) as context:
             self.factory._create_pagination(10, -1)
-        self.assertEqual(context.exception.code, ErrorCode.InvalidParameter)
+        self.assertEqual(context.exception.code, ErrorCode.InvalidParameter.value)
         self.assertEqual(context.exception.message, PaginationFactory.ERROR_MESSAGE_INVALID_OFFSET)
 
 

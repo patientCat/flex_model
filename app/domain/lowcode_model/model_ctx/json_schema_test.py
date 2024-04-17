@@ -247,7 +247,7 @@ class FormatOfSchemaTest(unittest.TestCase):
 
     def test_wrong_format(self):
         try:
-            jsonschema.validate(instance={"ipv4": "012", "age": "123"},
+            jsonschema.validate(instance={"ipv4": "012", "age": 123},
                                 schema=self.schema, format_checker=self.format_checker)
         except jsonschema.exceptions.ValidationError as e:
             print(e.message)

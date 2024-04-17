@@ -18,13 +18,21 @@ class TestSelector(unittest.TestCase):
 class TestSelectorFactory(unittest.TestCase):
 
     def setUp(self):
-        self.model_context = MagicMock(model.ModelContext)
-        self.model_context.key_2_schema_column_map = {
-            'a': SchemaColumn('a', {'format': 'x-long-text'}),
-            'b': SchemaColumn('b', {'format': 'x-long-text'}),
-            'c': SchemaColumn('c', {'format': 'x-long-text'}),
-        }
+        self.model_context = MagicMock(spec=model.ModelContext)
+        self.metadata_ctx = MagicMock(model.MetadataContext)
+        self.metadata_ctx.column_list = [
+            SchemaColumn(key='a', json_val={'name': 'a'}),
+            SchemaColumn(key='b', json_val={'name': 'b'}),
+            SchemaColumn(key='c', json_val={'name': 'c'})
+        ]
+        self.model_context.get_master_metadata_ctx.return_value = self.metadata_ctx
         self.selector_factory = SelectorFactory(self.model_context)
+
+    def test_func(self):
+        mtx = self.model_context.get_master_metadata_ctx()
+        print(mtx)
+        print(mtx.column_list)
+        pass
 
     def test_create_selector(self):
         select_dict = {'select': {'a': 1, 'b': 1, 'c': 0, 'sub_table': {'sub_a': 1, 'sub_b': 1}}}

@@ -58,6 +58,7 @@ class SelectorFactory:
         new_select_dict: Dict[str, Union[int, Dict[str, 1]]] = {}
         master_metadata_ctx: MetadataContext = self.model_context.get_master_metadata_ctx()
         column_list: List[field.SchemaColumn] = master_metadata_ctx.column_list
+        print(column_list)
         for column in column_list:
             if not column.is_relation():
                 new_select_dict[column.key] = 1

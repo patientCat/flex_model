@@ -67,6 +67,8 @@ class SchemaColumn(MetaColumn):
     @property
     def format(self) -> str:
         _format = self.json_val.get(constant.SCHEMA_KEYS["FORMAT"], "")
+        if _format is None or _format == "":
+            return ""
         try:
             return ColumnFormat(_format).value
         except ValueError:
@@ -86,3 +88,9 @@ class SchemaColumn(MetaColumn):
             return True
         else:
             return False
+
+    def __str__(self) -> str:
+        return f"SchemaColumn(value={self.__dict__})"
+
+    def __repr__(self) -> str:
+        return self.__str__()

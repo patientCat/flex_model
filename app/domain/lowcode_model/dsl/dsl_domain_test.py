@@ -9,16 +9,6 @@ from app.domain.lowcode_model.model_ctx.model import ModelContext
 
 
 class TestFindDomain(unittest.TestCase):
-    example_schema = {
-        "x-model-name": "autotest-model",
-        "x-database-name": "autotest-database",
-        "type": "object",
-        "properties": {
-            "id": {"type": "integer", "x-format": "x-short-text"},
-            "name": {"type": "number", "x-format": "x-number"},
-            "relation": {"type": "number", "x-format": "x-many-to-one"}
-        }
-    }
 
     def setUp(self):
         self.model_context = ModelContext.create_from_schema(self.example_schema)
@@ -63,7 +53,7 @@ class TestFindDomain(unittest.TestCase):
                 'name': 'abcdefg',
             }
         }
-        domain = self.domain_factory.create_domain(dict_param)
+        domain = self.domain_factory.create_domain(dict_param=dict_param)
         print(domain)
 
     def test_create_many_domain(self):
@@ -73,7 +63,7 @@ class TestFindDomain(unittest.TestCase):
                 'name': 'abcdefg',
             }]
         }
-        domain = self.domain_factory.create_many_domain(dict_param)
+        domain = self.domain_factory.create_many_domain(dict_param=dict_param)
         print(domain)
 
     def test_update_domain(self):
@@ -84,7 +74,7 @@ class TestFindDomain(unittest.TestCase):
                 'name': 'abcdefg',
             }
         }
-        domain = self.domain_factory.update_domain(dict_param)
+        domain = self.domain_factory.update_domain(dict_param=dict_param)
         print(utils.toJSON(domain))
 
     def test_update_many_domain(self):
@@ -96,7 +86,7 @@ class TestFindDomain(unittest.TestCase):
                 'name': 'abcdefg',
             }
         }
-        domain = self.domain_factory.update_many_domain(dict_param)
+        domain = self.domain_factory.update_many_domain(dict_param=dict_param)
         print(utils.toJSON(domain))
 
         dict_param = {
@@ -106,7 +96,7 @@ class TestFindDomain(unittest.TestCase):
                 'name': 'abcdefg',
             }
         }
-        domain = self.domain_factory.update_many_domain(dict_param)
+        domain = self.domain_factory.update_many_domain(dict_param=dict_param)
 
     def test_delete(self):
         # Arrange
@@ -114,7 +104,7 @@ class TestFindDomain(unittest.TestCase):
             'where': {'name': 'value1'}
         }
 
-        result = self.domain_factory.delete_domain(dict_param)
+        result = self.domain_factory.delete_domain(dict_param=dict_param)
         print(result.query)
 
     def test_delete_many(self):
@@ -123,7 +113,7 @@ class TestFindDomain(unittest.TestCase):
             'where': {'name': 'value1'}
         }
 
-        result = self.domain_factory.delete_many_domain(dict_param)
+        result = self.domain_factory.delete_many_domain(dict_param=dict_param)
         print(result.query)
 
 

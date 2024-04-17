@@ -126,7 +126,7 @@ class RuntimeService:
         db_context = self._get_database_context(model_context, req)
 
         # 4. 获取Factory
-        domain = DomainFactory(model_context).update_domain(req.param)
+        domain = DomainFactory(model_context).update_domain(dict_param=req.param)
         mongo_repo = reposervice.MongoRepoService(db_context)
         count = mongo_repo.apply_update(domain)
         resp = UpdateOneResponse(count=count)
@@ -141,7 +141,7 @@ class RuntimeService:
         db_context = self._get_database_context(model_context, req)
 
         # 4. 获取Factory
-        domain = DomainFactory(model_context).update_many_domain(req.param)
+        domain = DomainFactory(model_context).update_many_domain(dict_param=req.param)
         mongo_repo = reposervice.MongoRepoService(db_context)
         count = mongo_repo.apply_update_many(domain)
         resp = UpdateManyResponse(count=count)
@@ -154,7 +154,7 @@ class RuntimeService:
         db_context = self._get_database_context(model_context, req)
 
         # 4. 获取Factory
-        domain = DomainFactory(model_context).delete_domain(req.param)
+        domain = DomainFactory(model_context).delete_domain(dict_param=req.param)
         mongo_repo = reposervice.MongoRepoService(db_context)
         count = mongo_repo.apply_delete(domain)
         resp = DeleteOneResponse(count=count)
@@ -167,7 +167,7 @@ class RuntimeService:
         db_context = self._get_database_context(model_context, req)
 
         # 4. 获取Factory
-        domain = DomainFactory(model_context).delete_many_domain(req.param)
+        domain = DomainFactory(model_context).delete_many_domain(dict_param=req.param)
         mongo_repo = reposervice.MongoRepoService(db_context)
         count = mongo_repo.apply_delete_many(domain)
         resp = DeleteManyResponse(count=count)

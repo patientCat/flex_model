@@ -9,102 +9,94 @@ from app.api.runtime import RuntimeService
 from app.common.error import BizException, ErrorCode
 from app.model.biz_response import BizResponse, Error
 from app.model.param import runtime
-from app.model.param.test_response import TestResponse
 
-app = Flask(__name__)
-api = Api(app)
+APP = Flask(__name__)
+API = Api(APP)
 
+RUNTIME_SERVICE = RuntimeService.create()
 
-@app.route("/")
-def hello():
-    res = TestResponse("luke", 12)
-    print(res)
-    success = BizResponse.success(res)
-    return jsonify(success.dict_msg()), success.status, success.header
-
-
-runtime_service = RuntimeService.create()
-
-parser = reqparse.RequestParser()
-parser.add_argument('ModelName', type=str, required=True)
-parser.add_argument('ProjectId', type=str, required=True)
-parser.add_argument('Param', type=dict, required=True)
+PARSER = reqparse.RequestParser()
+PARSER.add_argument('ModelName', type=str, required=True)
+PARSER.add_argument('ProjectId', type=str, required=True)
+PARSER.add_argument('Param', type=dict, required=True)
 
 
 class FindOne(Resource):
     def post(self):
-        args = parser.parse_args()
+        args = PARSER.parse_args()
         req = runtime.FindOneRequest(**args)
-        response = runtime_service.find_one(req)
+        response = RUNTIME_SERVICE.find_one(req)
         success = BizResponse.success(response)
         return success.dict_msg(), 200
 
 
 class FindMany(Resource):
     def post(self):
-        args = parser.parse_args()
+        args = PARSER.parse_args()
         req = runtime.FindManyRequest(**args)
-        response = runtime_service.find_many(req)
+        response = RUNTIME_SERVICE.find_many(req)
         success = BizResponse.success(response)
         return success.dict_msg(), 200
 
 
 class CreateOne(Resource):
     def post(self):
-        args = parser.parse_args()
+        args = PARSER.parse_args()
         req = runtime.CreateOneRequest(**args)
-        response = runtime_service.create_one(req)
+        response = RUNTIME_SERVICE.create_one(req)
         success = BizResponse.success(response)
         return success.dict_msg(), 201
 
 
 class CreateMany(Resource):
     def post(self):
-        args = parser.parse_args()
+        args = PARSER.parse_args()
         logger.info("args={}", args)
         req = runtime.CreateManyRequest(**args)
-        response = runtime_service.create_many(req)
+        response = RUNTIME_SERVICE.create_many(req)
         success = BizResponse.success(response)
         return success.dict_msg(), 201
 
 
 class UpdateOne(Resource):
     def post(self):
-        args = parser.parse_args()
+        args = PARSER.parse_args()
         req = runtime.UpdateOneRequest(**args)
-        response = runtime_service.update_one(req)
+        response = RUNTIME_SERVICE.update_one(req)
         success = BizResponse.success(response)
         return success.dict_msg(), 201
 
 
 class UpdateMany(Resource):
     def post(self):
-        args = parser.parse_args()
+        args = PARSER.parse_args()
         logger.info("args={}", args)
         req = runtime.UpdateManyRequest(**args)
-        response = runtime_service.update_many(req)
+        response = RUNTIME_SERVICE.update_many(req)
         success = BizResponse.success(response)
         return success.dict_msg(), 201
 
+
 class DeleteOne(Resource):
     def post(self):
-        args = parser.parse_args()
+        args = PARSER.parse_args()
         req = runtime.DeleteOneRequest(**args)
-        response = runtime_service.delete_one(req)
+        response = RUNTIME_SERVICE.delete_one(req)
         success = BizResponse.success(response)
         return success.dict_msg(), 201
 
 
 class DeleteMany(Resource):
     def post(self):
-        args = parser.parse_args()
+        args = PARSER.parse_args()
         logger.info("args={}", args)
         req = runtime.DeleteManyRequest(**args)
-        response = runtime_service.delete_many(req)
+        response = RUNTIME_SERVICE.delete_many(req)
         success = BizResponse.success(response)
         return success.dict_msg(), 201
 
-@app.errorhandler(Exception)
+
+@APP.errorhandler(Exception)
 def error_handler(e):
     """
     全局异常捕获
@@ -121,14 +113,14 @@ def error_handler(e):
     return jsonify(response.dict_msg()), response.status, response.header
 
 
-api.add_resource(FindOne, '/FindOne')
-api.add_resource(FindMany, '/FindMany')
-api.add_resource(CreateOne, '/CreateOne')
-api.add_resource(CreateMany, '/CreateMany')
-api.add_resource(UpdateOne, '/UpdateOne')
-api.add_resource(UpdateMany, '/UpdateMany')
-api.add_resource(DeleteOne, '/DeleteOne')
-api.add_resource(DeleteMany, '/DeleteMany')
+API.add_resource(FindOne, '/FindOne')
+API.add_resource(FindMany, '/FindMany')
+API.add_resource(CreateOne, '/CreateOne')
+API.add_resource(CreateMany, '/CreateMany')
+API.add_resource(UpdateOne, '/UpdateOne')
+API.add_resource(UpdateMany, '/UpdateMany')
+API.add_resource(DeleteOne, '/DeleteOne')
+API.add_resource(DeleteMany, '/DeleteMany')
 
 if __name__ == '__main__':
-    app.run(port=8080, debug=True)
+    APP.run(port=8080, debug=True)
