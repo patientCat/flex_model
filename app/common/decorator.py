@@ -1,14 +1,16 @@
-def to_string(cls):
+def readable(cls):
     def __str__(self):
-        attr_list = []
-        for attr in vars(self):
-            attr_value = getattr(self, attr)
-            if hasattr(attr_value, '__str__'):
-                attr_list.append(attr_value.__str__())
-            else:
-                attr_list.append(attr_value)
-        return f'{cls.__name__}({",".join(attr_list)})'
+        readable_str_list = []
+        for attr_name in dir(self):
+            if not callable(getattr(self, attr_name)) and not attr_name.startswith("__"):
+                attr_value = getattr(self, attr_name)
+                readable_str_list.append(f"{attr_name}: {attr_value.__str__()}")
+        return f'{cls.__name__}({",".join(readable_str_list)})'
+
+    def __repr__(self):
+        return self.__str__()
 
     cls.__str__ = __str__
+    cls.__repr__ = __repr__
     return cls
 

@@ -7,7 +7,7 @@ from app.domain.project_ctx.database import MongoDbContext
 from app.domain.project_ctx.mongo import reposervice
 from app.domain.lowcode_model.dsl.dsl_domain import DomainFactory
 from app.domain.lowcode_model.model_ctx.model import ModelNameContext, ModelContext, MetadataContext
-from app.model.param.runtime import UpdateOneRequest, UpdateOneResponse, UpdateManyResponse, UpdateManyRequest, \
+from app.common.param.runtime import UpdateOneRequest, UpdateOneResponse, UpdateManyResponse, UpdateManyRequest, \
     FindOneRequest, FindOneResponse, FindManyRequest, FindManyResponse, CreateOneRequest, CreateOneResponse, \
     CreateManyResponse, CreateManyRequest, DeleteOneRequest, DeleteOneResponse, DeleteManyRequest, DeleteManyResponse
 from app.repo import instance
@@ -172,3 +172,6 @@ class RuntimeService:
         count = mongo_repo.apply_delete_many(domain)
         resp = DeleteManyResponse(count=count)
         return resp
+
+
+RUNTIME_SERVICE = RuntimeService.create()

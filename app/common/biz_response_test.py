@@ -1,7 +1,7 @@
 import unittest
 from app.common.error import Error, ErrorCode
-from app.model.param import find, test_response
-from biz_response import BizResponse, dict_response
+from app.common.param import test_response
+from biz_response import BizResponse
 
 
 class TestBizResponse(unittest.TestCase):

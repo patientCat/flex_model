@@ -3,6 +3,7 @@ import json
 import jsonschema
 import unittest
 
+from jsonschema.protocols import Validator
 from jsonschema.validators import Draft202012Validator
 
 from app.domain.lowcode_model.model_ctx.json_schema import JsonSchemaChecker, get_key_from_json_path, _get_many_schema

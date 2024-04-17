@@ -1,0 +1,17 @@
+# 使用官方的Python基础镜像
+FROM python:3.8-slim
+
+# 设置工作目录
+WORKDIR /app
+
+# 将当前目录的内容复制到容器的/app目录中
+COPY . /app
+
+# 安装依赖项
+RUN pip install --trusted-host pypi.python.org -r requirements.txt
+
+# 暴露端口，如果你的应用程序需要
+EXPOSE 8080
+
+# 运行应用程序
+CMD ["python", "app.py"]

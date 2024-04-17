@@ -1,12 +1,12 @@
 import unittest
 
-from app.common.decorator import to_string
+from app.common.decorator import readable
 
 
 class TestToString(unittest.TestCase):
 
     def test_to_string(self):
-        @to_string
+        @readable
         class TestClass:
             def __init__(self, a, b):
                 self.a = a
@@ -15,7 +15,7 @@ class TestToString(unittest.TestCase):
         test_obj = TestClass(1, "autotest")
         print(test_obj)
 
-        @to_string
+        @readable
         class TestClass2:
             def __init__(self, a, b):
                 self.a = a

@@ -1,7 +1,10 @@
 import json
+import re
+import sqlite3
 from typing import Dict, List, Optional
 
 import loguru
+import sqlalchemy
 
 from app.common.error import ErrorCode, BizException, EzErrorCodeEnum
 from app.domain.lowcode_model.model_ctx import field
@@ -9,13 +12,30 @@ from app.domain.lowcode_model.model_ctx.json_schema import JsonSchemaChecker
 from app.repo.interface import ModelRepo
 from app.repo.po import ModelPO
 
-
 # ModelNameCtx 模型标识上下文
+NAME_PATTERN = r"^[a-zA-Z][a-zA-Z0-9-_]*$"
+ERROR_MATCH_NAME_PATTERN = "Name must start with letters, and it can only contain letters , numbers, '-', '_'"
+
+
+def check_name(name: str) -> bool:
+    # 使用 re.match() 函数检查字符串是否符合正则表达式模式
+    if re.match(NAME_PATTERN, name):
+        return True
+    else:
+        return False
+
+
 class ModelNameContext:
     def __init__(self, *, name: str, project_id: str, ns: str = None):
         self.namespace = ns
         self.name = name
         self.project_id = project_id
+
+    @staticmethod
+    def validate_and_create(*, name: str, project_id: str, ns: str = None) -> "ModelNameContext":
+        if not check_name(name):
+            raise BizException(ErrorCode.InvalidParameter, ERROR_MATCH_NAME_PATTERN)
+        return ModelNameContext(name=name, project_id=project_id, ns=ns)
 
     @property
     def collection_name(self) -> str:
@@ -80,7 +100,7 @@ class MetadataContext:
 
 class MetadataContextPool:
     def __init__(self, model_repo: ModelRepo):
-        self.__metadata_context_pool = dict()
+        self.__metadata_context_pool: Dict[str, MetadataContext] = dict()
         self.__model_repo = model_repo
 
     def get_by_name(self, project_id, name) -> Optional[MetadataContext]:
@@ -102,6 +122,20 @@ class MetadataContextPool:
         metadata_ctx = MetadataContext(json_schema=json_schema)
         self.__metadata_context_pool[name] = metadata_ctx
         return metadata_ctx
+
+    def create(self, model_po: ModelPO):
+        self.__model_repo.create_model(model_po)
+
+    def add(self, name: str, value: ModelPO):
+        json_schema = json.loads(value.schema)
+        self.__metadata_context_pool[name] = MetadataContext(json_schema=json_schema)
+
+
+def check_schema(schema: dict) -> bool:
+    if "properties" not in schema:
+        raise ValueError("schema must contain 'properties'")
+    if "type" not in schema:
+        raise ValueError("schema must contain 'type'")
 
 
 class ModelContext:
@@ -125,3 +159,25 @@ class ModelContext:
 
     def get_metadata_ctx_by_name(self, model_name: str) -> MetadataContext:
         return self.__metadata_ctx_pool.get_by_name(self.__model_name_ctx.project_id, model_name)
+
+    def create_metadata_ctx(self, *, schema):
+        project_id = self.__model_name_ctx.project_id
+        model_name = self.__model_name_ctx.name
+        json_schema = json.dumps(schema)
+        model_po: ModelPO = ModelPO(model_name=self.__model_name_ctx.name,
+                                    project_id=self.__model_name_ctx.project_id,
+                                    schema=json_schema
+                                    )
+        try:
+            check_schema(schema)
+        except Exception as e:
+            raise BizException(ErrorCode.InvalidParameter, f"{e}")
+
+        try:
+            self.__metadata_ctx_pool.create(model_po=model_po)
+        except sqlalchemy.exc.IntegrityError as e:
+            if isinstance(e, sqlalchemy.exc.IntegrityError):
+                raise BizException(ErrorCode.InvalidParameter,
+                                   f"project='{project_id}', model_name='{model_name}' already exists")
+            raise e
+        self.__metadata_ctx_pool.add(name=self.__model_name_ctx.name, value=model_po)

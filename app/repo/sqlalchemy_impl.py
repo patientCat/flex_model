@@ -1,13 +1,14 @@
 import json
 import logging
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 from sqlalchemy import Column, Integer, String, DateTime, UniqueConstraint, create_engine
 from sqlalchemy import and_
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
+from app.common.decorator import readable
 from app.repo.interface import ProjectRepo, ModelRepo
 from app.repo.po import ModelPO, ProjectPO
 
@@ -26,10 +27,11 @@ def copy_value(from_cls, to_cls):
         setattr(to_cls, k, v)
 
 
-class _ProjectPO(Base):
+class _ProjectPO(Base, ProjectPO):
     __tablename__ = 'project'
     id = Column(Integer, primary_key=True)
     project_id = Column(String)
+    db_type = Column(String)
     connection_info = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -43,7 +45,7 @@ class ConnectionInfoHolder:
         return self.info_map.get('db_url')
 
 
-class _ModelPO(Base):
+class _ModelPO(Base, ModelPO):
     __tablename__ = 'model'
     id = Column(Integer, primary_key=True)
     model_name = Column(String)
@@ -58,6 +60,11 @@ class _ModelPO(Base):
         UniqueConstraint('project_id', 'model_name', name='unique_project_id_name'),
     )
 
+    def __str__(self):
+        return f'_ModelPO(__dict__={self.__dict__})'
+
+    def __repr__(self):
+        return self.__str__()
 
 class SqlModelRepo(ModelRepo):
     def __init__(self):
@@ -76,6 +83,15 @@ class SqlModelRepo(ModelRepo):
                  .first())
         session.close()
         return model
+
+    def get_model_list_page(self, project_id, page_num, page_size) -> List[ModelPO]:
+        Session = sessionmaker(bind=self.engine)
+        session = Session()
+        session_query = session.query(_ModelPO).filter(_ModelPO.project_id == project_id)
+        paginated_query = session_query.limit(page_size).offset((page_num - 1) * page_size)
+        model_list = paginated_query.all()
+        session.close()
+        return model_list
 
     def create_model(self, model_ctx: ModelPO) -> None:
         Session = sessionmaker(bind=self.engine)

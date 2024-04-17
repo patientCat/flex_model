@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from app.repo.po import ModelPO, ProjectPO
 
@@ -15,6 +15,9 @@ class ModelRepo(object):
         pass
 
     def get_model_by_name(self, project_id, model_name) -> Optional[ModelPO]:
+        pass
+
+    def get_model_list_page(self, project_id, page_num, page_size) -> List[ModelPO]:
         pass
 
     def create_model(self, model_ctx: ModelPO) -> None:

@@ -171,3 +171,29 @@ curl -X POST  -H "Content-Type: application/json" 'http://127.0.0.1:8080/DeleteM
       }
     }
 }'
+
+### GetModelList
+curl -X POST -H "Content-Type: application/json" 'http://127.0.0.1:8080/GetModelList' \
+-d '{
+    "ProjectId": "default"
+}'
+
+### GetModel
+curl -X POST -H "Content-Type: application/json" 'http://127.0.0.1:8080/GetModel' \
+-d '{
+    "ModelName":"user",
+    "ProjectId": "default"
+}'
+
+### CreateModel
+curl -X POST -H "Content-Type: application/json" 'http://127.0.0.1:8080/CreateModel' \
+-d '{
+    "ModelName":"luke",
+    "ProjectId": "default",
+    "ModelSchema":{
+    "type":"object",
+    "properties":{
+    }
+    }
+}'
+
