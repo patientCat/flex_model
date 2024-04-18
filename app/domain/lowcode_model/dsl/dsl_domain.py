@@ -95,6 +95,9 @@ class DomainFactory:
 
     ERROR_INVALID_DATALIST_VALUE = "value `data` should be List[dict], reference : {'datalist':[{'foo':'bar'}]}"
     ERROR_PARAM_IS_NONE = "param can not be none"
+    ERROR_SELECT_AND_INCLUDE_BOTH_EXIST = "Please either use `include` or `select`, but not both at the same time."
+
+
     EXAMPLE_CREATE_ONE = '{"data":{"name":"foo", "age":18}}'
     EXAMPLE_CREATE_MANY = '{"data":[{"name":"foo", "age":18}]}'
     EXAMPLE_UPDATE_ONE = '{"where":{"name":"foo"}, "data":{"name":"foo", "age":18}}'
@@ -116,6 +119,8 @@ class DomainFactory:
             return value
 
     def find_domain(self, *, dict_param: dict) -> FindDomain:
+        if "select" in dict_param and "include" in dict_param:
+            raise BizException(ErrorCode.InvalidParameter, self.ERROR_SELECT_AND_INCLUDE_BOTH_EXIST)
         selector = self.selector_factory.create_selector(dict_param)
         pagination = self.pagination_factory.create_one_pagination()
         where_node = self.node_factory.create_node(dict_param)
@@ -123,6 +128,8 @@ class DomainFactory:
         return FindDomain(selector, pagination, where_node, with_count)
 
     def find_many_domain(self, *, dict_param: dict) -> FindManyDomain:
+        if "select" in dict_param and "include" in dict_param:
+            raise BizException(ErrorCode.InvalidParameter, self.ERROR_SELECT_AND_INCLUDE_BOTH_EXIST)
         selector = self.selector_factory.create_selector(dict_param)
         pagination = self.pagination_factory.create_pagination(dict_param)
         where_node = self.node_factory.create_node(dict_param)

@@ -3,7 +3,7 @@ from typing import List
 from app.common.error import BizException, ErrorCode
 from app.common.model_converter import ModelConverter
 from app.common.param.design import CreateModelRequest, CreateModelResponse, GetModelRequest, GetModelListRequest, \
-    GetModelResponse, GetModelListResponse
+    GetModelResponse, GetModelListResponse, DeleteModelRequest, DeleteModelResponse
 from app.domain.lowcode_model.model_ctx.model import ModelContext, ModelNameContext
 from app.repo.instance import MODEL_REPO, PROJECT_REPO
 from app.repo.po import ProjectPO, ModelPO
@@ -45,6 +45,10 @@ class DesignService:
             model_po_list = []
 
         return GetModelListResponse(model_list=ModelConverter.convert_model_list_po_2_vo(model_po_list))
+
+    def delete_model(self, req: DeleteModelRequest) -> DeleteModelResponse:
+        self.model_repo.delete_model(project_id=req.project_id, model_name=req.model_name)
+        return DeleteModelResponse(success=True)
 
 
 DESIGN_SERVICE = DesignService()

@@ -1,14 +1,13 @@
 import json
 import logging
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Callable
 
 from sqlalchemy import Column, Integer, String, DateTime, UniqueConstraint, create_engine
 from sqlalchemy import and_
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 
-from app.common.decorator import readable
 from app.repo.interface import ProjectRepo, ModelRepo
 from app.repo.po import ModelPO, ProjectPO
 
@@ -66,6 +65,15 @@ class _ModelPO(Base, ModelPO):
     def __repr__(self):
         return self.__str__()
 
+
+def call_on_session(*, engine, func: Callable):
+    SessionFactory = sessionmaker(bind=engine)
+    session = SessionFactory()
+    rtn = func(session)
+    session.close()
+    return rtn
+
+
 class SqlModelRepo(ModelRepo):
     def __init__(self):
         super().__init__("sql")
@@ -76,31 +84,41 @@ class SqlModelRepo(ModelRepo):
         Base.metadata.create_all(self.engine)
 
     def get_model_by_name(self, project_id, model_name) -> Optional[ModelPO]:
-        Session = sessionmaker(bind=self.engine)
-        session = Session()
-        model = (session.query(_ModelPO)
-                 .filter(and_(_ModelPO.project_id == project_id, _ModelPO.model_name == model_name))
-                 .first())
-        session.close()
-        return model
+        def func(session: Session):
+            model = (session.query(_ModelPO)
+                     .filter(and_(_ModelPO.project_id == project_id, _ModelPO.model_name == model_name))
+                     .first())
+            return model
+
+        return call_on_session(engine=self.engine, func=func)
 
     def get_model_list_page(self, project_id, page_num, page_size) -> List[ModelPO]:
-        Session = sessionmaker(bind=self.engine)
-        session = Session()
-        session_query = session.query(_ModelPO).filter(_ModelPO.project_id == project_id)
-        paginated_query = session_query.limit(page_size).offset((page_num - 1) * page_size)
-        model_list = paginated_query.all()
-        session.close()
-        return model_list
+        def func(session: Session):
+            session_query = session.query(_ModelPO).filter(_ModelPO.project_id == project_id)
+            paginated_query = session_query.limit(page_size).offset((page_num - 1) * page_size)
+            model_list = paginated_query.all()
+            return model_list
+
+        return call_on_session(engine=self.engine, func=func)
 
     def create_model(self, model_ctx: ModelPO) -> None:
-        Session = sessionmaker(bind=self.engine)
-        session = Session()
-        _model_ctx: _ModelPO = _ModelPO()
-        copy_value(model_ctx, _model_ctx)
-        session.add(_model_ctx)
-        session.commit()
-        session.close()
+        def func(session: Session):
+            _model_ctx: _ModelPO = _ModelPO()
+            copy_value(model_ctx, _model_ctx)
+            session.add(_model_ctx)
+            session.commit()
+
+        return call_on_session(engine=self.engine, func=func)
+
+    def delete_model(self, project_id, model_name):
+        def func(session: Session):
+            user_to_delete = session.query(_ModelPO).filter(
+                and_(_ModelPO.model_name == model_name, _ModelPO.project_id == project_id)).first()
+            if user_to_delete:
+                session.delete(user_to_delete)
+                session.commit()
+
+        return call_on_session(engine=self.engine, func=func)
 
 
 class SqlProjectRepo(ProjectRepo):
@@ -113,20 +131,19 @@ class SqlProjectRepo(ProjectRepo):
         Base.metadata.create_all(self.engine)
 
     def get_project_by_project_id(self, project_id) -> Optional[ProjectPO]:
-        Session = sessionmaker(bind=self.engine)
-        session = Session()
-        project = (session.query(_ProjectPO)
-                   .filter(_ProjectPO.project_id == project_id)
-                   .first())
-        session.close()
+        def func(session: Session):
+            project = (session.query(_ProjectPO)
+                       .filter(_ProjectPO.project_id == project_id)
+                       .first())
+            return project
 
-        return project
+        return call_on_session(engine=self.engine, func=func)
 
     def create_project(self, project: ProjectPO) -> None:
-        Session = sessionmaker(bind=self.engine)
-        session = Session()
-        _project = _ProjectPO()
-        copy_value(project, _project)
-        session.add(_project)
-        session.commit()
-        session.close()
+        def func(session: Session):
+            _project = _ProjectPO()
+            copy_value(project, _project)
+            session.add(_project)
+            session.commit()
+
+        return call_on_session(engine=self.engine, func=func)

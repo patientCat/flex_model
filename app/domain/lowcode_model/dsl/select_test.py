@@ -11,7 +11,7 @@ class TestSelector(unittest.TestCase):
 
     def test_init(self):
         select_dict = {'a': 1, 'b': 1, 'c': 0, 'sub_table': {'sub_a': 1, 'sub_b': 1}}
-        selector = Selector(select_dict)
+        selector = Selector(select_dict=select_dict)
         self.assertEqual(selector.select_dict, select_dict)
 
 
@@ -48,6 +48,7 @@ class TestSelectorFactory(unittest.TestCase):
         selector = self.selector_factory.create_selector({})
         print(selector.select_dict)
         self.assertIsInstance(selector, Selector)
+        self.assertTrue(selector.find_all)
         self.assertEqual(expected_result, selector.select_dict)
 
     def test_filter_non_zero(self):

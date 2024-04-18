@@ -4,17 +4,17 @@ localhost:8080
 ### FindOne
 curl -X POST -H "Content-Type: application/json" 'http://127.0.0.1:8080/FindOne' \
 -d '{
-    "ModelName": "luke_test",
+    "ModelName": "user",
     "ProjectId": "default",
     "Param": {
         "select": {
-            "id": 1,
+            "_id": 1,
             "name": 1
         },
         "limit": 10,
         "offset": 0,
         "where": {
-            "name": "foo"
+            "name": "luke"
         }
     }
 }'
@@ -76,12 +76,12 @@ curl -X POST -H "Content-Type: application/json" 'http://127.0.0.1:8080/FindMany
 ### CreateOne
 curl -X POST  -H "Content-Type: application/json" 'http://127.0.0.1:8080/CreateOne' \
 -d '{
-    "ModelName": "luke_test",
+    "ModelName": "user",
     "ProjectId": "default",
     "Param": {
       "data":{
-        "name": "foo",
-        "age": "1"
+        "name": "luke",
+        "age": 18
       }
     }
 }'

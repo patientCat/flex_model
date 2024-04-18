@@ -41,6 +41,7 @@ API.add_resource(runtime.DeleteOne, '/DeleteOne')
 API.add_resource(runtime.DeleteMany, '/DeleteMany')
 
 API.add_resource(design.CreateModel, "/CreateModel")
+API.add_resource(design.DeleteModel, "/DeleteModel")
 API.add_resource(design.GetModel, "/GetModel")
 API.add_resource(design.GetModelList, "/GetModelList")
 

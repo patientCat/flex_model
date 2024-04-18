@@ -55,7 +55,7 @@ class RuntimeService:
 
         # 4. 获取Factory
         mongo_repo = reposervice.MongoRepoService(dbcontext)
-        find_domain = DomainFactory(model_context).find_domain(req.param)
+        find_domain = DomainFactory(model_context).find_domain(dict_param=req.param)
         record, total = mongo_repo.apply_find(find_domain)
         logger.info("record={}".format(record))
         resp = FindOneResponse(record=record, total=total)
@@ -69,7 +69,7 @@ class RuntimeService:
 
         # 4. 获取Factory
         mongo_repo = reposervice.MongoRepoService(dbcontext)
-        find_many_domain = DomainFactory(model_context).find_many_domain(req.param)
+        find_many_domain = DomainFactory(model_context).find_many_domain(dict_param=req.param)
         record, total = mongo_repo.apply_find_many(find_many_domain)
         logger.info("record_list={}, total={}".format(record, total))
         resp = FindManyResponse(record=record, total=total)

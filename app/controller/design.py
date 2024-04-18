@@ -45,3 +45,16 @@ class GetModelList(Resource):
         success = BizResponse.success(response)
         print(response.dict_msg())
         return success.dict_msg(), 200
+
+
+class DeleteModel(Resource):
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('ModelName', type=str, required=True)
+        parser.add_argument('ProjectId', type=str, required=True)
+        args = parser.parse_args()
+
+        req = design.DeleteModelRequest(**args)
+        response = DESIGN_SERVICE.delete_model(req)
+        success = BizResponse.success(response)
+        return success.dict_msg(), 200

@@ -74,3 +74,19 @@ class GetModelListResponse:
         return {
             "ModelList": [x.dict_msg() for x in self.model_list],
         }
+
+
+class DeleteModelRequest(BaseDesignRequest):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.model_name: int = kwargs.get('ModelName')
+
+
+@dataclass
+class DeleteModelResponse:
+    success: bool
+
+    def dict_msg(self):
+        return {
+            "Success": self.success
+        }

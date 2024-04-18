@@ -2,6 +2,153 @@
 低代码中数据模型的实现
 ## quickstart
 
+1. 定义schema
+
+数据模型通过json-schema定义通用的表结构。
+ModelName: 定义模型的名字
+ProjetId: 项目id
+
+创建user模型
+```curl
+curl -X POST -H "Content-Type: application/json" 'http://127.0.0.1:8080/CreateModel' \
+-d '{
+    "ModelName": "user",
+    "ProjectId": "default",
+    "ModelSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+            "_id": {
+                "type": "string",
+                "format": "x-short-text"
+            },
+            "name": {
+                "type": "string",
+                "format": "x-short-text"
+            },
+            "age": {
+                "type": "number",
+                "format": "x-number"
+            },
+            "email": {
+                "type": "string",
+                "format": "email"
+            }
+        },
+        "required": [
+            "name",
+            "age"
+        ]
+    }
+}'
+
+```
+
+创建profile模型
+```curl
+curl -X POST -H "Content-Type: application/json" 'http://127.0.0.1:8080/CreateModel' \
+-d '{
+    "ModelName": "user",
+    "ProjectId": "default",
+    "ModelSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+            "_id": {
+                "type": "string",
+                "format": "x-short-text"
+            },
+            "biography": {
+                "type": "string",
+                "format": "x-short-text"
+            },
+            "userId": {
+                "type": "string",
+                "format": "x-short-text"
+            },
+            "user": {
+                "type": "object",
+                "properties": {
+
+                },
+                "format": "x-many-one",
+                "x-relation": {
+                    "field": "userId",
+                    "reference": {
+                        "field": "id",
+                        "model_name": "user"
+                    }
+                }
+            }
+        },
+        "required": [
+            "biography"
+        ]
+    }
+}'
+```
+
+profile模型通过userId关联user模型
+
+
+2. 对模型进行增删查改
+
+创建一条数据
+```curl
+curl -X POST  -H "Content-Type: application/json" 'http://127.0.0.1:8080/CreateOne' \
+-d '{
+    "ModelName": "user",
+    "ProjectId": "default",
+    "Param": {
+      "data":{
+        "name": "luke",
+        "age": 18
+      }
+    }
+}'
+```
+```json
+{
+    "Response": {
+        "Id": "662150a82ea4456eff41cb9e"
+    }
+}
+
+```
+
+查询一条数据
+```json
+curl -X POST -H "Content-Type: application/json" 'http://127.0.0.1:8080/FindOne' \
+-d '{
+    "ModelName": "user",
+    "ProjectId": "default",
+    "Param": {
+        "select": {
+            "_id": 1,
+            "name": 1
+        },
+        "limit": 10,
+        "offset": 0,
+        "where": {
+            "name": "luke"
+        }
+    }
+}'
+
+{
+    "Response": {
+        "Record": {
+            "_id": "662150a82ea4456eff41cb9e",
+            "name": "luke"
+        },
+        "Total": null
+    }
+}
+```
+
+### 详细了解
+[自动化测试用例](/autotest/base.py)
+
 ## 项目讲解
 低代码项目中的数据模型实现。
 

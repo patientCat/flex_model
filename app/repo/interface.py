@@ -23,6 +23,9 @@ class ModelRepo(object):
     def create_model(self, model_ctx: ModelPO) -> None:
         pass
 
+    def delete_model(self, project_id, model_name):
+        pass
+
 
 class ProjectRepo(object):
     def __init__(self, repo_name) -> None:

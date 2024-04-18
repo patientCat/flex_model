@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, Union, Optional, List
 
+from app.common.decorator import readable
 from app.common.error import BizException, ErrorCode
 from app.domain.lowcode_model.model_ctx import model, field
 from app.domain.lowcode_model.model_ctx.model import MetadataContext
@@ -12,16 +13,15 @@ selector
 
 pagination
 
-
+include
 """
 
 
+@readable
 class Selector:
-    def __init__(self, select_dict: dict):
+    def __init__(self, *, select_dict: dict, find_all=False):
         self.select_dict = select_dict
-
-    def __repr__(self):
-        return f"{self.__class__.__name__}(select_dict= {self.select_dict.__repr__()})"
+        self.find_all = find_all
 
 
 class SelectorFactory:
@@ -47,12 +47,14 @@ class SelectorFactory:
 
     def create_selector(self, select_dict: Dict[str, Union[int, Dict]]):
         new_dict = {}
+        find_all = False
         if self.KEY_SELECT not in select_dict:
             # select all
             new_dict = self.select_all()
+            find_all = True
         else:
             new_dict = self.select_target(select_dict[self.KEY_SELECT])
-        return Selector(new_dict)
+        return Selector(select_dict=new_dict, find_all=find_all)
 
     def select_all(self) -> Dict[str, Union[int, Dict]]:
         new_select_dict: Dict[str, Union[int, Dict[str, 1]]] = {}
