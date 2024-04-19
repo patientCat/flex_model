@@ -11,25 +11,25 @@ class TestSchemaColumn(unittest.TestCase):
         self.assertEqual(column.name, "test_key")
 
     def test_format(self):
-        column = SchemaColumn("test_key", {"format": "x-short-text"})
+        column = SchemaColumn("test_key", {"format": "xShortText"})
         self.assertEqual(column.format, ColumnFormat.SHORT_TEXT)
 
-        column = SchemaColumn("test_key", {"format": "x-long-text"})
+        column = SchemaColumn("test_key", {"format": "xLongText"})
         self.assertEqual(column.format, ColumnFormat.LONG_TEXT)
 
-        column = SchemaColumn("test_key", {"format": "x-number"})
+        column = SchemaColumn("test_key", {"format": "xNumber"})
         self.assertEqual(column.format, ColumnFormat.NUMBER)
 
-        column = SchemaColumn("test_key", {"format": "x-json"})
+        column = SchemaColumn("test_key", {"format": "xJson"})
         self.assertEqual(column.format, ColumnFormat.JSON)
 
-        column = SchemaColumn("test_key", {"format": "x-many-to-one"})
+        column = SchemaColumn("test_key", {"format": "xManyToOne"})
         self.assertEqual(column.format, ColumnFormat.MANY_TO_ONE)
 
-        column = SchemaColumn("test_key", {"format": "x-one-to-many"})
+        column = SchemaColumn("test_key", {"format": "xOneToMany"})
         self.assertEqual(column.format, ColumnFormat.ONE_TO_MANY)
 
-        column = SchemaColumn("test_key", {"format": "x-many-to-many"})
+        column = SchemaColumn("test_key", {"format": "xManyToMany"})
         self.assertEqual(column.format, ColumnFormat.MANY_TO_MANY)
         # Add more tests for other formats
 
@@ -56,7 +56,7 @@ class TestSchemaColumn(unittest.TestCase):
         # Add more tests for other types
 
     def test_is_relation(self):
-        column = SchemaColumn("test_key", {"type": "number", "format": "x-one-to-many"})
+        column = SchemaColumn("test_key", {"type": "number", "format": "xOneToMany"})
         self.assertTrue(column.is_relation())
 
 

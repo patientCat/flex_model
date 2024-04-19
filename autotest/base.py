@@ -17,15 +17,15 @@ class TestAPI(unittest.TestCase):
             "properties": {
                 "_id": {
                     "type": "string",
-                    "format": "x-short-text"
+                    "format": "xShortText"
                 },
                 "name": {
                     "type": "string",
-                    "format": "x-short-text"
+                    "format": "xShortText"
                 },
                 "age": {
                     "type": "number",
-                    "format": "x-number"
+                    "format": "xNumber"
                 },
                 "email": {
                     "type": "string",
@@ -44,15 +44,15 @@ class TestAPI(unittest.TestCase):
             "properties": {
                 "_id": {
                     "type": "string",
-                    "format": "x-short-text"
+                    "format": "xShortText"
                 },
                 "biography": {
                     "type": "string",
-                    "format": "x-short-text"
+                    "format": "xShortText"
                 },
                 "userId": {
                     "type": "string",
-                    "format": "x-short-text"
+                    "format": "xShortText"
                 },
                 "user": {
                     "type": "object",
@@ -60,11 +60,11 @@ class TestAPI(unittest.TestCase):
 
                     },
                     "format": "x-many-one",
-                    "x-relation": {
-                        "field": "userId",
-                        "reference": {
-                            "field": "id",
-                            "model_name": "user"
+                    "xRelation": {
+                        {
+                            "field": "userId",
+                            "relatedField": "_id",
+                            "relate_model_name": "user"
                         }
                     }
                 }
@@ -99,6 +99,7 @@ class TestAPI(unittest.TestCase):
     """
     case1 : 测试基础的crud
     """
+
     def test_base_crud(self):
         user_model_name = "user"
         project_id = "default"
@@ -159,6 +160,7 @@ class TestAPI(unittest.TestCase):
     """
     case3 : 测试关联关系查询
     """
+
     def test_query_relation(self):
         # 测试关联查询
         user_model_name = "user"
@@ -167,7 +169,8 @@ class TestAPI(unittest.TestCase):
         self.clear_table(model_name=user_model_name, project_id=project_id)
 
         print("step1: create user")
-        user_insert_id = self.create_one(model_name=user_model_name, project_id=project_id, data={"name": "luke", "age": 20})
+        user_insert_id = self.create_one(model_name=user_model_name, project_id=project_id,
+                                         data={"name": "luke", "age": 20})
         print(f"step1: create success, insert_id: {user_insert_id}")
 
         print("step2: create profile and relate user")
@@ -187,8 +190,6 @@ class TestAPI(unittest.TestCase):
         count = self.delete_one(model_name=user_model_name, project_id=project_id, where={"age": {"$eq": new_age}})
         print(f"step4: delete success, count: {count}")
         self.assertEqual(count, 1)
-
-
 
     def create_one(self, *, model_name, project_id, data: dict) -> str:
         payload = {

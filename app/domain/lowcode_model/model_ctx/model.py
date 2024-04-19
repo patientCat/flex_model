@@ -66,7 +66,15 @@ class MetadataContext:
 
     @property
     def column_list(self) -> List[field.SchemaColumn]:
+        if self.__column_list is None:
+            return []
         return self.__column_list
+
+    @property
+    def relation_column_list(self) -> List[field.SchemaColumn]:
+        if self.column_list is None:
+            return []
+        return [column for column in self.column_list if column.is_relation]
 
     def validate_on_create(self, data: Dict):
         if data is None:

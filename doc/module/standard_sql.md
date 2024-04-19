@@ -16,15 +16,15 @@ ModelUser
     "properties": {
         "id": {
             "type": "string",
-            "format": "x-short-text"
+            "format": "xShortText"
         },
         "name": {
             "type": "string",
-            "format": "x-short-text"
+            "format": "xShortText"
         },
         "age": {
             "type": "number",
-            "format": "x-number"
+            "format": "xNumber"
         },
         "email": {
             "type": "string",
@@ -50,21 +50,21 @@ Profile Schema
     "properties": {
         "id": {
             "type": "string",
-            "format": "x-short-text"
+            "format": "xShortText"
         },
         "biography": {
             "type": "string",
-            "format": "x-short-text"
+            "format": "xShortText"
         },
         "userId": {
             "type": "string",
-            "format": "x-short-text"
+            "format": "xShortText"
         },
         "user": {
             "type": "object",
             "properties": {},
             "format": "x-many-one",
-            "x-relation": {
+            "xRelation": {
                 "field": "userId",
                 "reference": {
                     "field": "id",

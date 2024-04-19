@@ -20,15 +20,15 @@ curl -X POST -H "Content-Type: application/json" 'http://127.0.0.1:8080/CreateMo
         "properties": {
             "_id": {
                 "type": "string",
-                "format": "x-short-text"
+                "format": "xShortText"
             },
             "name": {
                 "type": "string",
-                "format": "x-short-text"
+                "format": "xShortText"
             },
             "age": {
                 "type": "number",
-                "format": "x-number"
+                "format": "xNumber"
             },
             "email": {
                 "type": "string",
@@ -56,15 +56,15 @@ curl -X POST -H "Content-Type: application/json" 'http://127.0.0.1:8080/CreateMo
         "properties": {
             "_id": {
                 "type": "string",
-                "format": "x-short-text"
+                "format": "xShortText"
             },
             "biography": {
                 "type": "string",
-                "format": "x-short-text"
+                "format": "xShortText"
             },
             "userId": {
                 "type": "string",
-                "format": "x-short-text"
+                "format": "xShortText"
             },
             "user": {
                 "type": "object",
@@ -72,7 +72,7 @@ curl -X POST -H "Content-Type: application/json" 'http://127.0.0.1:8080/CreateMo
 
                 },
                 "format": "x-many-one",
-                "x-relation": {
+                "xRelation": {
                     "field": "userId",
                     "reference": {
                         "field": "id",

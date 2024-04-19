@@ -2,11 +2,13 @@ from typing import TypedDict
 
 
 class SchemaKey(TypedDict, total=False):
-    FORMAT: str  # noqa
-    TYPE: str
+    format: str  # noqa
+    type: str
+    xRelation: str  # noqa
 
 
-SCHEMA_KEYS = {
-    "FORMAT": "format",
-    "TYPE": "type",
+SCHEMA_KEYS: SchemaKey = {
+    "format": "format",
+    "type": "type",
+    "xRelation": "xRelation"
 }

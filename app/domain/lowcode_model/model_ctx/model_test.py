@@ -70,13 +70,13 @@ class TestModelClass(unittest.TestCase):
                     "type": "string",
                 },
                 "short_text": {
-                    "format": "x-short-text",
+                    "format": "xShortText",
                     "x-name": "short_text",
                     "x-title": "短文本",
                     "type": "string",
                 },
                 "show_number": {
-                    "format": "x-number",
+                    "format": "xNumber",
                     "x-name": "show_number",
                     "x-title": "数字",
                     "type": "number",
