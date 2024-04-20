@@ -31,6 +31,8 @@ class DSLParamDict(TypedDict, total=False):
 @readable
 class Selector:
     def __init__(self, *, select_dict: dict, find_all=False):
+        if select_dict is None:
+            select_dict = {}
         self.select_dict = select_dict
         self.find_all = find_all
 
@@ -44,22 +46,31 @@ class SelectorFactory:
     def __init__(self, *, model_ctx: model.ModelContext):
         self.model_ctx: model.ModelContext = model_ctx
 
-    def create_selector(self, select_dict: DSLParamDict):
+    def create_all_selector(self, model_name: str = None):
+        new_dict = self.select_all(model_name=model_name)
+        find_all = True
+        return Selector(select_dict=new_dict, find_all=find_all)
+
+    def create_selector(self, select_dict: DSLParamDict, model_name: str = None):
         new_dict = {}
         find_all = False
         if 'select' not in select_dict:
             # select all
-            new_dict = self.select_all()
+            new_dict = self.select_all(model_name=model_name)
             find_all = True
         else:
             new_dict = self.select_target(select_dict['select'])
         return Selector(select_dict=new_dict, find_all=find_all)
 
-    def select_all(self) -> Dict[str, Union[int, Dict]]:
+    def select_all(self, model_name: str = None) -> Dict[str, Union[int, Dict]]:
         new_select_dict: Dict[str, Union[int, Dict[str, 1]]] = {}
-        master_metadata_ctx: MetadataContext = self.model_ctx.get_master_metadata_ctx()
-        column_list: List[field.SchemaColumn] = master_metadata_ctx.column_list
-        print(column_list)
+        if model_name is None or model_name == '':
+            model_name = self.model_ctx.model_name_ctx.name
+        metadata_ctx: MetadataContext = self.model_ctx.get_metadata_ctx_by_name(model_name=model_name)
+        if metadata_ctx is None:
+            raise BizException(ErrorCode.InvalidParameter, f"MetadataContext not found model_name={model_name}")
+
+        column_list: List[field.SchemaColumn] = metadata_ctx.column_list
         for column in column_list:
             if not column.is_relation():
                 new_select_dict[column.key] = 1
@@ -127,16 +138,19 @@ class PaginationFactory:
 @readable
 class IncludeParam:
     def __init__(self, *, local_key: str, foreign_key: str, from_col_name: str, include_as_key: str,
-                 join_one: bool = False):
+                 selector: Selector, join_one: bool = False):
         self.local_key: str = local_key
         self.foreign_key: str = foreign_key
         self.from_col_name: str = from_col_name
         self.include_as_key: str = include_as_key
+        self.selector: Selector = selector
         self.join_one: bool = join_one
 
     def to_mongo_cmd_list(self) -> List[dict]:
         # 获取mongo的lookup查询
         cmd_list = []
+        related_select: dict = self.selector.select_dict
+        related_select['_id'] = 0
         lookup: dict = {
             "$lookup": {
                 "from": self.from_col_name,
@@ -148,7 +162,7 @@ class IncludeParam:
                          {"$expr":
                               {"$eq": ["$$local_field", f"${self.foreign_key}"]}
                           }},
-                    # {"$project": {self.from_col_name: 1}},
+                    {"$project": related_select},
                 ],
                 "as": self.include_as_key
             }
@@ -189,7 +203,7 @@ class IncludeContextFactory:
 
     def __init__(self, *, model_ctx: ModelContext):
         self.model_ctx: ModelContext = model_ctx
-        pass
+        self.selector_factory: SelectorFactory = SelectorFactory(model_ctx=self.model_ctx)
 
     def create_include_context(self, *, param: DSLParamDict) -> IncludeContext:
         if 'include' not in param or param['include'] is None:
@@ -217,18 +231,30 @@ class IncludeContextFactory:
         if len(valid_relation_column_list) == 0:
             return IncludeContext.create_none_include_context()
 
-        def column_2_include_param(column: field.SchemaColumn) -> IncludeParam:
-            relation_info: RelationInfo = column.get_relation()
-            loguru.logger.debug(f"relation_info={relation_info}")
-            include_param = IncludeParam(
-                local_key=relation_info['field'],
-                foreign_key=relation_info['relatedField'],
-                from_col_name=relation_info['relatedModelName'],
-                include_as_key=column.name,
-                join_one=column.format == ColumnFormat.MANY_TO_ONE.value
-            )
-            return include_param
+        include_param_list: List[IncludeParam] = []
+        for column in relation_column_list:
+            include_param = self.column_2_include_param(column=column, include_dict_param=include_dict)
+            if include_param is not None:
+                include_param_list.append(include_param)
 
-        include_param_list: List[IncludeParam] = \
-            [column_2_include_param(column) for column in valid_relation_column_list]
         return IncludeContext(need_include=True, include_param_list=include_param_list)
+
+    def column_2_include_param(self, column: field.SchemaColumn, include_dict_param: dict) -> Optional[IncludeParam]:
+        relation_info: RelationInfo = column.get_relation()
+        loguru.logger.debug(f"relation_info={relation_info}, include_dict={include_dict_param}")
+        include_dict_value = include_dict_param.get(column.name)
+        if include_dict_value is None:
+            return None
+        if include_dict_value:
+            selector = self.selector_factory.create_all_selector(relation_info['relatedModelName'])
+        else:
+            selector = self.selector_factory.create_selector(select_dict=include_dict_value)
+        include_param = IncludeParam(
+            local_key=relation_info['field'],
+            foreign_key=relation_info['relatedField'],
+            from_col_name=relation_info['relatedModelName'],
+            include_as_key=column.name,
+            selector=selector,
+            join_one=column.format == ColumnFormat.MANY_TO_ONE.value
+        )
+        return include_param

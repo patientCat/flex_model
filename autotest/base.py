@@ -30,6 +30,18 @@ class TestAPI(unittest.TestCase):
                 "email": {
                     "type": "string",
                     "format": "email"
+                },
+                "profileList": {
+                    "type": "object",
+                    "properties": {
+
+                    },
+                    "format": "xOneToMany",
+                    "xRelation": {
+                        "field": "id",
+                        "relatedField": "userId",
+                        "relatedModelName": "profile"
+                    }
                 }
             },
             "required": [
@@ -166,45 +178,56 @@ class TestAPI(unittest.TestCase):
         project_id = "default"
         self.clear_table(model_name=user_model_name, project_id=project_id)
 
-        print("step1: create user")
+        print("begin: create user")
         user_insert_id = self.create_one(model_name=user_model_name, project_id=project_id,
                                          data={"name": "luke", "age": 20})
-        print(f"step1: create success, insert_id: {user_insert_id}")
+        print(f"end: create success, insert_id: {user_insert_id}")
 
-        print("step2: create profile and relate user")
-        profile_insert_id = self.create_one(
+        print("begin: create profile and relate user")
+        profile_insert_id_list = self.create_many(
             model_name=profile_model_name,
             project_id=project_id,
-            data={"biography": "this is luke, a python coder", "userId": user_insert_id}
+            data=[
+                {"biography": "this is luke, a python coder", "userId": user_insert_id},
+                {"biography": "this is james, a cpp coder", "userId": user_insert_id}
+            ]
         )
-        print(f"step2: create success, insert_id: {profile_insert_id}")
+        print(f"end: create success, insert_id: {profile_insert_id_list}")
 
-        print("step3: find and relation")
+        print("begin: find and many2one relation")
 
         record = self.find_one(model_name=profile_model_name, project_id=project_id,
-                               where={"id": {"$eq": profile_insert_id}}, include={"user": True})
-        print(f"step3: find success, record: {record}")
+                               where={"id": {"$eq": profile_insert_id_list[0]}}, include={"user": True})
+        print(f"end: find success, record: {record}")
         self.assertTrue(record is not None)
         self.assertTrue('user' in record)
 
-        print("step4: findMany and relation")
+        print("begin: findMany and relation")
         record = self.find_many(model_name=profile_model_name, project_id=project_id,
-                                where={"id": {"$eq": profile_insert_id}}, include={"user": True})
-        print(f"step4: find success, record: {record}")
+                                where={"id": {"$eq": profile_insert_id_list[0]}}, include={"user": True})
+        print(f"end: find success, record: {record}")
         self.assertTrue(record is not None)
         self.assertTrue('user' in record[0])
 
-        print(f"step5: delete user with {user_insert_id}")
+        print("begin: find and one2many relation")
+
+        record = self.find_one(model_name=user_model_name, project_id=project_id,
+                               where={"id": {"$eq": user_insert_id}}, include={"profileList": True})
+        print(f"end: find success, record: {record}")
+        self.assertTrue(record is not None)
+        self.assertTrue('profileList' in record)
+
+        print(f"begin: delete user with {user_insert_id}")
         count = self.delete_one(model_name=user_model_name, project_id=project_id,
                                 where={"id": {"$eq": user_insert_id}})
-        print(f"step5: delete success, count: {count}")
+        print(f"end: delete success, count: {count}")
         self.assertEqual(count, 1)
 
-        print(f"step6: delete profile with {profile_insert_id}")
-        count = self.delete_one(model_name=profile_model_name, project_id=project_id,
-                                where={"id": {"$eq": profile_insert_id}})
-        print(f"step6: delete success, count: {count}")
-        self.assertEqual(count, 1)
+        print(f"begin: delete profile with {profile_insert_id_list}")
+        count = self.delete_many(model_name=profile_model_name, project_id=project_id,
+                                 where={"id": {"$in": profile_insert_id_list}})
+        print(f"end: delete success, count: {count}")
+        self.assertEqual(count, 2)
 
     def create_one(self, *, model_name, project_id, data: dict) -> str:
         payload = {
@@ -256,7 +279,7 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
         return response.json().get("Response").get("Count")
 
-    def create_many(self, model_name, project_id, data):
+    def create_many(self, model_name, project_id, data) -> list:
         payload = {
             "ModelName": model_name,
             "ProjectId": project_id,

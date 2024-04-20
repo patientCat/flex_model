@@ -106,15 +106,13 @@ class MetadataContext:
             raise BizException(ErrorCode.InvalidParameter, validation_result.error_message)
 
 
-class MetadataContextPool:
+class MetadataContextDomain:
     def __init__(self, model_repo: ModelRepo):
-        self.__metadata_context_pool: Dict[str, MetadataContext] = dict()
         self.__model_repo = model_repo
+        # todo 加入缓存
 
     def get_by_name(self, project_id, name) -> Optional[MetadataContext]:
-        if name in self.__metadata_context_pool:
-            return self.__metadata_context_pool[name]
-
+        # todo 从缓存中取
         model: ModelPO = self.__model_repo.get_model_by_name(project_id=project_id, model_name=name)
         if model is None:
             raise BizException(
@@ -128,18 +126,14 @@ class MetadataContextPool:
             )
         json_schema = json.loads(model.schema)
         metadata_ctx = MetadataContext(json_schema=json_schema)
-        self.__metadata_context_pool[name] = metadata_ctx
         return metadata_ctx
 
     def create(self, model_po: ModelPO):
         self.__model_repo.create_model(model_po)
-
-    def add(self, name: str, value: ModelPO):
-        json_schema = json.loads(value.schema)
-        self.__metadata_context_pool[name] = MetadataContext(json_schema=json_schema)
+        # todo 加入缓存
 
 
-def check_schema(schema: dict) -> bool:
+def check_schema(schema: dict) -> None:
     if "properties" not in schema:
         raise ValueError("schema must contain 'properties'")
     if "type" not in schema:
@@ -148,13 +142,13 @@ def check_schema(schema: dict) -> bool:
 
 class ModelContext:
     def __init__(self, model_name_ctx: ModelNameContext,
-                 metadata_ctx_pool: MetadataContextPool):
+                 metadata_ctx_domain: MetadataContextDomain):
         self.__model_name_ctx: ModelNameContext = model_name_ctx
-        self.__metadata_ctx_pool = metadata_ctx_pool
+        self.__metadata_ctx_domain = metadata_ctx_domain
 
     @staticmethod
     def create(model_name_ctx: ModelNameContext, model_repo: ModelRepo) -> "ModelContext":
-        pool = MetadataContextPool(model_repo=model_repo)
+        pool = MetadataContextDomain(model_repo=model_repo)
         return ModelContext(model_name_ctx, pool)
 
     @property
@@ -163,10 +157,10 @@ class ModelContext:
 
     def get_master_metadata_ctx(self) -> MetadataContext:
         name = self.__model_name_ctx.name
-        return self.__metadata_ctx_pool.get_by_name(self.__model_name_ctx.project_id, name)
+        return self.get_metadata_ctx_by_name(name)
 
     def get_metadata_ctx_by_name(self, model_name: str) -> MetadataContext:
-        return self.__metadata_ctx_pool.get_by_name(self.__model_name_ctx.project_id, model_name)
+        return self.__metadata_ctx_domain.get_by_name(self.__model_name_ctx.project_id, model_name)
 
     def create_metadata_ctx(self, *, schema):
         project_id = self.__model_name_ctx.project_id
@@ -182,10 +176,9 @@ class ModelContext:
             raise BizException(ErrorCode.InvalidParameter, f"{e}")
 
         try:
-            self.__metadata_ctx_pool.create(model_po=model_po)
+            self.__metadata_ctx_domain.create(model_po=model_po)
         except sqlalchemy.exc.IntegrityError as e:
             if isinstance(e, sqlalchemy.exc.IntegrityError):
                 raise BizException(ErrorCode.InvalidParameter,
                                    f"project='{project_id}', model_name='{model_name}' already exists")
             raise e
-        self.__metadata_ctx_pool.add(name=self.__model_name_ctx.name, value=model_po)
