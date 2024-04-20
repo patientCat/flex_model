@@ -20,19 +20,12 @@ include
 """
 
 
-class DSLParamKey(TypedDict, total=False):
-    select: str
-    include: str
-    limit: str
-    offset: str
-
-
-DSL_PARAM_KEY: DSLParamKey = {
-    'select': 'select',
-    'include': 'include',
-    'limit': "limit",
-    'offset': "offset",
-}
+class DSLParamDict(TypedDict, total=False):
+    select: dict
+    where: dict
+    include: dict
+    limit: int
+    offset: int
 
 
 @readable
@@ -51,26 +44,15 @@ class SelectorFactory:
     def __init__(self, *, model_ctx: model.ModelContext):
         self.model_ctx: model.ModelContext = model_ctx
 
-    """
-    Args:
-        1. select_dict (Dict)             : a dict contains all fields and conditions
-
-    Example:
-        Selector(model_class=ExampleModelClass, select_dict={'select':{'a':1, 'b':1, 'c':0 'sub_table':{'sub_a':1, 'sub_b':1}}}
-        1 stands for selecting this field
-        0 stands for not selecting this field
-    """
-
-    def create_selector(self, select_dict: Dict[str, Union[int, Dict]]):
+    def create_selector(self, select_dict: DSLParamDict):
         new_dict = {}
         find_all = False
-        key_select = DSL_PARAM_KEY['select']
-        if key_select not in select_dict:
+        if 'select' not in select_dict:
             # select all
             new_dict = self.select_all()
             find_all = True
         else:
-            new_dict = self.select_target(select_dict[key_select])
+            new_dict = self.select_target(select_dict['select'])
         return Selector(select_dict=new_dict, find_all=find_all)
 
     def select_all(self) -> Dict[str, Union[int, Dict]]:
@@ -99,7 +81,7 @@ class SelectorFactory:
                     new_dict[k] = 1
         return new_dict
 
-    def select_target(self, select_dict: Dict[str, Union[int, Dict]]) -> Dict[str, Union[int, Dict]]:
+    def select_target(self, select_dict: dict) -> Dict[str, Union[int, Dict]]:
         # 从select_dict中过滤掉非0值
         new_select = self.filter_non_zero(select_dict)
 
@@ -118,9 +100,9 @@ class PaginationFactory:
     ERROR_MESSAGE_INVALID_LIMIT = "limit must be greater than 0"
     ERROR_MESSAGE_INVALID_OFFSET = "offset must be greater than equal 0"
 
-    def create_pagination(self, param: dict) -> Pagination:
-        limit = param.get(DSL_PARAM_KEY['limit'])
-        offset = param.get(DSL_PARAM_KEY['offset'])
+    def create_pagination(self, param: DSLParamDict) -> Pagination:
+        limit = param.get('limit')
+        offset = param.get('offset')
 
         return self._create_pagination(limit, offset)
 
@@ -209,12 +191,11 @@ class IncludeContextFactory:
         self.model_ctx: ModelContext = model_ctx
         pass
 
-    def create_include_context(self, *, param: dict) -> IncludeContext:
-        key_include = DSL_PARAM_KEY['include']
-        if key_include not in param:
+    def create_include_context(self, *, param: DSLParamDict) -> IncludeContext:
+        if 'include' not in param or param['include'] is None:
             return IncludeContext.create_none_include_context()
 
-        include_dict = param[key_include]
+        include_dict = param['include']
         if not isinstance(include_dict, dict):
             raise BizException(ErrorCode.InvalidParameter, self.ERROR_INCLUDE_MUST_BE_DICT)
 

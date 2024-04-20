@@ -182,19 +182,28 @@ class TestAPI(unittest.TestCase):
         print("step3: find and relation")
 
         record = self.find_one(model_name=profile_model_name, project_id=project_id,
-                               where={"id": {"$eq": profile_insert_id}}, include={"user":True})
+                               where={"id": {"$eq": profile_insert_id}}, include={"user": True})
         print(f"step3: find success, record: {record}")
         self.assertTrue(record is not None)
         self.assertTrue('user' in record)
 
-        print(f"step4: delete user with {user_insert_id}")
-        count = self.delete_one(model_name=user_model_name, project_id=project_id, where={"id": {"$eq": user_insert_id}})
-        print(f"step4: delete success, count: {count}")
+        print("step4: findMany and relation")
+        record = self.find_many(model_name=profile_model_name, project_id=project_id,
+                                where={"id": {"$eq": profile_insert_id}}, include={"user": True})
+        print(f"step4: find success, record: {record}")
+        self.assertTrue(record is not None)
+        self.assertTrue('user' in record[0])
+
+        print(f"step5: delete user with {user_insert_id}")
+        count = self.delete_one(model_name=user_model_name, project_id=project_id,
+                                where={"id": {"$eq": user_insert_id}})
+        print(f"step5: delete success, count: {count}")
         self.assertEqual(count, 1)
 
-        print(f"step5: delete profile with {profile_insert_id}")
-        count = self.delete_one(model_name=profile_model_name, project_id=project_id, where={"id": {"$eq": profile_insert_id}})
-        print(f"step5: delete success, count: {count}")
+        print(f"step6: delete profile with {profile_insert_id}")
+        count = self.delete_one(model_name=profile_model_name, project_id=project_id,
+                                where={"id": {"$eq": profile_insert_id}})
+        print(f"step6: delete success, count: {count}")
         self.assertEqual(count, 1)
 
     def create_one(self, *, model_name, project_id, data: dict) -> str:
@@ -222,7 +231,7 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
         return response.json().get("Response").get("Count")
 
-    def find_one(self, *, model_name, project_id, where: dict, include:dict):
+    def find_one(self, *, model_name, project_id, where: dict, include: dict = None):
         payload = {
             "ModelName": model_name,
             "ProjectId": project_id,
@@ -272,12 +281,13 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
         return response.json().get("Response").get("Count")
 
-    def find_many(self, model_name, project_id, where):
+    def find_many(self, *, model_name, project_id, where, include: dict = None):
         payload = {
             "ModelName": model_name,
             "ProjectId": project_id,
             "Param": {
                 "where": where,
+                "include": include,
             }
         }
         response = requests.post(f'{self.url}/FindMany', json=payload, headers=self.headers)

@@ -1,5 +1,6 @@
 import json
 
+from app.domain.lowcode_model.dsl.dsl_param import DSLParamDict
 from app.domain.lowcode_model.dsl.node import node_base, op_node, logical_node
 from app.common.error import BizException, ErrorCode
 from typing import Dict, Optional
@@ -13,18 +14,17 @@ def get_first_pair(query: Dict):
 
 
 class NodeFactory:
-    KEY_WHERE = "where"
 
     def __init__(self, strict: bool = True, ignore_invalid_op: bool = False):
         self.strict = strict
         self.ignore_invalid_op = ignore_invalid_op
         pass
 
-    def create_node(self, param: Optional[dict]) -> node_base.WhereNode:
-        if param is None or self.KEY_WHERE not in param:
+    def create_node(self, param: DSLParamDict) -> node_base.WhereNode:
+        if param is None or 'where' not in param:
             return op_node.EMPTY_NODE
         else:
-            return self._create_node_from_dict(param[self.KEY_WHERE])
+            return self._create_node_from_dict(param['where'])
 
     def _create_node(self, query: str) -> node_base.WhereNode:
         if query is None or query == "":
@@ -84,7 +84,9 @@ class NodeFactory:
         if self.ignore_invalid_op:
             return None
         else:
-            raise BizException(ErrorCode.InvalidParameter, f"op='{op}' is invalid, please start with '$' or check the op")
+            raise BizException(
+                ErrorCode.InvalidParameter,
+                f"op='{op}' is invalid, please start with '$' or check the op")
 
     def _process_logical_node(self, logical_key, obj):
         if not isinstance(obj, list):
