@@ -64,28 +64,28 @@ class TestPaginationFactory(unittest.TestCase):
         self.factory = PaginationFactory()
 
     def test_create_pagination_with_valid_params(self):
-        param_dict = {"limit": 5, "offset": 10}
-        pagination = self.factory.create_pagination(param_dict)
+        param = {"limit": 5, "offset": 10}
+        pagination = self.factory.create_pagination(param)
         self.assertEqual(pagination.limit, 5)
         self.assertEqual(pagination.offset, 10)
 
     def test_create_pagination_with_invalid_limit(self):
-        param_dict = {"limit": -5, "offset": 10}
+        param = {"limit": -5, "offset": 10}
         with self.assertRaises(BizException) as context:
-            self.factory.create_pagination(param_dict)
+            self.factory.create_pagination(param)
         self.assertEqual(context.exception.code, ErrorCode.InvalidParameter.value)
         self.assertEqual(context.exception.message, PaginationFactory.ERROR_MESSAGE_INVALID_LIMIT)
 
     def test_create_pagination_with_invalid_offset(self):
-        param_dict = {"limit": 5, "offset": -10}
+        param = {"limit": 5, "offset": -10}
         with self.assertRaises(BizException) as context:
-            self.factory.create_pagination(param_dict)
+            self.factory.create_pagination(param)
         self.assertEqual(context.exception.code, ErrorCode.InvalidParameter.value)
         self.assertEqual(context.exception.message, PaginationFactory.ERROR_MESSAGE_INVALID_OFFSET)
 
     def test_create_pagination_with_default_values(self):
-        param_dict = {}
-        pagination = self.factory.create_pagination(param_dict)
+        param = {}
+        pagination = self.factory.create_pagination(param)
         self.assertEqual(pagination.limit, 10)
         self.assertEqual(pagination.offset, 0)
 
@@ -137,30 +137,30 @@ class TestIncludeParams(unittest.TestCase):
         print(list)
 
     def test_include_false(self):
-        include_ctx = self.factory.create_include_context(param_dict={})
+        include_ctx = self.factory.create_include_context(param={})
 
         self.assertTrue(not include_ctx.need_include)
 
     def test_include_invalid(self):
         with self.assertRaises(BizException) as context:
-            include_ctx = self.factory.create_include_context(param_dict={"include": []})
+            include_ctx = self.factory.create_include_context(param={"include": []})
         self.assertEqual(context.exception.code, ErrorCode.InvalidParameter.value)
         self.assertEqual(context.exception.message, IncludeContextFactory.ERROR_INCLUDE_MUST_BE_DICT)
 
     def test_include_false_with_empty_dict(self):
-        include_ctx = self.factory.create_include_context(param_dict={"include": {}})
+        include_ctx = self.factory.create_include_context(param={"include": {}})
 
         self.assertTrue(not include_ctx.need_include)
 
     def test_include_right_with_key_not_in_metadata(self):
-        # include 包含的key
-        include_ctx = self.factory.create_include_context(param_dict={"include": {"posts": True}})
+        # include 包含的key 不在metadata中
+        include_ctx = self.factory.create_include_context(param={"include": {"posts": True}})
 
         self.assertTrue(not include_ctx.need_include)
 
     def test_include_right_with_key_in_metadata(self):
-        # include 包含的key
-        include_ctx = self.factory.create_include_context(param_dict={"include": {"relation": True}})
+        # include 包含的key 在metadata中
+        include_ctx = self.factory.create_include_context(param={"include": {"relation": True}})
 
         self.assertTrue(include_ctx.need_include)
         print(include_ctx)

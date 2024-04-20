@@ -1,10 +1,12 @@
 from dataclasses import dataclass
 from typing import Dict, Union, Optional, List, TypedDict
 
+import loguru
+
 from app.common.decorator import readable
 from app.common.error import BizException, ErrorCode
 from app.domain.lowcode_model.model_ctx import model, field
-from app.domain.lowcode_model.model_ctx.field import RelationInfo
+from app.domain.lowcode_model.model_ctx.field import RelationInfo, ColumnFormat
 from app.domain.lowcode_model.model_ctx.model import MetadataContext, ModelContext
 
 """
@@ -46,8 +48,8 @@ class SelectorFactory:
         1. model_contex (model.ModelContext) : 模型上下文
     """
 
-    def __init__(self, model_contex: model.ModelContext):
-        self.model_context: model.ModelContext = model_contex
+    def __init__(self, *, model_ctx: model.ModelContext):
+        self.model_ctx: model.ModelContext = model_ctx
 
     """
     Args:
@@ -73,7 +75,7 @@ class SelectorFactory:
 
     def select_all(self) -> Dict[str, Union[int, Dict]]:
         new_select_dict: Dict[str, Union[int, Dict[str, 1]]] = {}
-        master_metadata_ctx: MetadataContext = self.model_context.get_master_metadata_ctx()
+        master_metadata_ctx: MetadataContext = self.model_ctx.get_master_metadata_ctx()
         column_list: List[field.SchemaColumn] = master_metadata_ctx.column_list
         print(column_list)
         for column in column_list:
@@ -116,9 +118,9 @@ class PaginationFactory:
     ERROR_MESSAGE_INVALID_LIMIT = "limit must be greater than 0"
     ERROR_MESSAGE_INVALID_OFFSET = "offset must be greater than equal 0"
 
-    def create_pagination(self, param_dict: dict) -> Pagination:
-        limit = param_dict.get(DSL_PARAM_KEY['limit'])
-        offset = param_dict.get(DSL_PARAM_KEY['offset'])
+    def create_pagination(self, param: dict) -> Pagination:
+        limit = param.get(DSL_PARAM_KEY['limit'])
+        offset = param.get(DSL_PARAM_KEY['offset'])
 
         return self._create_pagination(limit, offset)
 
@@ -142,11 +144,41 @@ class PaginationFactory:
 
 @readable
 class IncludeParam:
-    def __init__(self, *, local_key: str, foreign_key: str, from_col_name: str, include_as_key: str):
+    def __init__(self, *, local_key: str, foreign_key: str, from_col_name: str, include_as_key: str,
+                 join_one: bool = False):
         self.local_key: str = local_key
         self.foreign_key: str = foreign_key
         self.from_col_name: str = from_col_name
         self.include_as_key: str = include_as_key
+        self.join_one: bool = join_one
+
+    def to_mongo_cmd_list(self) -> List[dict]:
+        # 获取mongo的lookup查询
+        cmd_list = []
+        lookup: dict = {
+            "$lookup": {
+                "from": self.from_col_name,
+                "let": {
+                    "local_field": f"${self.local_key}"
+                },
+                "pipeline": [
+                    {"$match":
+                         {"$expr":
+                              {"$eq": ["$$local_field", f"${self.foreign_key}"]}
+                          }},
+                    # {"$project": {self.from_col_name: 1}},
+                ],
+                "as": self.include_as_key
+            }
+        }
+        cmd_list.append(lookup)
+        # 如果是多对一，就返回单文档
+        if self.join_one:
+            cmd_list.append({
+                "$unwind": '$' + self.include_as_key
+            })
+        # 否则返回数组，就不需要$unwind
+        return cmd_list
 
 
 @readable
@@ -177,12 +209,12 @@ class IncludeContextFactory:
         self.model_ctx: ModelContext = model_ctx
         pass
 
-    def create_include_context(self, *, param_dict: dict) -> IncludeContext:
+    def create_include_context(self, *, param: dict) -> IncludeContext:
         key_include = DSL_PARAM_KEY['include']
-        if key_include not in param_dict:
+        if key_include not in param:
             return IncludeContext.create_none_include_context()
 
-        include_dict = param_dict[key_include]
+        include_dict = param[key_include]
         if not isinstance(include_dict, dict):
             raise BizException(ErrorCode.InvalidParameter, self.ERROR_INCLUDE_MUST_BE_DICT)
 
@@ -206,11 +238,13 @@ class IncludeContextFactory:
 
         def column_2_include_param(column: field.SchemaColumn) -> IncludeParam:
             relation_info: RelationInfo = column.get_relation()
+            loguru.logger.debug(f"relation_info={relation_info}")
             include_param = IncludeParam(
                 local_key=relation_info['field'],
                 foreign_key=relation_info['relatedField'],
                 from_col_name=relation_info['relatedModelName'],
                 include_as_key=column.name,
+                join_one=column.format == ColumnFormat.MANY_TO_ONE.value
             )
             return include_param
 

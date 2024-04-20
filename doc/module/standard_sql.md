@@ -63,7 +63,7 @@ Profile Schema
         "user": {
             "type": "object",
             "properties": {},
-            "format": "x-many-one",
+            "format": "xManyToOne",
             "xRelation": {
                 "field": "userId",
                 "reference": {

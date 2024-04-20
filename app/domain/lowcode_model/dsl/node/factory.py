@@ -20,11 +20,11 @@ class NodeFactory:
         self.ignore_invalid_op = ignore_invalid_op
         pass
 
-    def create_node(self, dict_param: Optional[dict]) -> node_base.WhereNode:
-        if dict_param is None or self.KEY_WHERE not in dict_param:
+    def create_node(self, param: Optional[dict]) -> node_base.WhereNode:
+        if param is None or self.KEY_WHERE not in param:
             return op_node.EMPTY_NODE
         else:
-            return self._create_node_from_dict(dict_param[self.KEY_WHERE])
+            return self._create_node_from_dict(param[self.KEY_WHERE])
 
     def _create_node(self, query: str) -> node_base.WhereNode:
         if query is None or query == "":

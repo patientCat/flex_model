@@ -1,11 +1,12 @@
 import json
-from typing import Optional
+from typing import Optional, List
 
 import loguru
 import pymongo
 from bson import json_util
 
 from app.common.error import BizException, ErrorCode
+from app.domain.lowcode_model.dsl.dsl_param import IncludeContext, IncludeParam
 from app.domain.project_ctx import database
 from app.domain.lowcode_model.dsl.dsl_domain import FindDomain, CreateDomain, CreateManyDomain, FindManyDomain, \
     UpdateDomain, UpdateManyDomain, DeleteDomain, DeleteManyDomain
@@ -13,6 +14,7 @@ from app.domain.project_ctx.database import DbContext
 
 
 def remove_oid_and_date(obj):
+    print(obj)
     if isinstance(obj, dict):
         if '$oid' in obj:
             return str(obj['$oid'])
@@ -27,6 +29,29 @@ def remove_oid_and_date(obj):
 def do_find(collection, pagination, projection, query) -> list:
     cursor: pymongo.cursor.Cursor = collection.find(filter=query, projection=projection, limit=pagination.limit,
                                                     skip=pagination.offset)
+    doc_list = []
+    for doc in cursor:
+        json_doc = json.dumps(doc, sort_keys=True, default=json_util.default)
+        dict_doc = json.loads(json_doc)
+        doc_list.append(remove_oid_and_date(dict_doc))
+    return doc_list
+
+
+def do_aggregate(collection, projection: dict, query: dict, include_ctx: IncludeContext) -> list:
+    pipeline = [
+        {'$match': query},
+        {'$project': projection},
+    ]
+    include_param_list: List[IncludeParam] = include_ctx.include_param_list
+    for include_param in include_param_list:
+        if include_param is None:
+            continue
+        for mongo_cmd in include_param.to_mongo_cmd_list():
+            pipeline.append(mongo_cmd)
+
+    loguru.logger.info(f"aggregate_pipeline={pipeline}")
+
+    cursor: pymongo.cursor.Cursor = collection.aggregate(pipeline=pipeline)
     doc_list = []
     for doc in cursor:
         json_doc = json.dumps(doc, sort_keys=True, default=json_util.default)
@@ -83,31 +108,30 @@ class MongoRepoService:
     def apply_create(self, create_domain: CreateDomain) -> str:
         client, db, collection = self._connect_to_db()
         loguru.logger.info(f"create data={create_domain.data}")
-        result = collection.insert_one(create_domain.data)
-        return str(result.inserted_id)
+        collection.insert_one(create_domain.data)
+        return str(create_domain.insert_id)
 
     def apply_create_many(self, create_domain: CreateManyDomain) -> list:
         client, db, collection = self._connect_to_db()
+        collection.insert_many(create_domain.datalist)
 
-        result = collection.insert_many(create_domain.datalist)
-
-        id_list = []
-        for _id in result.inserted_ids:
-            id_list.append(str(_id))
-        return id_list
+        return create_domain.insert_id_list
 
     def apply_find(self, find_domain: FindDomain) -> (Optional[dict], Optional[int]):
         client, db, collection = self._connect_to_db()
-
         query = find_domain.where_node.to_dict()
         projection = find_domain.selector.select_dict
+        # 默认情况下，不返回mongo的_id
+        projection["_id"] = 0
         pagination = find_domain.pagination
-        doc_list = do_find(collection, pagination, projection, query)
-
+        include_context = find_domain.include_context
         total = None
         if find_domain.with_count:
             total = do_count(collection, query)
-
+        if find_domain.need_include:
+            doc_list = do_aggregate(collection, projection, query, include_context)
+        else:
+            doc_list = do_find(collection, pagination, projection, query)
         if len(doc_list) == 0:
             return None, total
         else:
@@ -118,12 +142,17 @@ class MongoRepoService:
 
         query = find_many_domain.where_node.to_dict()
         projection = find_many_domain.selector.select_dict
+        # 默认情况下，不返回mongo的_id
+        projection["_id"] = 0
         pagination = find_many_domain.pagination
-        doc_list = do_find(collection, pagination, projection, query)
-
+        include_context = find_many_domain.include_context
         total = None
         if find_many_domain.with_count:
             total = do_count(collection, query)
+        if find_many_domain.need_include:
+            doc_list = do_aggregate(collection, projection, query, include_context)
+        else:
+            doc_list = do_find(collection, pagination, projection, query)
 
         return doc_list, total
 

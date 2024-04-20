@@ -20,8 +20,8 @@ json-schema的校验属性很多。这里只介绍常见的几个。
 测试最大最小值
 ```python
 class NumberOfSchemaTest(unittest.TestCase):
-    def setUp(self) -> None:
-        self.number_schema = {
+    def setUp(cls) -> None:
+        cls.number_schema = {
             "type": "object",
             "properties": {
                 "price": {"type": "number", "minimum": 5},
@@ -29,21 +29,21 @@ class NumberOfSchemaTest(unittest.TestCase):
             },
         }
 
-    def test_number_minimum_schema(self):
+    def test_number_minimum_schema(cls):
         try:
-            jsonschema.validate(instance={"price": 3}, schema=self.number_schema)
+            jsonschema.validate(instance={"price": 3}, schema=cls.number_schema)
         except jsonschema.exceptions.ValidationError as e:
             print(e.message)
             print(e.validator)
-            self.assertEqual(e.validator, "minimum")
+            cls.assertEqual(e.validator, "minimum")
 
-    def test_number_maximum_schema(self):
+    def test_number_maximum_schema(cls):
         try:
-            jsonschema.validate(instance={"priceHigh": 13}, schema=self.number_schema)
+            jsonschema.validate(instance={"priceHigh": 13}, schema=cls.number_schema)
         except jsonschema.exceptions.ValidationError as e:
             print(e.message)
             print(e.validator)
-            self.assertEqual(e.validator, "maximum")
+            cls.assertEqual(e.validator, "maximum")
 ```
 
 ### string
@@ -51,8 +51,8 @@ class NumberOfSchemaTest(unittest.TestCase):
 
 ```python
 class StringOfSchemaTest(unittest.TestCase):
-    def setUp(self) -> None:
-        self.number_schema = {
+    def setUp(cls) -> None:
+        cls.number_schema = {
             "type": "object",
             "properties": {
                 "name": {"type": "string", "minLength": 5},
@@ -60,21 +60,21 @@ class StringOfSchemaTest(unittest.TestCase):
             },
         }
 
-    def test_minLength_schema(self):
+    def test_minLength_schema(cls):
         try:
-            jsonschema.validate(instance={"name": "abc"}, schema=self.number_schema)
+            jsonschema.validate(instance={"name": "abc"}, schema=cls.number_schema)
         except jsonschema.exceptions.ValidationError as e:
             print(e.message)
             print(e.validator)
-            self.assertEqual(e.validator, "minLength")
+            cls.assertEqual(e.validator, "minLength")
 
-    def test_maxLength_schema(self):
+    def test_maxLength_schema(cls):
         try:
-            jsonschema.validate(instance={"nameLong": "acdefghijklmnopq"}, schema=self.number_schema)
+            jsonschema.validate(instance={"nameLong": "acdefghijklmnopq"}, schema=cls.number_schema)
         except jsonschema.exceptions.ValidationError as e:
             print(e.message)
             print(e.validator)
-            self.assertEqual(e.validator, "maxLength")
+            cls.assertEqual(e.validator, "maxLength")
 ```
 
 ### 校验必填字段
@@ -83,8 +83,8 @@ class StringOfSchemaTest(unittest.TestCase):
 ```python
 
 class RequiredOfSchemaTest(unittest.TestCase):
-    def setUp(self) -> None:
-        self.schema = {
+    def setUp(cls) -> None:
+        cls.schema = {
             "type": "object",
             "properties": {
                 "name": {"type": "string"},
@@ -93,21 +93,21 @@ class RequiredOfSchemaTest(unittest.TestCase):
             "required": ["name", "age"]
         }
 
-    def test_ok(self):
+    def test_ok(cls):
         try:
-            jsonschema.validate(instance={"name": "foo", "age": 10}, schema=self.schema)
+            jsonschema.validate(instance={"name": "foo", "age": 10}, schema=cls.schema)
         except jsonschema.exceptions.ValidationError as e:
             print(e.message)
             print(e.validator)
-            self.assertTrue(True is False)
+            cls.assertTrue(True is False)
 
-    def test_lack_age(self):
+    def test_lack_age(cls):
         try:
-            jsonschema.validate(instance={"name": "foo"}, schema=self.schema)
+            jsonschema.validate(instance={"name": "foo"}, schema=cls.schema)
         except jsonschema.exceptions.ValidationError as e:
             print(e.message)
             print(e.validator)
-            self.assertEqual(e.validator, "required")
+            cls.assertEqual(e.validator, "required")
 
 
 ```
@@ -118,8 +118,8 @@ class RequiredOfSchemaTest(unittest.TestCase):
 ```python
 
 class FormatOfSchemaTest(unittest.TestCase):
-    def setUp(self) -> None:
-        self.schema = {
+    def setUp(cls) -> None:
+        cls.schema = {
             "type": "object",
             "properties": {
                 "ipv4": {"type": "string", "format": "ipv4"},
@@ -127,25 +127,25 @@ class FormatOfSchemaTest(unittest.TestCase):
             },
         }
 
-        self.format_checker = Draft202012Validator.FORMAT_CHECKER
+        cls.format_checker = Draft202012Validator.FORMAT_CHECKER
 
-    def test_ok(self):
+    def test_ok(cls):
         try:
             jsonschema.validate(instance={"ipv4": "127.0.0.1", "age": 10},
-                                schema=self.schema, format_checker=self.format_checker)
+                                schema=cls.schema, format_checker=cls.format_checker)
         except jsonschema.exceptions.ValidationError as e:
             print(e.message)
             print(e.validator)
-            self.assertTrue(True is False)
+            cls.assertTrue(True is False)
 
-    def test_wrong_format(self):
+    def test_wrong_format(cls):
         try:
             jsonschema.validate(instance={"ipv4": "012", "age": 10},
-                                schema=self.schema, format_checker=self.format_checker)
+                                schema=cls.schema, format_checker=cls.format_checker)
         except jsonschema.exceptions.ValidationError as e:
             print(e.message)
             print(e.validator)
-            self.assertEqual(e.validator, "format")
+            cls.assertEqual(e.validator, "format")
 
 
 ```

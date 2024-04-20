@@ -29,8 +29,8 @@ dict_msg()函数负责将出参映射成为希望看到的样子
 装饰器的感觉和java的注解类似，实现 dict_response
 ```python
 def dict_response(cls):
-    def dict_msg(self):
-        return {key: value for key, value in self.__dict__.items()}
+    def dict_msg(cls):
+        return {key: value for key, value in cls.__dict__.items()}
 
     cls.dict_msg = dict_msg
     return cls
@@ -48,8 +48,8 @@ class TestResponse:
 class TestResponse:
     name: str
     age: int
-    def dict_msg(self):
-      return {"name":self.name, "age":self.age}
+    def dict_msg(cls):
+      return {"name":cls.name, "age":cls.age}
 
 ```
 
@@ -59,11 +59,11 @@ python没有Java中的interface的概念。
 python本身是支持鸭子类型的。和go中鸭子类型一样。所以不需要像java中定义interface。
 ```python
 class Animal:
-    def bark(self):
+    def bark(cls):
         print("im a animal")
 
 class Dog:
-    def bark(self):
+    def bark(cls):
         print("wang wang")
 
 animal : Animal = Dog()
@@ -73,19 +73,19 @@ animal.bark() # wang wang
 ```python3
 #biz_response.py
 class BizResponse:
-    def dict_msg(self):
+    def dict_msg(cls):
         return {
-            "Response": self.message.dict_msg()
+            "Response": cls.message.dict_msg()
         }
 
 @dataclass
 class TestResponse:
     id: str
     
-    def dict_msg(self):
+    def dict_msg(cls):
         # 手动改为大写开头的格式
         return {
-            "Id": self.id,
+            "Id": cls.id,
         }
 
 ```
@@ -113,21 +113,21 @@ class ErrorCode(Enum):
 
 
 class BizException(Exception):
-    def __init__(self, code: ErrorCode, message: str):
-        self.code = code
-        self.message = message
+    def __init__(cls, code: ErrorCode, message: str):
+        cls.code = code
+        cls.message = message
 
 
 class Error:
-    def __init__(self, msg: str, code: str):
-        self.message = msg
-        self.code = code
+    def __init__(cls, msg: str, code: str):
+        cls.message = msg
+        cls.code = code
 
-    def dict_msg(self):
+    def dict_msg(cls):
         return {
             "Error": {
-                "Message": self.message,
-                "Code": self.code
+                "Message": cls.message,
+                "Code": cls.code
             }
         }
 

@@ -15,7 +15,7 @@ class TestAPI(unittest.TestCase):
             "$schema": "http://json-schema.org/draft-07/schema#",
             "type": "object",
             "properties": {
-                "_id": {
+                "id": {
                     "type": "string",
                     "format": "xShortText"
                 },
@@ -42,7 +42,7 @@ class TestAPI(unittest.TestCase):
             "$schema": "http://json-schema.org/draft-07/schema#",
             "type": "object",
             "properties": {
-                "_id": {
+                "id": {
                     "type": "string",
                     "format": "xShortText"
                 },
@@ -59,13 +59,11 @@ class TestAPI(unittest.TestCase):
                     "properties": {
 
                     },
-                    "format": "x-many-one",
+                    "format": "xManyToOne",
                     "xRelation": {
-                        {
-                            "field": "userId",
-                            "relatedField": "_id",
-                            "relate_model_name": "user"
-                        }
+                        "field": "userId",
+                        "relatedField": "id",
+                        "relatedModelName": "user"
                     }
                 }
             },
@@ -111,13 +109,13 @@ class TestAPI(unittest.TestCase):
 
         print("step2: update")
         new_age = 30
-        count = self.update_one(model_name=user_model_name, project_id=project_id, where={"_id": {"$eq": insert_id}},
+        count = self.update_one(model_name=user_model_name, project_id=project_id, where={"id": {"$eq": insert_id}},
                                 data={"age": new_age})
         print(f"step2: update success, count: {count}")
         self.assertEqual(count, 1)
 
         print("step3: find")
-        record = self.find_one(model_name=user_model_name, project_id=project_id, where={"_id": {"$eq": insert_id}})
+        record = self.find_one(model_name=user_model_name, project_id=project_id, where={"id": {"$eq": insert_id}})
         print(f"step3: find success, record: {record}")
         self.assertTrue(record is not None)
 
@@ -142,13 +140,13 @@ class TestAPI(unittest.TestCase):
 
         print("step2: update")
         new_age = 50
-        count = self.update_many(model_name=user_model_name, project_id=project_id, where={"_id": {"$in": insert_id}},
+        count = self.update_many(model_name=user_model_name, project_id=project_id, where={"id": {"$in": insert_id}},
                                  data={"age": new_age})
         print(f"step2: update success, count: {count}")
         self.assertEqual(count, 2)
 
         print("step3: find")
-        record = self.find_many(model_name=user_model_name, project_id=project_id, where={"_id": {"$in": insert_id}})
+        record = self.find_many(model_name=user_model_name, project_id=project_id, where={"id": {"$in": insert_id}})
         print(f"step3: find success, record: {record}")
         self.assertTrue(record is not None)
 
@@ -182,13 +180,21 @@ class TestAPI(unittest.TestCase):
         print(f"step2: create success, insert_id: {profile_insert_id}")
 
         print("step3: find and relation")
-        record = self.find_one(model_name=user_model_name, project_id=project_id, where={"_id": {"$eq": insert_id}})
+
+        record = self.find_one(model_name=profile_model_name, project_id=project_id,
+                               where={"id": {"$eq": profile_insert_id}}, include={"user":True})
         print(f"step3: find success, record: {record}")
         self.assertTrue(record is not None)
+        self.assertTrue('user' in record)
 
-        print("step4: delete")
-        count = self.delete_one(model_name=user_model_name, project_id=project_id, where={"age": {"$eq": new_age}})
+        print(f"step4: delete user with {user_insert_id}")
+        count = self.delete_one(model_name=user_model_name, project_id=project_id, where={"id": {"$eq": user_insert_id}})
         print(f"step4: delete success, count: {count}")
+        self.assertEqual(count, 1)
+
+        print(f"step5: delete profile with {profile_insert_id}")
+        count = self.delete_one(model_name=profile_model_name, project_id=project_id, where={"id": {"$eq": profile_insert_id}})
+        print(f"step5: delete success, count: {count}")
         self.assertEqual(count, 1)
 
     def create_one(self, *, model_name, project_id, data: dict) -> str:
@@ -216,12 +222,13 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
         return response.json().get("Response").get("Count")
 
-    def find_one(self, *, model_name, project_id, where: dict):
+    def find_one(self, *, model_name, project_id, where: dict, include:dict):
         payload = {
             "ModelName": model_name,
             "ProjectId": project_id,
             "Param": {
                 "where": where,
+                "include": include,
             }
         }
         response = requests.post(f'{self.url}/FindOne', json=payload, headers=self.headers)

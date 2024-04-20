@@ -101,18 +101,18 @@ name = person.get("name_not_exist", "default_value")
 当我们想使用json序列化一个类时
 ```python
 class Test:
-    def __init__(self):
-        self.name = "123"
+    def __init__(cls):
+        cls.name = "123"
 
 print(json.dumps(Test())) # raise TypeError: Object of type Test is not JSON serializable
 ```
 即默认的Python类是无法进行Json序列化的。
 ```python
 class Test:
-    def __init__(self):
-        self.name = "123"
-    def to_dict(self):
-        return {"name": self.name}
+    def __init__(cls):
+        cls.name = "123"
+    def to_dict(cls):
+        return {"name": cls.name}
     
 print(json.dumps(Test().to_dict()))
 ```
@@ -126,12 +126,12 @@ print(json.dumps(Test().__dict__))
 但是当我们进行嵌套处理的时候，就又会有问题
 ```python
 class Dog:
-    def __init__(self):
-        self.dog = "dog"
+    def __init__(cls):
+        cls.dog = "dog"
 class Test:
-    def __init__(self):
-        self.name = "123"
-        self.dog = Dog()
+    def __init__(cls):
+        cls.name = "123"
+        cls.dog = Dog()
 
 print(json.dumps(Test().__dict__)) #raise Type Error
 ```

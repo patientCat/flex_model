@@ -48,11 +48,11 @@ class TestProjectSqlRepoInterface(unittest.TestCase):
         print(vars(rtn_model2))
 
     def test_cls_var(self):
-        project1 = ProjectPO(id="1")
+        project1 = ProjectPO()
         project1.id = "1"
         ProjectPO.id = "1"
 
-        project2 = ProjectPO(id="1")
+        project2 = ProjectPO()
         project2.id = "2"
         ProjectPO.id = "2"
 

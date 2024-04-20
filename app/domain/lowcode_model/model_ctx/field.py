@@ -4,7 +4,6 @@ from typing import Optional, TypedDict, List
 
 import loguru
 
-from app.common.error import BizException, ErrorCode
 from app.domain.lowcode_model.model_ctx import constant
 
 
@@ -30,6 +29,9 @@ class ColumnFormat(Enum):
         return getattr(self, "_enum_value", None)
 
 
+COLUMN_FORMAT_SET = {column_format.value for column_format in ColumnFormat.__members__.values()}
+
+
 class ColumnType(Enum):
     NUMBER = "number"
     STRING = "string"
@@ -38,6 +40,8 @@ class ColumnType(Enum):
     OBJECT = "object"
     NULL = "null"
 
+
+COLUMN_TYPE_SET = {column_type.value for column_type in ColumnType.__members__.values()}
 
 RELATION_FORMAT_LIST: List[str] = [ColumnFormat.MANY_TO_ONE.value,
                                    ColumnFormat.MANY_TO_MANY.value,
@@ -72,6 +76,9 @@ class RelationInfo(TypedDict, total=False):
 
 
 class SchemaColumn(MetaColumn):
+    KEY_FORMAT = "format"
+    KEY_TYPE = "type"
+
     def __init__(self, key, json_val):
         self.key = key
         self.json_val = json_val
@@ -82,22 +89,18 @@ class SchemaColumn(MetaColumn):
 
     @property
     def format(self) -> str:
-        _format = self.json_val.get(constant.SCHEMA_KEYS["format"], "")
-        if _format is None or _format == "":
-            return ""
-        try:
-            return ColumnFormat(_format).value
-        except ValueError:
-            loguru.logger.error(f"Invalid format for {_format}")
-            return _format
+        _format = self.json_val.get(self.KEY_FORMAT, "")
+        if _format not in COLUMN_FORMAT_SET:
+            loguru.logger.error(f"Invalid format for '{_format}'")
+        return _format
 
     @property
-    def type(self) -> ColumnType:
-        _type = self.json_val.get(constant.SCHEMA_KEYS["type"], "")
-        try:
-            return ColumnType(_type)
-        except ValueError:
-            raise BizException(ErrorCode.InvalidParameter, f"Invalid type for {_type}")
+    def type(self) -> Optional[ColumnType]:
+        _type = self.json_val.get(self.KEY_TYPE, "")
+        if _type not in COLUMN_TYPE_SET:
+            loguru.logger.error(f"Invalid type for '{_type}'")
+            return None
+        return ColumnType(_type)
 
     def is_relation(self) -> bool:
         if self.format in RELATION_FORMAT_LIST:
