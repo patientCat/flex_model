@@ -229,6 +229,39 @@ class TestAPI(unittest.TestCase):
         print(f"end: delete success, count: {count}")
         self.assertEqual(count, 2)
 
+    def test_orderby(self):
+        user_model_name = "user"
+        project_id = "default"
+        self.clear_table(model_name=user_model_name, project_id=project_id)
+
+        print("begin: create_many")
+        insert_id = self.create_many(model_name=user_model_name, project_id=project_id,
+                                     data=[
+                                         {"name": "luke", "age": 20},
+                                         {"name": "james", "age": 40},
+                                         {"name": "craig", "age": 30},
+                                     ])
+        print(f"end: create_many success, insert_id: {insert_id}")
+
+        print("begin: find_and_orderby = 1")
+        record = self.find_many(model_name=user_model_name, project_id=project_id, where={"id": {"$in": insert_id}}, orderby=[{"age":1}])
+        print(f"end: find success, record: {record}")
+        self.assertTrue(record is not None)
+        age_list = [elem['age'] for elem in record]
+        self.assertEqual(age_list, [20, 30, 40])
+
+        print("begin: find_and_orderby = -1")
+        record = self.find_many(model_name=user_model_name, project_id=project_id, where={"id": {"$in": insert_id}}, orderby=[{"age":-1}])
+        print(f"end: find success, record: {record}")
+        self.assertTrue(record is not None)
+        age_list = [elem['age'] for elem in record]
+        self.assertEqual(age_list, [40, 30, 20])
+
+        print("step4: delete")
+        count = self.delete_many(model_name=user_model_name, project_id=project_id, where={"id": {"$in": insert_id}})
+        print(f"step4: delete success, count: {count}")
+        self.assertEqual(count, 3)
+
     def create_one(self, *, model_name, project_id, data: dict) -> str:
         payload = {
             "ModelName": model_name,
@@ -304,13 +337,14 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
         return response.json().get("Response").get("Count")
 
-    def find_many(self, *, model_name, project_id, where, include: dict = None):
+    def find_many(self, *, model_name, project_id, where, include: dict = None, orderby: list = None):
         payload = {
             "ModelName": model_name,
             "ProjectId": project_id,
             "Param": {
                 "where": where,
                 "include": include,
+                "orderby": orderby,
             }
         }
         response = requests.post(f'{self.url}/FindMany', json=payload, headers=self.headers)

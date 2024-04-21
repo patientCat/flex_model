@@ -5,7 +5,7 @@ import bson
 
 from app.common.error import ErrorCode, BizException, EzErrorCodeEnum
 from app.domain.lowcode_model.dsl.dsl_param import Selector, SelectorFactory, Pagination, PaginationFactory, \
-    IncludeContextFactory, IncludeContext, DSLParamDict
+    IncludeContextFactory, IncludeContext, DSLParamDict, OrderByFactory, OrderBy
 from app.domain.lowcode_model.dsl.node.factory import NodeFactory
 from app.domain.lowcode_model.dsl.node.node_base import WhereNode
 from app.domain.lowcode_model.model_ctx.model import ModelContext, MetadataContext
@@ -13,12 +13,13 @@ from app.domain.lowcode_model.model_ctx.model import ModelContext, MetadataConte
 
 class FindDomain:
     def __init__(self, *, selector: Selector, pagination: Pagination, where_node: WhereNode,
-                 with_count=False, include_context: IncludeContext = None):
+                 with_count=False, include_context: IncludeContext = None, orderby: OrderBy = None):
         self.selector = selector
         self.pagination = pagination
         self.where_node = where_node
         self.with_count = with_count
         self.include_context = include_context
+        self.orderby: OrderBy = orderby
 
     @property
     def need_include(self):
@@ -27,16 +28,18 @@ class FindDomain:
 
 class FindManyDomain:
     def __init__(self, *, selector: Selector, pagination: Pagination, where_node: WhereNode,
-                 with_count=False, include_context: IncludeContext = None):
+                 with_count=False, include_context: IncludeContext = None, orderby: OrderBy = None):
         self.selector = selector
         self.pagination = pagination
         self.where_node = where_node
         self.with_count = with_count
         self.include_context = include_context
+        self.orderby: OrderBy = orderby
 
     @property
     def need_include(self):
         return self.include_context is not None and self.include_context.need_include
+
 
 class CreateDomain:
     def __init__(self, *, data: dict, insert_id: str):
@@ -108,6 +111,7 @@ class DomainFactory:
         self.pagination_factory = PaginationFactory()
         self.node_factory = NodeFactory()
         self.include_factory = IncludeContextFactory(model_ctx=model_context)
+        self.orderby_factory = OrderByFactory(model_ctx=model_context)
 
     KEY_WITH_COUNT = "withCount"
     KEY_DATA = "data"
@@ -147,12 +151,14 @@ class DomainFactory:
         where_node = self.node_factory.create_node(param)
         with_count = self.__with_count(param)
         include_context = self.include_factory.create_include_context(param=param)
+        orderby = self.orderby_factory.create_order_by(param=param)
         return FindDomain(
             selector=selector,
             pagination=pagination,
             where_node=where_node,
             with_count=with_count,
             include_context=include_context,
+            orderby=orderby,
         )
 
     @classmethod
@@ -168,8 +174,15 @@ class DomainFactory:
         where_node = self.node_factory.create_node(param)
         with_count = self.__with_count(param)
         include_context = self.include_factory.create_include_context(param=param)
-        return FindManyDomain(selector=selector, pagination=pagination, where_node=where_node,
-                              with_count=with_count, include_context=include_context)
+        orderby = self.orderby_factory.create_order_by(param=param)
+        return FindManyDomain(
+            selector=selector,
+            pagination=pagination,
+            where_node=where_node,
+            with_count=with_count,
+            include_context=include_context,
+            orderby=orderby,
+        )
 
     def create_domain(self, *, param: Optional[dict], metadata_ctx: MetadataContext = None) -> CreateDomain:
         if param is None:

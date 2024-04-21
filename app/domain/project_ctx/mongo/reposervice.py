@@ -24,9 +24,9 @@ def remove_oid_and_date(obj):
     return obj
 
 
-def do_find(collection, pagination, projection, query) -> list:
+def do_find(collection, pagination, projection, query, orderby) -> list:
     cursor: pymongo.cursor.Cursor = collection.find(filter=query, projection=projection, limit=pagination.limit,
-                                                    skip=pagination.offset)
+                                                    skip=pagination.offset, sort=orderby)
     doc_list = []
     for doc in cursor:
         json_doc = json.dumps(doc, sort_keys=True, default=json_util.default)
@@ -35,11 +35,15 @@ def do_find(collection, pagination, projection, query) -> list:
     return doc_list
 
 
-def do_aggregate(collection, projection: dict, query: dict, include_ctx: IncludeContext) -> list:
+def do_aggregate(collection, projection: dict, query: dict, include_ctx: IncludeContext, orderby_list: list) -> list:
     pipeline = [
         {'$match': query},
         {'$project': projection},
     ]
+    if orderby_list is not None and len(orderby_list) > 0:
+        sort = {item[0]: item[1] for item in orderby_list if item is not None}
+        if len(sort.keys()) > 0:
+            pipeline.append({'$sort': sort})
     include_param_list: List[IncludeParam] = include_ctx.include_param_list
     for include_param in include_param_list:
         if include_param is None:
@@ -123,13 +127,14 @@ class MongoRepoService:
         projection["_id"] = 0
         pagination = find_domain.pagination
         include_context = find_domain.include_context
+        orderby_list = find_domain.orderby.order_by_list if find_domain.orderby else []
         total = None
         if find_domain.with_count:
             total = do_count(collection, query)
         if find_domain.need_include:
-            doc_list = do_aggregate(collection, projection, query, include_context)
+            doc_list = do_aggregate(collection, projection, query, include_context, orderby_list)
         else:
-            doc_list = do_find(collection, pagination, projection, query)
+            doc_list = do_find(collection, pagination, projection, query, orderby_list)
         if len(doc_list) == 0:
             return None, total
         else:
@@ -144,13 +149,14 @@ class MongoRepoService:
         projection["_id"] = 0
         pagination = find_many_domain.pagination
         include_context = find_many_domain.include_context
+        orderby_list = find_many_domain.orderby.order_by_list if find_many_domain.orderby else []
         total = None
         if find_many_domain.with_count:
             total = do_count(collection, query)
         if find_many_domain.need_include:
-            doc_list = do_aggregate(collection, projection, query, include_context)
+            doc_list = do_aggregate(collection, projection, query, include_context, orderby_list)
         else:
-            doc_list = do_find(collection, pagination, projection, query)
+            doc_list = do_find(collection, pagination, projection, query, orderby_list)
 
         return doc_list, total
 

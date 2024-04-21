@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, Union, Optional, List, TypedDict
+from typing import Dict, Union, Optional, List, TypedDict, Tuple
 
 from app.common.bizlogger import LOGGER
 from app.common.decorator import readable
@@ -25,6 +25,7 @@ class DSLParamDict(TypedDict, total=False):
     include: dict
     limit: int
     offset: int
+    orderby: List[dict]
 
 
 @readable
@@ -259,3 +260,39 @@ class IncludeContextFactory:
             join_one=column.format == ColumnFormat.MANY_TO_ONE.value
         )
         return include_param
+
+
+class OrderBy:
+    def __init__(self, order_by_list: List = None):
+        self.order_by_list: List[Tuple[str, int]] = order_by_list
+
+
+class OrderByFactory:
+    def __init__(self, model_ctx: ModelContext):
+        self.model_ctx = model_ctx
+
+    def create_order_by(self, *, param: DSLParamDict) -> OrderBy:
+        if 'orderby' not in param or param['orderby'] is None:
+            return OrderBy()
+        orderby_value = param['orderby']
+        if not isinstance(orderby_value, list):
+            raise BizException(ErrorCode.InvalidParameter, 'orderby must be a list')
+        orderby_list = []
+        for value in orderby_value:
+            orderby_tuple = self.get_orderby(value)
+            if orderby_tuple:
+                orderby_list.append(orderby_tuple)
+
+        orderby_list = [self.get_orderby(value) for value in orderby_value]
+        return OrderBy(order_by_list=orderby_list)
+
+    def get_orderby(self, one_orderby: dict) -> Optional[Tuple]:
+        if not isinstance(one_orderby, dict):
+            return None
+        keys = list(one_orderby.keys())
+        if len(keys) == 0:
+            return None
+        if len(keys) > 1:
+            raise BizException(ErrorCode.InvalidParameter, 'orderby must be [{"a":1}], each dict can only have one key')
+        first_key = keys[0]
+        return first_key, 1 if one_orderby[first_key] > 0 else -1
