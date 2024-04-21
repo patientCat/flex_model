@@ -1,20 +1,18 @@
 import json
 from typing import Optional, List
 
-import loguru
 import pymongo
 from bson import json_util
 
+from app.common.bizlogger import LOGGER
 from app.common.error import BizException, ErrorCode
 from app.domain.lowcode_model.dsl.dsl_param import IncludeContext, IncludeParam
-from app.domain.project_ctx import database
 from app.domain.lowcode_model.dsl.dsl_domain import FindDomain, CreateDomain, CreateManyDomain, FindManyDomain, \
     UpdateDomain, UpdateManyDomain, DeleteDomain, DeleteManyDomain
 from app.domain.project_ctx.database import DbContext
 
 
 def remove_oid_and_date(obj):
-    print(obj)
     if isinstance(obj, dict):
         if '$oid' in obj:
             return str(obj['$oid'])
@@ -49,7 +47,7 @@ def do_aggregate(collection, projection: dict, query: dict, include_ctx: Include
         for mongo_cmd in include_param.to_mongo_cmd_list():
             pipeline.append(mongo_cmd)
 
-    loguru.logger.info(f"aggregate_pipeline={pipeline}")
+    LOGGER.info(f"aggregate_pipeline={pipeline}")
 
     cursor: pymongo.cursor.Cursor = collection.aggregate(pipeline=pipeline)
     doc_list = []
@@ -107,7 +105,7 @@ class MongoRepoService:
 
     def apply_create(self, create_domain: CreateDomain) -> str:
         client, db, collection = self._connect_to_db()
-        loguru.logger.info(f"create data={create_domain.data}")
+        LOGGER.info(f"create data={create_domain.data}")
         collection.insert_one(create_domain.data)
         return str(create_domain.insert_id)
 
@@ -161,7 +159,7 @@ class MongoRepoService:
 
         query = update_domain.query
         data = update_domain.data
-        loguru.logger.info(f"query={query}_data={data}")
+        LOGGER.info(f"query={query}_data={data}")
 
         count = do_update(collection, query, data)
         return count
@@ -171,7 +169,7 @@ class MongoRepoService:
 
         query = update_domain.query
         data = update_domain.data
-        loguru.logger.info(f"query={query}_data={data}")
+        LOGGER.info(f"query={query}_data={data}")
         count = do_update(collection, query, data, update_many=True)
         return count
 

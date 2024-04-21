@@ -1,11 +1,10 @@
 import json
 import re
-import sqlite3
 from typing import Dict, List, Optional
 
-import loguru
 import sqlalchemy
 
+from app.common.bizlogger import LOGGER
 from app.common.error import ErrorCode, BizException, EzErrorCodeEnum
 from app.domain.lowcode_model.model_ctx import field
 from app.domain.lowcode_model.model_ctx.json_schema import JsonSchemaChecker
@@ -89,7 +88,7 @@ class MetadataContext:
         if data is None:
             return
         validation_result = self.__json_schema_checker.validate_on_create_many(data)
-        loguru.logger.info(f"Validation result: {validation_result}")
+        LOGGER.info(f"Validation result: {validation_result}")
         if validation_result.is_valid:
             return
         else:

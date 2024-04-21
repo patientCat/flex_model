@@ -1,10 +1,10 @@
-import json
 from dataclasses import dataclass
 from typing import Optional, List, Dict, Union
 
 import jsonschema
-import loguru
 from jsonschema.validators import Draft202012Validator
+
+from app.common.bizlogger import LOGGER
 
 
 def remove_required_key(json_schema: dict) -> dict:
@@ -52,7 +52,7 @@ def _validate_on_create_fail_first(data: Dict, json_schema: dict, format_checker
         jsonschema.validate(instance=data, schema=json_schema, format_checker=format_checker)
         return ValidationResult(is_valid=True, error_message=None)
     except jsonschema.exceptions.ValidationError as e:
-        loguru.logger.exception(e)
+        LOGGER.exception(e)
         error_msg = __get_err_msg(e)
         if idx is not None:
             error_msg = "idx = '{0}', {1}".format(idx, error_msg)

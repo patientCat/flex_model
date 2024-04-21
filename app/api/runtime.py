@@ -1,7 +1,6 @@
-from loguru import logger
-
 from app.api.context import ContextHolder, ContextHolderImpl
 from app.common import utils
+from app.common.bizlogger import LOGGER
 from app.common.error import BizException, ErrorCode
 from app.domain.project_ctx.database import MongoDbContext
 from app.domain.project_ctx.mongo import reposervice
@@ -28,22 +27,22 @@ class RuntimeService:
 
     def _get_model_context(self, project_id: str, model_name: str) -> ModelContext:
         model_name_ctx = ModelNameContext(name=model_name, project_id=project_id)
-        logger.info("model_name_ctx={}", utils.toJSON(model_name_ctx))
+        LOGGER.info("model_name_ctx=%s", utils.toJSON(model_name_ctx))
 
         model_context = self.context.get_model_context(project_id, model_name_ctx)
         if model_context is None:
             raise BizException(ErrorCode.InvalidParameter, f"name={model_name_ctx.name}_model_context is None")
-        logger.info("model_context={}", model_context)
+        LOGGER.info("model_context=%s", model_context)
         return model_context
 
     def _get_database_context(self, model_context: ModelContext, req):
         model_name_ctx = model_context.model_name_ctx
-        logger.info("get_database_ctx, model_name_ctx={}", utils.toJSON(model_name_ctx))
+        LOGGER.info("get_database_ctx, model_name_ctx=%s", utils.toJSON(model_name_ctx))
         database_info = self.context.get_database_info(req.project_id, model_context)
         if database_info is None:
-            logger.error(f"get_database_info_fail_with_project_id={req.project_id}")
+            LOGGER.error(f"get_database_info_fail_with_project_id={req.project_id}")
             raise BizException(ErrorCode.InvalidParameter, "project_id relate database_info is not exist")
-        logger.info("get_database_ctx, database_info={}", database_info.to_json())
+        LOGGER.info("get_database_ctx, database_info=%s", database_info.to_json())
         dbcontext = MongoDbContext(database_info, model_name_ctx.collection_name)
         return dbcontext
 
@@ -57,7 +56,7 @@ class RuntimeService:
         mongo_repo = reposervice.MongoRepoService(dbcontext)
         find_domain = DomainFactory(model_context).find_domain(param=req.param)
         record, total = mongo_repo.apply_find(find_domain)
-        logger.info("record={}".format(record))
+        LOGGER.info("record={}".format(record))
         resp = FindOneResponse(record=record, total=total)
         return resp
 
@@ -71,7 +70,7 @@ class RuntimeService:
         mongo_repo = reposervice.MongoRepoService(dbcontext)
         find_many_domain = DomainFactory(model_context).find_many_domain(param=req.param)
         record, total = mongo_repo.apply_find_many(find_many_domain)
-        logger.info("record_list={}, total={}".format(record, total))
+        LOGGER.info("record_list={}, total={}".format(record, total))
         resp = FindManyResponse(record=record, total=total)
         return resp
 

@@ -30,5 +30,4 @@ class ContextHolderImpl(ContextHolder):
     # 通过模型上下文，拿到数据库上下文
     @abstractmethod
     def get_database_info(self, project_id: str, model_ctx: ModelContext) -> DatabaseInfo:
-        print(f"project_id = {project_id}")
         return ProjectContext(project_repo=self.project_repo).get_database_info(project_id=project_id)

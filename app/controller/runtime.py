@@ -1,5 +1,4 @@
 from flask_restful import reqparse, Resource
-from loguru import logger
 
 from app.api.runtime import RUNTIME_SERVICE
 from app.common.biz_response import BizResponse
@@ -41,7 +40,6 @@ class CreateOne(Resource):
 class CreateMany(Resource):
     def post(self):
         args = PARSER.parse_args()
-        logger.info("args={}", args)
         req = runtime.CreateManyRequest(**args)
         response = RUNTIME_SERVICE.create_many(req)
         success = BizResponse.success(response)
@@ -60,7 +58,6 @@ class UpdateOne(Resource):
 class UpdateMany(Resource):
     def post(self):
         args = PARSER.parse_args()
-        logger.info("args={}", args)
         req = runtime.UpdateManyRequest(**args)
         response = RUNTIME_SERVICE.update_many(req)
         success = BizResponse.success(response)
@@ -79,7 +76,6 @@ class DeleteOne(Resource):
 class DeleteMany(Resource):
     def post(self):
         args = PARSER.parse_args()
-        logger.info("args={}", args)
         req = runtime.DeleteManyRequest(**args)
         response = RUNTIME_SERVICE.delete_many(req)
         success = BizResponse.success(response)

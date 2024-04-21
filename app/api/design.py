@@ -40,7 +40,6 @@ class DesignService:
         model_po_list: List[ModelPO] = self.model_repo.get_model_list_page(project_id=req.project_id,
                                                                            page_size=req.page_size,
                                                                            page_num=req.page_number)
-        print(model_po_list)
         if model_po_list is None:
             model_po_list = []
 

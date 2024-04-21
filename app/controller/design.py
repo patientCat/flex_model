@@ -43,7 +43,6 @@ class GetModelList(Resource):
         req = design.GetModelListRequest(**args)
         response = DESIGN_SERVICE.get_model_list(req)
         success = BizResponse.success(response)
-        print(response.dict_msg())
         return success.dict_msg(), 200
 
 

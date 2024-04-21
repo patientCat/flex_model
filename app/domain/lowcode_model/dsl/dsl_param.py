@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, Union, Optional, List, TypedDict
 
-import loguru
-
+from app.common.bizlogger import LOGGER
 from app.common.decorator import readable
 from app.common.error import BizException, ErrorCode
 from app.domain.lowcode_model.model_ctx import model, field
@@ -159,9 +158,11 @@ class IncludeParam:
                 },
                 "pipeline": [
                     {"$match":
-                         {"$expr":
-                              {"$eq": ["$$local_field", f"${self.foreign_key}"]}
-                          }},
+                        {
+                            "$expr":
+                                {"$eq": ["$$local_field", f"${self.foreign_key}"]}
+                        }
+                    },
                     {"$project": related_select},
                 ],
                 "as": self.include_as_key
@@ -241,7 +242,7 @@ class IncludeContextFactory:
 
     def column_2_include_param(self, column: field.SchemaColumn, include_dict_param: dict) -> Optional[IncludeParam]:
         relation_info: RelationInfo = column.get_relation()
-        loguru.logger.debug(f"relation_info={relation_info}, include_dict={include_dict_param}")
+        LOGGER.debug(f"relation_info={relation_info}, include_dict={include_dict_param}")
         include_dict_value = include_dict_param.get(column.name)
         if include_dict_value is None:
             return None

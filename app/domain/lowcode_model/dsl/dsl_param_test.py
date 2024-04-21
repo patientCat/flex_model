@@ -27,7 +27,8 @@ class TestSelectorFactory(unittest.TestCase):
             SchemaColumn(key='c', json_val={'name': 'c'})
         ]
         self.model_context.get_master_metadata_ctx.return_value = self.metadata_ctx
-        self.selector_factory = SelectorFactory(self.model_context)
+        self.model_context.get_metadata_ctx_by_name.return_value = self.metadata_ctx
+        self.selector_factory = SelectorFactory(model_ctx=self.model_context)
 
     def test_func(self):
         mtx = self.model_context.get_master_metadata_ctx()
@@ -43,11 +44,18 @@ class TestSelectorFactory(unittest.TestCase):
         self.assertIsInstance(selector, Selector)
         self.assertEqual(expect_dict, selector.select_dict)
 
-    def test_select_all(self):
+    def test_select_all_by_param(self):
         expected_result = {'a': 1, 'b': 1, 'c': 1}
 
         selector = self.selector_factory.create_selector({})
-        print(selector.select_dict)
+        self.assertIsInstance(selector, Selector)
+        self.assertTrue(selector.find_all)
+        self.assertEqual(expected_result, selector.select_dict)
+
+    def test_select_all(self):
+        expected_result = {'a': 1, 'b': 1, 'c': 1}
+
+        selector = self.selector_factory.create_all_selector()
         self.assertIsInstance(selector, Selector)
         self.assertTrue(selector.find_all)
         self.assertEqual(expected_result, selector.select_dict)

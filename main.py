@@ -2,10 +2,10 @@
 import traceback
 
 from flask import Flask, jsonify
-from flask_restful import Api, Resource
-from loguru import logger
+from flask_restful import Api
 
 from app.common.biz_response import BizResponse, Error
+from app.common.bizlogger import LOGGER,init_logger
 from app.common.error import BizException, ErrorCode
 from app.controller import runtime, design
 
@@ -13,14 +13,15 @@ APP = Flask(__name__)
 API = Api(APP)
 
 
+init_logger()
 
 @APP.errorhandler(Exception)
 def error_handler(e):
     """
     全局异常捕获
     """
-    logger.error("error={}", e)
-    logger.error("traceback={}", traceback.format_exc())
+    LOGGER.error("error={}", e)
+    LOGGER.error("traceback={}", traceback.format_exc())
     if isinstance(e, BizException):
         message = e.message
         code = e.code

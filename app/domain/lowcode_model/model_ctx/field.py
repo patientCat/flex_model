@@ -2,8 +2,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Optional, TypedDict, List
 
-import loguru
-
+from app.common.bizlogger import LOGGER
 from app.domain.lowcode_model.model_ctx import constant
 
 
@@ -91,14 +90,14 @@ class SchemaColumn(MetaColumn):
     def format(self) -> str:
         _format = self.json_val.get(self.KEY_FORMAT, "")
         if _format not in COLUMN_FORMAT_SET:
-            loguru.logger.error(f"Invalid format for '{_format}'")
+            LOGGER.warning(f"invalid format for '{_format}'")
         return _format
 
     @property
     def type(self) -> Optional[ColumnType]:
         _type = self.json_val.get(self.KEY_TYPE, "")
         if _type not in COLUMN_TYPE_SET:
-            loguru.logger.error(f"Invalid type for '{_type}'")
+            LOGGER.warning(f"invalid type for '{_type}'")
             return None
         return ColumnType(_type)
 

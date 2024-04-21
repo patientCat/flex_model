@@ -15,10 +15,10 @@ from app.repo.po import ModelPO, ProjectPO
 Base = declarative_base()
 
 Db_Path = 'sqlite:///database.db'
-Engine = create_engine(Db_Path, echo=True)
+Engine = create_engine(Db_Path, echo=False)
 
 # 配置日志记录器
-logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
+logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
 
 def copy_value(from_cls, to_cls):
