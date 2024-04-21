@@ -32,5 +32,8 @@ class ThreadLocalContext:
         context[attr] = value
         self.__thread_local.value = context
 
+    def clear(self) -> None:
+        self.get_context().clear()
+
 
 BIZ_CONTEXT: ThreadLocalContext = ThreadLocalContext()

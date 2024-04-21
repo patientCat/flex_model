@@ -1,3 +1,5 @@
+import functools
+
 from flask_restful import reqparse, Resource
 
 from app.api.runtime import RUNTIME_SERVICE

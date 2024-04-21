@@ -2,10 +2,18 @@
 import logging
 import uuid
 from datetime import datetime
+from typing import Any
 
 from pythonjsonlogger import jsonlogger
 
 from app.common.thread_local_utils import BIZ_CONTEXT
+
+
+class LogKey:
+    request_id = "request_id"
+    project_id = "project_id"
+    action = "action"
+    trace_id = "trace_id"
 
 
 # 将日志处理器添加到日志记录器
@@ -21,22 +29,25 @@ class CustomJsonFormatter(jsonlogger.JsonFormatter):
         else:
             log_record['level'] = record.levelname
 
-        trace = self._get_trace_id()
-        if trace:
-            log_record["trace_id"] = trace
+        self.set_key_of_log_record(log_record, LogKey.trace_id, self._get_trace_id())
+        self.set_key_of_log_record(log_record, LogKey.request_id, self._get_request_id())
+        self.set_key_of_log_record(log_record, LogKey.project_id, self._get_project_id())
+        self.set_key_of_log_record(log_record, LogKey.action, self._get_action())
 
-        request_id = self._get_request_id()
-        if request_id:
-            log_record["request_id"] = request_id
+    def set_key_of_log_record(self, log_record: dict, key: str, value: Any):
+        log_record[key] = value if value else ""
 
     def _get_trace_id(self):
-        return BIZ_CONTEXT.get_attr_and_set("trace_id", uuid.uuid4().hex)
+        return BIZ_CONTEXT.get_attr_and_set(LogKey.trace_id, uuid.uuid4().hex)
 
     def _get_request_id(self):
-        return BIZ_CONTEXT.get_attr("request_id")
+        return BIZ_CONTEXT.get_attr(LogKey.request_id)
 
     def _get_project_id(self):
-        return BIZ_CONTEXT.get_attr("project_id")
+        return BIZ_CONTEXT.get_attr(LogKey.project_id)
+
+    def _get_action(self):
+        return BIZ_CONTEXT.get_attr(LogKey.action)
 
 
 LOGGER: logging.Logger = logging.getLogger("app")
@@ -54,9 +65,3 @@ def init_logger():
     # 创建日志格式器
     handler.setFormatter(formatter)
     LOGGER.addHandler(handler)
-
-
-@property
-def get_logger() -> logging.Logger:
-    logger = logging.getLogger("app")
-    return logger

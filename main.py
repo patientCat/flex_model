@@ -1,19 +1,37 @@
 # save this as main.py
 import traceback
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_restful import Api
 
 from app.common.biz_response import BizResponse, Error
-from app.common.bizlogger import LOGGER,init_logger
+from app.common.bizlogger import LOGGER, init_logger, LogKey
 from app.common.error import BizException, ErrorCode
-from app.controller import runtime, design
+from app.common.thread_local_utils import BIZ_CONTEXT
+from app.controller import runtime, manage
 
 APP = Flask(__name__)
 API = Api(APP)
 
 
+@APP.before_request
+def before_request_func():
+    BIZ_CONTEXT.set_attr(LogKey.action, request.path)
+    BIZ_CONTEXT.set_attr(LogKey.request_id, request.headers.get("x-request-id", ""))
+    request_body = request.get_json()
+    BIZ_CONTEXT.set_attr(LogKey.project_id, request_body.get("ProjectId", ""))
+    LOGGER.info(f"Handling request: {request.method} body:{request_body}")
+
+
+@APP.after_request
+def after_request_func(response):
+    LOGGER.info(f"Handling response: {response.get_json()}")
+    BIZ_CONTEXT.clear()
+    return response
+
+
 init_logger()
+
 
 @APP.errorhandler(Exception)
 def error_handler(e):
@@ -41,10 +59,10 @@ API.add_resource(runtime.UpdateMany, '/UpdateMany')
 API.add_resource(runtime.DeleteOne, '/DeleteOne')
 API.add_resource(runtime.DeleteMany, '/DeleteMany')
 
-API.add_resource(design.CreateModel, "/CreateModel")
-API.add_resource(design.DeleteModel, "/DeleteModel")
-API.add_resource(design.GetModel, "/GetModel")
-API.add_resource(design.GetModelList, "/GetModelList")
+API.add_resource(manage.CreateModel, "/CreateModel")
+API.add_resource(manage.DeleteModel, "/DeleteModel")
+API.add_resource(manage.GetModel, "/GetModel")
+API.add_resource(manage.GetModelList, "/GetModelList")
 
 if __name__ == '__main__':
     APP.run(port=8080, debug=True)

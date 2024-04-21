@@ -155,6 +155,8 @@ curl -X POST -H "Content-Type: application/json" 'http://127.0.0.1:8080/FindOne'
 ### 详细了解
 [自动化测试用例](/autotest/base.py)
 
+[](/接入协议)
+
 ## 项目讲解
 低代码项目中的数据模型实现。
 
@@ -193,7 +195,6 @@ curl -X POST -H "Content-Type: application/json" 'http://127.0.0.1:8080/FindOne'
 
 
 ## Python3工程学习
-[如何编写更加现代的python3]()
 
 [Json和python字典深入学习](/doc/learn/json_and_dict.md)
 
@@ -203,4 +204,4 @@ curl -X POST -H "Content-Type: application/json" 'http://127.0.0.1:8080/FindOne'
 
 [使用sqlalchemy进行数据库处理](/doc/learn/learn_repo.md)
 
-[如何接入流水线]()
+[处理日志](/doc/learn/learn_logger.md)

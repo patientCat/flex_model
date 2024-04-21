@@ -20,7 +20,7 @@ curl -X POST -H "Content-Type: application/json" 'http://127.0.0.1:8080/FindOne'
 }'
 
 ### FindOne with withCount
-curl -X POST -H "Content-Type: application/json" 'http://127.0.0.1:8080/FindOne' \
+curl -X POST -H "x-request-id: 12345" -H "Content-Type: application/json" 'http://127.0.0.1:8080/FindOne' \
 -d '{
     "ModelName": "luke_test",
     "ProjectId": "default",
