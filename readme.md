@@ -1,11 +1,17 @@
 # Readme
-低代码中数据模型的实现
+基于Http协议的数据库实现。
+
+屏蔽底层数据库实现。可以自由将项目从mysql，mongo等进行切换。简化所有sql协议。使crud变得更加简单。
+
+基于schema实现。可以通过schema快速生成表单。
 ## quickstart
 
 1. 定义schema
 
 数据模型通过json-schema定义通用的表结构。
+
 ModelName: 定义模型的名字
+
 ProjetId: 项目id
 
 创建user模型
