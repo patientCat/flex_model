@@ -196,12 +196,14 @@ curl -X POST -H "Content-Type: application/json" 'http://127.0.0.1:8080/FindOne'
 
 ## Python3工程学习
 
-[Json和python字典深入学习](/doc/learn/json_and_dict.md)
+1. [如何组织代码](/doc/learn/learn_organize_code)
 
-[如何进行统一全局Response结构和处理全局业务异常](/doc/learn/global_error_handle.md)
+2. [如何进行统一全局Response结构和处理全局业务异常](/doc/learn/global_error_handle.md)
 
-[使用flask-restful进行controller处理](/doc/learn/flask-restful.md)
+3. [使用flask-restful进行controller处理](/doc/learn/flask-restful.md)
 
-[使用sqlalchemy进行数据库处理](/doc/learn/learn_repo.md)
+4. [Json和python字典深入学习](/doc/learn/json_and_dict.md)
 
-[处理日志](/doc/learn/learn_logger.md)
+5. [使用sqlalchemy进行数据库处理](/doc/learn/learn_repo.md)
+
+6. [处理日志](/doc/learn/learn_logger.md)

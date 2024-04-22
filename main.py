@@ -8,7 +8,7 @@ from app.common.biz_response import BizResponse, Error
 from app.common.bizlogger import LOGGER, init_logger, LogKey
 from app.common.error import BizException, ErrorCode
 from app.common.thread_local_utils import BIZ_CONTEXT
-from app.controller import runtime, manage
+from app.controller import runtime, manage, common
 
 APP = Flask(__name__)
 API = Api(APP)
@@ -16,18 +16,24 @@ API = Api(APP)
 
 @APP.before_request
 def before_request_func():
-    BIZ_CONTEXT.set_attr(LogKey.action, request.path)
-    BIZ_CONTEXT.set_attr(LogKey.request_id, request.headers.get("x-request-id", ""))
-    request_body = request.get_json()
-    BIZ_CONTEXT.set_attr(LogKey.project_id, request_body.get("ProjectId", ""))
-    LOGGER.info(f"Handling request: {request.method} body:{request_body}")
+    if request.method == "GET":
+        LOGGER.info(f"Handling request: {request.method}")
+    elif request.method == "POST":
+        BIZ_CONTEXT.set_attr(LogKey.action, request.path)
+        BIZ_CONTEXT.set_attr(LogKey.request_id, request.headers.get("x-request-id", ""))
+        request_body = request.get_json()
+        BIZ_CONTEXT.set_attr(LogKey.project_id, request_body.get("ProjectId", ""))
+        LOGGER.info(f"Handling request: {request.method} body:{request_body}")
 
 
 @APP.after_request
 def after_request_func(response):
-    LOGGER.info(f"Handling response: {response.get_json()}")
-    BIZ_CONTEXT.clear()
-    return response
+    if request.method == "GET":
+        return response
+    elif request.method == "POST":
+        LOGGER.info(f"Handling response: {response.get_json()}")
+        BIZ_CONTEXT.clear()
+        return response
 
 
 init_logger()
@@ -64,5 +70,6 @@ API.add_resource(manage.DeleteModel, "/DeleteModel")
 API.add_resource(manage.GetModel, "/GetModel")
 API.add_resource(manage.GetModelList, "/GetModelList")
 
+API.add_resource(common.HealthCheck, "/HealthCheck")
 if __name__ == '__main__':
     APP.run(port=8080, debug=True)
