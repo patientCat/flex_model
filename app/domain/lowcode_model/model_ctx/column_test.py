@@ -1,7 +1,7 @@
 import unittest
 
 from app.common.error import BizException
-from field import ColumnFormat, ColumnType, SchemaColumn
+from column import ColumnFormat, ColumnType, SchemaColumn
 
 
 class TestSchemaColumn(unittest.TestCase):

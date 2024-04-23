@@ -9,7 +9,7 @@ from app.domain.lowcode_model.dsl.dsl_domain import DomainFactory
 from app.domain.lowcode_model.dsl.dsl_param import SelectorFactory, PaginationFactory
 from app.domain.lowcode_model.dsl.node.factory import NodeFactory
 from app.domain.lowcode_model.model_ctx import model
-from app.domain.lowcode_model.model_ctx.field import SchemaColumn
+from app.domain.lowcode_model.model_ctx.column import SchemaColumn
 from app.domain.lowcode_model.model_ctx.model import ModelContext
 
 

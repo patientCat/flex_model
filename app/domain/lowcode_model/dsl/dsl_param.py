@@ -4,8 +4,7 @@ from typing import Dict, Union, Optional, List, TypedDict, Tuple
 from app.common.bizlogger import LOGGER
 from app.common.decorator import readable
 from app.common.error import BizException, ErrorCode
-from app.domain.lowcode_model.model_ctx import model, field
-from app.domain.lowcode_model.model_ctx.field import RelationInfo, ColumnFormat
+from app.domain.lowcode_model.model_ctx.column import RelationInfo, ColumnFormat, SchemaColumn
 from app.domain.lowcode_model.model_ctx.model import MetadataContext, ModelContext
 
 """
@@ -43,8 +42,8 @@ class SelectorFactory:
         1. model_contex (model.ModelContext) : 模型上下文
     """
 
-    def __init__(self, *, model_ctx: model.ModelContext):
-        self.model_ctx: model.ModelContext = model_ctx
+    def __init__(self, *, model_ctx: ModelContext):
+        self.model_ctx: ModelContext = model_ctx
 
     def create_all_selector(self, model_name: str = None):
         new_dict = self.select_all(model_name=model_name)
@@ -70,7 +69,7 @@ class SelectorFactory:
         if metadata_ctx is None:
             raise BizException(ErrorCode.InvalidParameter, f"MetadataContext not found model_name={model_name}")
 
-        column_list: List[field.SchemaColumn] = metadata_ctx.column_list
+        column_list: List[SchemaColumn] = metadata_ctx.column_list
         for column in column_list:
             if not column.is_relation():
                 new_select_dict[column.key] = 1
@@ -219,9 +218,9 @@ class IncludeContextFactory:
             return IncludeContext.create_none_include_context()
 
         metadata_ctx: MetadataContext = self.model_ctx.get_master_metadata_ctx()
-        relation_column_list: List[field.SchemaColumn] = metadata_ctx.relation_column_list
+        relation_column_list: List[SchemaColumn] = metadata_ctx.relation_column_list
 
-        def need_process_relation(column: field.SchemaColumn) -> bool:
+        def need_process_relation(column: SchemaColumn) -> bool:
             if column.name in include_dict:
                 include_value = include_dict[column.name]
                 if include_value is True:
@@ -241,7 +240,7 @@ class IncludeContextFactory:
 
         return IncludeContext(need_include=True, include_param_list=include_param_list)
 
-    def column_2_include_param(self, column: field.SchemaColumn, include_dict_param: dict) -> Optional[IncludeParam]:
+    def column_2_include_param(self, column: SchemaColumn, include_dict_param: dict) -> Optional[IncludeParam]:
         relation_info: RelationInfo = column.get_relation()
         LOGGER.debug(f"relation_info={relation_info}, include_dict={include_dict_param}")
         include_dict_value = include_dict_param.get(column.name)

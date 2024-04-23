@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import MagicMock
 
 from app.common.error import ErrorCode, BizException
-from app.domain.lowcode_model.model_ctx.field import SchemaColumn
+from app.domain.lowcode_model.model_ctx.column import SchemaColumn
 from app.domain.lowcode_model.model_ctx.model import MetadataContext
 from .dsl_param import Selector, SelectorFactory, PaginationFactory, IncludeContextFactory
 from ..model_ctx import model

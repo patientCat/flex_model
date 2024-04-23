@@ -2,7 +2,7 @@ from typing import List
 
 from app.common.error import BizException, ErrorCode
 from app.common.model_converter import ModelConverter
-from app.common.param.manager import CreateModelRequest, CreateModelResponse, GetModelRequest, GetModelListRequest, \
+from app.common.param.manage import CreateModelRequest, CreateModelResponse, GetModelRequest, GetModelListRequest, \
     GetModelResponse, GetModelListResponse, DeleteModelRequest, DeleteModelResponse
 from app.domain.lowcode_model.model_ctx.model import ModelContext, ModelNameContext
 from app.repo.instance import MODEL_REPO, PROJECT_REPO

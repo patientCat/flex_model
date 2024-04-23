@@ -1,8 +1,8 @@
 from flask_restful import Resource, reqparse
 
-from app.service.design import DESIGN_SERVICE
+from app.service.manage import DESIGN_SERVICE
 from app.common.biz_response import BizResponse
-from app.common.param import manager
+from app.common.param import manage
 
 
 class CreateModel(Resource):
@@ -13,7 +13,7 @@ class CreateModel(Resource):
         parser.add_argument('ProjectId', type=str, required=True)
         args = parser.parse_args()
 
-        req = design.CreateModelRequest(**args)
+        req = manage.CreateModelRequest(**args)
         response = DESIGN_SERVICE.create_model(req)
         success = BizResponse.success(response)
         return success.dict_msg(), 200
@@ -26,7 +26,7 @@ class GetModel(Resource):
         parser.add_argument('ProjectId', type=str, required=True)
         args = parser.parse_args()
 
-        req = design.GetModelRequest(**args)
+        req = manage.GetModelRequest(**args)
         response = DESIGN_SERVICE.get_model(req)
         success = BizResponse.success(response)
         return success.dict_msg(), 200
@@ -40,7 +40,7 @@ class GetModelList(Resource):
         parser.add_argument('ProjectId', type=str, required=True)
         args = parser.parse_args()
 
-        req = design.GetModelListRequest(**args)
+        req = manage.GetModelListRequest(**args)
         response = DESIGN_SERVICE.get_model_list(req)
         success = BizResponse.success(response)
         return success.dict_msg(), 200
@@ -53,7 +53,7 @@ class DeleteModel(Resource):
         parser.add_argument('ProjectId', type=str, required=True)
         args = parser.parse_args()
 
-        req = design.DeleteModelRequest(**args)
+        req = manage.DeleteModelRequest(**args)
         response = DESIGN_SERVICE.delete_model(req)
         success = BizResponse.success(response)
         return success.dict_msg(), 200

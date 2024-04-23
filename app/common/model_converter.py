@@ -1,6 +1,6 @@
 from typing import List
 
-from app.common.param.manager import ModelVO
+from app.common.param.manage import ModelVO
 from app.repo.po import ModelPO
 
 

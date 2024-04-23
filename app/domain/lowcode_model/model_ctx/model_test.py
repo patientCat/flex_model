@@ -1,7 +1,7 @@
 import unittest
 
 from app.common.error import BizException
-from app.domain.lowcode_model.model_ctx import field
+from app.domain.lowcode_model.model_ctx import column
 from model import ModelContext, MetadataContext
 
 

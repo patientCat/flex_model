@@ -16,22 +16,27 @@ class TestAPI(unittest.TestCase):
             "type": "object",
             "properties": {
                 "id": {
+                    "name":"id",
                     "type": "string",
                     "format": "xShortText"
                 },
                 "name": {
+                    "name":"name",
                     "type": "string",
                     "format": "xShortText"
                 },
                 "age": {
+                    "name":"age",
                     "type": "number",
                     "format": "xNumber"
                 },
                 "email": {
+                    "name": "email",
                     "type": "string",
                     "format": "email"
                 },
                 "profileList": {
+                    "name": "profileList",
                     "type": "object",
                     "properties": {
 
@@ -55,18 +60,22 @@ class TestAPI(unittest.TestCase):
             "type": "object",
             "properties": {
                 "id": {
+                    "name":"id",
                     "type": "string",
                     "format": "xShortText"
                 },
                 "biography": {
+                    "name":"biography",
                     "type": "string",
                     "format": "xShortText"
                 },
                 "userId": {
+                    "name": "userId",
                     "type": "string",
                     "format": "xShortText"
                 },
                 "user": {
+                    "name": "user",
                     "type": "object",
                     "properties": {
 
@@ -98,6 +107,7 @@ class TestAPI(unittest.TestCase):
             "ModelSchema": schema,
         }
         response = requests.post(f'{self.url}/CreateModel', json=payload, headers=self.headers)
+        print(response.json())
 
     def delete_model(self, model_name, project_id):
         payload = {
@@ -105,6 +115,7 @@ class TestAPI(unittest.TestCase):
             "ProjectId": project_id,
         }
         response = requests.post(f'{self.url}/DeleteModel', json=payload, headers=self.headers)
+        print(response.json())
 
     """
     case1 : 测试基础的crud
@@ -271,6 +282,7 @@ class TestAPI(unittest.TestCase):
             }
         }
         response = requests.post(f'{self.url}/CreateOne', json=payload, headers=self.headers)
+        print(response.json())
         self.assertEqual(response.status_code, 201)
         return response.json().get("Response").get("Id")
 

@@ -6,8 +6,9 @@ import sqlalchemy
 
 from app.common.bizlogger import LOGGER
 from app.common.error import ErrorCode, BizException, EzErrorCodeEnum
-from app.domain.lowcode_model.model_ctx import field
+from app.domain.lowcode_model.model_ctx.column import SchemaColumn, SchemaColumnFactory, ColumnFormat
 from app.domain.lowcode_model.model_ctx.json_schema import JsonSchemaChecker
+from app.domain.lowcode_model.model_ctx.model_validator import ColumnValidatorFactory
 from app.repo.interface import ModelRepo
 from app.repo.po import ModelPO
 
@@ -47,7 +48,7 @@ class ModelNameContext:
 class MetadataContext:
     def __init__(self, json_schema: dict):
         self.__json_schema = json_schema
-        self.__column_list: List[field.SchemaColumn] = MetadataContext.get_column_list_from_schema(json_schema)
+        self.__column_list: List[SchemaColumn] = MetadataContext.get_column_list_from_schema(json_schema)
         self.__json_schema_checker: JsonSchemaChecker = JsonSchemaChecker(json_schema=json_schema)
 
     @property
@@ -59,18 +60,18 @@ class MetadataContext:
         properties = json_schema.get("properties")
         column_list = []
         for k, v in properties.items():
-            column = field.SchemaColumn(k, v)
+            column = SchemaColumn(k, v)
             column_list.append(column)
         return column_list
 
     @property
-    def column_list(self) -> List[field.SchemaColumn]:
+    def column_list(self) -> List[SchemaColumn]:
         if self.__column_list is None:
             return []
         return self.__column_list
 
     @property
-    def relation_column_list(self) -> List[field.SchemaColumn]:
+    def relation_column_list(self) -> List[SchemaColumn]:
         if self.column_list is None:
             return []
         return [column for column in self.column_list if column.is_relation]
@@ -144,6 +145,7 @@ class ModelContext:
                  metadata_ctx_domain: MetadataContextDomain):
         self.__model_name_ctx: ModelNameContext = model_name_ctx
         self.__metadata_ctx_domain = metadata_ctx_domain
+        self.__column_validator_factory = ColumnValidatorFactory()
 
     @staticmethod
     def create(model_name_ctx: ModelNameContext, model_repo: ModelRepo) -> "ModelContext":
@@ -173,6 +175,13 @@ class ModelContext:
             check_schema(schema)
         except Exception as e:
             raise BizException(ErrorCode.InvalidParameter, f"{e}")
+
+        column_list = SchemaColumnFactory.create_column_list(schema)
+        for column in column_list:
+            column_format = ColumnFormat(column.format)
+            column_validator = self.__column_validator_factory.create_validator(column_format)
+            if column_validator is not None:
+                column_validator.validate(column)
 
         try:
             self.__metadata_ctx_domain.create(model_po=model_po)
