@@ -1,4 +1,6 @@
+from app.common.bizlogger import LogKey
 from app.common.error import Error
+from app.common.thread_local_utils import BIZ_CONTEXT
 
 
 class BizResponse:
@@ -12,6 +14,7 @@ class BizResponse:
     def success(response) -> "BizResponse":
         resmsg = BizResponse()
         resmsg.message = response
+        resmsg.status = 200
         return resmsg
 
     @staticmethod
@@ -23,6 +26,7 @@ class BizResponse:
 
     def dict_msg(self):
         return {
+            "RequestId": BIZ_CONTEXT.get_attr(LogKey.request_id),
             "Response": self.message.dict_msg()
         }
 

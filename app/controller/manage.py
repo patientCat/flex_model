@@ -2,7 +2,7 @@ from flask_restful import Resource, reqparse
 
 from app.service.design import DESIGN_SERVICE
 from app.common.biz_response import BizResponse
-from app.common.param import design
+from app.common.param import manager
 
 
 class CreateModel(Resource):

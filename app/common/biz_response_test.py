@@ -1,10 +1,15 @@
 import unittest
+
+from app.common.bizlogger import LogKey
 from app.common.error import Error, ErrorCode
 from app.common.param import test_response
+from app.common.thread_local_utils import BIZ_CONTEXT
 from biz_response import BizResponse
 
 
 class TestBizResponse(unittest.TestCase):
+    def setUp(self) -> None:
+        BIZ_CONTEXT.set_attr(LogKey.request_id, "request_id")
 
     def test_success(self):
         message = test_response.TestResponse(name="John Doe", age=10)

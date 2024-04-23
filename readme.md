@@ -194,7 +194,7 @@ curl -X POST -H "Content-Type: application/json" 'http://127.0.0.1:8080/FindOne'
 后续可以接入流水线，作为部署后的自动化测试。
 
 
-## 重生之我来做低代码
+## 重生之我来做低代码模型
 
 1. [如何组织代码](/doc/learn/learn_organize_code)
 2. [使用flask-restful进行controller处理](/doc/learn/flask-restful.md)

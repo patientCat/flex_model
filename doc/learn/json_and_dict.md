@@ -1,4 +1,6 @@
 # Json和python字典
+[github](https://github.com/patientCat/flex_model?tab=readme-ov-file)
+
 
 ## python字典使用
 ### 常见操作
@@ -156,3 +158,8 @@ print(toJSON(Test()))
 
 """
 ```
+
+详情见
+[github](https://github.com/patientCat/flex_model?tab=readme-ov-file)
+
+/app/common/utils_test.py
