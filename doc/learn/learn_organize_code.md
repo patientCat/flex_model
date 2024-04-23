@@ -1,5 +1,28 @@
 # 如何高效组织代码
 [github](https://github.com/patientCat/flex_model?tab=readme-ov-file)
+
+## 项目结构
+
+```
+项目名/
+│
+├─docs/                  # 项目文档, 如说明手册和技术文档
+│   ├─指南/               # 用户操作指南
+│   └─API文档/            # API接口详细描述
+│
+├─app/                   # 存放源代码文件
+│   ├─service            # service模块，负责组织
+│   ├─common             # 公共模块
+│   ├─controller         # 控制器模块
+│   ├─domain             # 业务模块
+│   └─repo               # 存储层
+│
+├─autotest               # 自动化测试
+│
+├─requirements.txt       # 项目所需依赖包列表以及版本号等信息
+└─readme.md              # 项目简介和项目安装使用方法的说明文档
+
+```
 ## 组织代码
 
 使用controller， service，domain的轻量DDD模式组织代码
@@ -20,90 +43,36 @@ domain: 每一个domain都是完善的业务模块。对外抽象底层逻辑。
 使用流水线进行集成测试。
 
 ### controller层处理
-1. 参数校验，使用RequestParser
+controller层负责处理用户请求。
+1. 校验参数。
+2. 处理入参。
+3. 处理出参。
+4. 整体错误处理。
 
 ```python
-from flask import Flask, request
-from flask_requestparser import RequestParser
+def service_process():
+    return {"success": True}
 
-app = Flask(__name__)
-
-# 初始化 RequestParser 对象
-parser = RequestParser()
-
-@app.route('/example')
-def example():
-    
-    # 解析 GET 请求中的参数
-    parser.add_argument('name', type=str, help='Name is required')
-    parser.add_argument('age', type=int, help='Age is required')
-   
-    args = parser.parse_args()
-  
-    # 访问解析得到的参数值
-    name = args.get('name')
-    age = args.get('age')
-    
-    return f'Hello {name}! You are {age} years old.'
-    
-if __name__ == '__main__':
-    app.run(debug=True)
-
+class TestArgParse(Resource):
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument(name='Required', required=True, help="Required is needed")
+        parser.add_argument(name='TestInt', type=int, required=True, help="TestInt must be an integer and required")
+        parser.add_argument(name='Optional', dest='opt', type=str, required=False, default="default",
+                            help="Optional must be a string")
+        args = parser.parse_args()
+        # log request args
+        print(f"request_args={args}")
+        # call service
+        response = service_process()
+        # log response 
+        print(f"response={response}")
+        return response
 ```
-
-2. 对每个请求的进行日志记录。方便排查bug。在java中可以用AOP，在go中可以注册mux，在python3中使用装饰器。
-
-这里原理都是相同的，本质上就是代理模式。
-
-这里需要2知识点。1个是线程局部变量。1个是如何记录日志。
-
-```python
-@APP.before_request
-def before_request_func():
-    BIZ_CONTEXT.set_attr(LogKey.action, request.path)
-    BIZ_CONTEXT.set_attr(LogKey.request_id, request.headers.get("x-request-id", ""))
-    request_body = request.get_json()
-    BIZ_CONTEXT.set_attr(LogKey.project_id, request_body.get("ProjectId", ""))
-    LOGGER.info(f"Handling request: {request.method} body:{request_body}")
-
-
-@APP.after_request
-def after_request_func(response):
-    LOGGER.info(f"Handling response: {response.get_json()}")
-    BIZ_CONTEXT.clear()
-    return response
-
-
-```
-
-
-处理异常
-处理异常我认为在编程中是非常重要的一个环节。它不仅决定了程序的稳定性，同时可以帮助程序员排查错误提供线索。要想不加班，异常处理十分重要。
-
-对于服务来说需要全局统一处理异常。
-```python
-@APP.errorhandler(Exception)
-def error_handler(e):
-    """
-    全局异常捕获
-    """
-    LOGGER.error("error={}", e)
-    LOGGER.error("traceback={}", traceback.format_exc())
-    if isinstance(e, BizException):
-        message = e.message
-        code = e.code
-    else:
-        message = f"error={e}"
-        code = ErrorCode.InternalError.value
-    response = BizResponse.fail(Error(message, code))
-    return jsonify(response.dict_msg()), response.status, response.header
-
-
-
-```
-对于下面业务来说，只需要抛出异常即可。
 
 ### service层
 传统的贫血模式代码，经常会导致service层写的非常重。包含大量凌乱的业务逻辑代码。
 
 而目前比较流行的方式会增加一层domain层。将不同业务逻辑进行抽象，解耦。对于Service层来说，只需要对domain进行组织即可。
+
+关于这里的分层模式，每个人有每个人的思考。大家自己选择，如果有兴趣，可以了解下DDD。消化其中的思想后，然后进行应用。

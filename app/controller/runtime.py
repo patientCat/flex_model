@@ -2,7 +2,7 @@ import functools
 
 from flask_restful import reqparse, Resource
 
-from app.api.runtime import RUNTIME_SERVICE
+from app.service.runtime import RUNTIME_SERVICE
 from app.common.biz_response import BizResponse
 from app.common.param import runtime
 

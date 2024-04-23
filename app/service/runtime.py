@@ -1,4 +1,4 @@
-from app.api.context import ContextHolder, ContextHolderImpl
+from app.service.context import ContextHolder, ContextHolderImpl
 from app.common import utils
 from app.common.bizlogger import LOGGER
 from app.common.error import BizException, ErrorCode

@@ -10,6 +10,8 @@ class HealthCheck(Resource):
         print("HealthCheck")
         return {"success": True}
 
+def service_process():
+    return {"success": True}
 
 class TestArgParse(Resource):
     def post(self):
@@ -19,4 +21,10 @@ class TestArgParse(Resource):
         parser.add_argument(name='Optional', dest='opt', type=str, required=False, default="default",
                             help="Optional must be a string")
         args = parser.parse_args()
-        print(f"args={args}")
+        # log request args
+        print(f"request_args={args}")
+        # call service
+        response = service_process()
+        # log response
+        print(f"response={response}")
+        return response
