@@ -70,6 +70,7 @@ API.add_resource(manage.DeleteModel, "/DeleteModel")
 API.add_resource(manage.GetModel, "/GetModel")
 API.add_resource(manage.GetModelList, "/GetModelList")
 
-API.add_resource(common.HealthCheck, "/HealthCheck")
+API.add_resource(common.HealthCheck, "/HealthCheck", "/healthcheck")
+API.add_resource(common.TestArgParse, "/TestArgParse", "/testargparse")
 if __name__ == '__main__':
     APP.run(port=8080, debug=True)
