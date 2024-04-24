@@ -23,7 +23,10 @@ class ModelRepo(object):
     def create_model(self, model_ctx: ModelPO) -> None:
         pass
 
-    def delete_model(self, project_id, model_name):
+    def delete_model_by_name(self, *, project_id, model_name):
+        pass
+
+    def update_schema(self, *, project_id, model_name, schema):
         pass
 
 

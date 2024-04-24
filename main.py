@@ -70,6 +70,9 @@ API.add_resource(manage.DeleteModel, "/DeleteModel")
 API.add_resource(manage.GetModel, "/GetModel")
 API.add_resource(manage.GetModelList, "/GetModelList")
 
+API.add_resource(manage.AddColumn, "/AddColumn")
+API.add_resource(manage.DeleteColumn, "/DeleteColumn")
+
 API.add_resource(common.HealthCheck, "/HealthCheck", "/healthcheck")
 API.add_resource(common.TestArgParse, "/TestArgParse", "/testargparse")
 if __name__ == '__main__':

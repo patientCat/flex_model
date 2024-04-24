@@ -1,6 +1,6 @@
 from flask_restful import Resource, reqparse
 
-from app.service.manage import DESIGN_SERVICE
+from app.service.manage import MANAGE_SERVICE
 from app.common.biz_response import BizResponse
 from app.common.param import manage
 
@@ -14,7 +14,7 @@ class CreateModel(Resource):
         args = parser.parse_args()
 
         req = manage.CreateModelRequest(**args)
-        response = DESIGN_SERVICE.create_model(req)
+        response = MANAGE_SERVICE.create_model(req)
         success = BizResponse.success(response)
         return success.dict_msg(), 200
 
@@ -27,7 +27,7 @@ class GetModel(Resource):
         args = parser.parse_args()
 
         req = manage.GetModelRequest(**args)
-        response = DESIGN_SERVICE.get_model(req)
+        response = MANAGE_SERVICE.get_model(req)
         success = BizResponse.success(response)
         return success.dict_msg(), 200
 
@@ -41,7 +41,7 @@ class GetModelList(Resource):
         args = parser.parse_args()
 
         req = manage.GetModelListRequest(**args)
-        response = DESIGN_SERVICE.get_model_list(req)
+        response = MANAGE_SERVICE.get_model_list(req)
         success = BizResponse.success(response)
         return success.dict_msg(), 200
 
@@ -54,6 +54,35 @@ class DeleteModel(Resource):
         args = parser.parse_args()
 
         req = manage.DeleteModelRequest(**args)
-        response = DESIGN_SERVICE.delete_model(req)
+        response = MANAGE_SERVICE.delete_model(req=req)
+        success = BizResponse.success(response)
+        return success.dict_msg(), 200
+
+
+class AddColumn(Resource):
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('ModelName', type=str, required=True)
+        parser.add_argument('ProjectId', type=str, required=True)
+        parser.add_argument('ColumnList', type=dict, action="append", required=True)
+        args = parser.parse_args()
+        print(f"args={args}")
+
+        req = manage.AddColumnRequest(**args)
+        response = MANAGE_SERVICE.add_column(req=req)
+        success = BizResponse.success(response)
+        return success.dict_msg(), 200
+
+
+class DeleteColumn(Resource):
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('ModelName', type=str, required=True)
+        parser.add_argument('ProjectId', type=str, required=True)
+        parser.add_argument('ColumnNameList', type=str, action="append", required=True)
+        args = parser.parse_args()
+
+        req = manage.DeleteColumnRequest(**args)
+        response = MANAGE_SERVICE.delete_column(req=req)
         success = BizResponse.success(response)
         return success.dict_msg(), 200

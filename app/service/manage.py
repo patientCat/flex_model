@@ -3,25 +3,27 @@ from typing import List
 from app.common.error import BizException, ErrorCode
 from app.common.model_converter import ModelConverter
 from app.common.param.manage import CreateModelRequest, CreateModelResponse, GetModelRequest, GetModelListRequest, \
-    GetModelResponse, GetModelListResponse, DeleteModelRequest, DeleteModelResponse
+    GetModelResponse, GetModelListResponse, DeleteModelRequest, DeleteModelResponse, AddColumnRequest, \
+    ModifyColumnRequest, DeleteColumnRequest, AddColumnResponse, ModifyColumnResponse, DeleteColumnResponse
 from app.domain.lowcode_model.model_ctx.model import ModelContext, ModelNameContext
 from app.repo.instance import MODEL_REPO, PROJECT_REPO
 from app.repo.po import ProjectPO, ModelPO
 
 
-class DesignService:
+class ManageService:
     def __init__(self):
         self.model_repo = MODEL_REPO
         self.project_repo = PROJECT_REPO
 
     @staticmethod
     def create():
-        return DesignService()
+        return ManageService()
 
     def create_model(self, req: CreateModelRequest) -> CreateModelResponse:
         project: ProjectPO = self.project_repo.get_project_by_project_id(project_id=req.project_id)
         if project is None:
-            raise BizException(code=ErrorCode.InvalidParameter, message=f"Project with id {req.project_id} is not found")
+            raise BizException(code=ErrorCode.InvalidParameter,
+                               message=f"Project with id {req.project_id} is not found")
 
         model_name_ctx = ModelNameContext.validate_and_create(name=req.model_name, project_id=req.project_id)
         model_context = ModelContext.create(model_name_ctx=model_name_ctx, model_repo=self.model_repo)
@@ -29,10 +31,7 @@ class DesignService:
         return CreateModelResponse(success=True)
 
     def get_model(self, req: GetModelRequest) -> GetModelResponse:
-        model_po: ModelPO = self.model_repo.get_model_by_name(project_id=req.project_id, model_name=req.model_name)
-        if model_po is None:
-            raise BizException(code=ErrorCode.InvalidParameter,
-                               message=f"Model with name '{req.model_name}' is not found")
+        model_po = self.__get_model(req)
 
         return GetModelResponse(model=ModelConverter.convert_model_po_2_vo(model_po))
 
@@ -46,8 +45,34 @@ class DesignService:
         return GetModelListResponse(model_list=ModelConverter.convert_model_list_po_2_vo(model_po_list))
 
     def delete_model(self, req: DeleteModelRequest) -> DeleteModelResponse:
-        self.model_repo.delete_model(project_id=req.project_id, model_name=req.model_name)
+        self.model_repo.delete_model_by_name(project_id=req.project_id, model_name=req.model_name)
         return DeleteModelResponse(success=True)
 
+    def add_column(self, req: AddColumnRequest) -> AddColumnResponse:
+        model_name_ctx = ModelNameContext.validate_and_create(name=req.model_name, project_id=req.project_id)
+        model_context = ModelContext.create(model_name_ctx=model_name_ctx, model_repo=self.model_repo)
 
-DESIGN_SERVICE = DesignService()
+        model_context.add_column(req.column_list)
+
+        return AddColumnResponse(True)
+
+    def modify_column(self, req: ModifyColumnRequest) -> ModifyColumnResponse:
+        model_po = self.__get_model(req)
+        pass
+
+    def __get_model(self, req) -> ModelPO:
+        model_po: ModelPO = self.model_repo.get_model_by_name(project_id=req.project_id, model_name=req.model_name)
+        if model_po is None:
+            raise BizException(code=ErrorCode.InvalidParameter,
+                               message=f"Model with name '{req.model_name}' is not found")
+        return model_po
+
+    def delete_column(self, req: DeleteColumnRequest) -> DeleteColumnResponse:
+        model_name_ctx = ModelNameContext.validate_and_create(name=req.model_name, project_id=req.project_id)
+        model_context = ModelContext.create(model_name_ctx=model_name_ctx, model_repo=self.model_repo)
+
+        model_context.delete_column(req.column_name_list)
+        return DeleteColumnResponse(True)
+
+
+MANAGE_SERVICE = ManageService()

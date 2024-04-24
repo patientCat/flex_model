@@ -55,6 +55,10 @@ class MetadataContext:
     def __dict__(self) -> dict:
         return {"json_schema": self.__json_schema, "autotest": True}
 
+    @property
+    def json_schema(self) -> dict:
+        return self.__json_schema
+
     @staticmethod
     def get_column_list_from_schema(json_schema: dict) -> list:
         properties = json_schema.get("properties")
@@ -105,6 +109,26 @@ class MetadataContext:
         else:
             raise BizException(ErrorCode.InvalidParameter, validation_result.error_message)
 
+    @staticmethod
+    def compose_schema_by_add(*, schema: dict, column_list: List[SchemaColumn]) -> dict:
+        json_schema = schema.copy()
+        properties = json_schema.get("properties")
+        for column in column_list:
+            properties[column.key] = column.json_val
+
+        json_schema["properties"] = properties
+        return json_schema
+
+    @staticmethod
+    def compose_schema_by_remove(*, schema: dict, column_name_list: List[str]) -> dict:
+        json_schema = schema.copy()
+        properties = json_schema.get("properties")
+        for column_name in column_name_list:
+            properties.pop(column_name)
+
+        json_schema["properties"] = properties
+        return json_schema
+
 
 class MetadataContextDomain:
     def __init__(self, model_repo: ModelRepo):
@@ -131,6 +155,10 @@ class MetadataContextDomain:
     def create(self, model_po: ModelPO):
         self.__model_repo.create_model(model_po)
         # todo 加入缓存
+
+    def update_schema(self, *, project_id, mode_name, schema):
+        schema_string = json.dumps(schema)
+        self.__model_repo.update_schema(project_id=project_id, model_name=mode_name, schema=schema_string)
 
 
 def check_schema(schema: dict) -> None:
@@ -190,3 +218,36 @@ class ModelContext:
                 raise BizException(ErrorCode.InvalidParameter,
                                    f"project='{project_id}', model_name='{model_name}' already exists")
             raise e
+
+    def add_column(self, add_column_list: List[dict]):
+
+        metadata_ctx = self.get_master_metadata_ctx()
+        column_list = metadata_ctx.column_list
+        existed_column_set = set([column.name for column in column_list])
+        new_column_list = []
+        for add_column in add_column_list:
+            print(f"add_column ={add_column}, {add_column_list}")
+            add_column_name = add_column.get('name')
+            if add_column_name in existed_column_set:
+                raise BizException(ErrorCode.InvalidParameter,
+                                   f"column '{add_column_name}' already exists in model '{self.__model_name_ctx.name}'")
+            new_column = SchemaColumnFactory.create_column(add_column.get('name'), add_column)
+            new_column_list.append(new_column)
+
+        new_schema = MetadataContext.compose_schema_by_add(schema=metadata_ctx.json_schema, column_list=new_column_list)
+        model_name_ctx = self.__model_name_ctx
+        self.__metadata_ctx_domain.update_schema(
+            project_id=model_name_ctx.project_id,
+            mode_name=model_name_ctx.name,
+            schema=new_schema)
+
+    def delete_column(self, column_name_list: List[str]):
+        metadata_ctx = self.get_master_metadata_ctx()
+
+        new_schema = MetadataContext.compose_schema_by_remove(schema=metadata_ctx.json_schema,
+                                                              column_name_list=column_name_list)
+        model_name_ctx = self.__model_name_ctx
+        self.__metadata_ctx_domain.update_schema(
+            project_id=model_name_ctx.project_id,
+            mode_name=model_name_ctx.name,
+            schema=new_schema)

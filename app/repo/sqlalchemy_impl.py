@@ -3,6 +3,7 @@ import logging
 from datetime import datetime
 from typing import Optional, List, Callable
 
+from sqlalchemy import bindparam, update
 from sqlalchemy import Column, Integer, String, DateTime, UniqueConstraint, create_engine
 from sqlalchemy import and_
 from sqlalchemy.ext.declarative import declarative_base
@@ -68,10 +69,9 @@ class _ModelPO(Base, ModelPO):
 
 def call_on_session(*, engine, func: Callable):
     SessionFactory = sessionmaker(bind=engine)
-    session = SessionFactory()
-    rtn = func(session)
-    session.close()
-    return rtn
+    with SessionFactory() as session:
+        rtn = func(session)
+        return rtn
 
 
 class SqlModelRepo(ModelRepo):
@@ -110,7 +110,7 @@ class SqlModelRepo(ModelRepo):
 
         return call_on_session(engine=self.engine, func=func)
 
-    def delete_model(self, project_id, model_name):
+    def delete_model_by_name(self, *, project_id, model_name):
         def func(session: Session):
             user_to_delete = session.query(_ModelPO).filter(
                 and_(_ModelPO.model_name == model_name, _ModelPO.project_id == project_id)).first()
@@ -118,6 +118,16 @@ class SqlModelRepo(ModelRepo):
                 session.delete(user_to_delete)
                 session.commit()
 
+        return call_on_session(engine=self.engine, func=func)
+
+    def update_schema(self, project_id, model_name, schema):
+        def func(session: Session):
+            # 直接更新用户的名字
+            stmt = update(_ModelPO).where(and_(_ModelPO.project_id == project_id, _ModelPO.model_name == model_name)).values(schema=schema)
+            session.execute(stmt)
+
+            # 提交更改
+            session.commit()
         return call_on_session(engine=self.engine, func=func)
 
 

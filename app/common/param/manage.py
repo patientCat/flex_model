@@ -89,3 +89,54 @@ class DeleteModelResponse:
         return {
             "Success": self.success
         }
+
+
+class AddColumnRequest(BaseDesignRequest):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.model_name: str = kwargs.get('ModelName')
+        self.column_list: List[dict] = kwargs.get('ColumnList')
+
+
+@dataclass
+class AddColumnResponse:
+    success: bool
+
+    def dict_msg(self):
+        return {
+            "Success": self.success
+        }
+
+
+class DeleteColumnRequest(BaseDesignRequest):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.model_name: str = kwargs.get('ModelName')
+        self.column_name_list: List[str] = kwargs.get('ColumnNameList')
+
+
+@dataclass
+class DeleteColumnResponse:
+    success: bool
+
+    def dict_msg(self):
+        return {
+            "Success": self.success
+        }
+
+
+class ModifyColumnRequest(BaseDesignRequest):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.model_name: str = kwargs.get('ModelName')
+        self.column_name_list: List[str] = kwargs.get('ColumnNameList')
+
+
+@dataclass
+class ModifyColumnResponse:
+    success: bool
+
+    def dict_msg(self):
+        return {
+            "Success": self.success
+        }

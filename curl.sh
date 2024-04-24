@@ -197,3 +197,15 @@ curl -X POST -H "Content-Type: application/json" 'http://127.0.0.1:8080/CreateMo
     }
 }'
 
+### AddColumn
+curl -X POST -H "Content-Type: application/json" 'http://127.0.0.1:8080/AddColumn' \
+-d '{
+    "ModelName":"user",
+    "ProjectId": "default",
+    "ColumnList": [
+      {
+        "name":"name",
+        "type":"string"
+      }]
+}'
+
