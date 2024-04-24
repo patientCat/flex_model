@@ -123,7 +123,7 @@ curl -X POST  -H "Content-Type: application/json" 'http://127.0.0.1:8080/CreateO
 ```
 
 查询一条数据
-```json
+```sh
 curl -X POST -H "Content-Type: application/json" 'http://127.0.0.1:8080/FindOne' \
 -d '{
     "ModelName": "user",
