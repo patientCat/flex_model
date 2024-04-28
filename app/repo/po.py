@@ -15,7 +15,8 @@ class DatabaseInstancePO:
     project_id: str
     # mongo, mysql
     db_type: str
-    connection_info: str
+    db_url: str
+    db_name: str
     created_at: datetime
     updated_at: datetime
 

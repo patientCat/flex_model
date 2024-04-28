@@ -4,6 +4,38 @@ import unittest
 import requests
 
 
+class TestDatabaseInstance(unittest.TestCase):
+    def setUp(self):
+        self.url = 'http://127.0.0.1:8080'
+        self.headers = {'Content-Type': 'application/json'}
+
+    def test_database_instance(self):
+        self.create_database_instance_t("default", "mongo", "mongodb://localhost:27017/", "my_database")
+        self.get_database_instance_t("default")
+
+    def create_database_instance_t(self, project_id, db_type, db_name, db_url):
+        payload = {
+            "ProjectId": project_id,
+            "Type": db_type,
+            "DatabaseName": db_name,
+            "DatabaseUrl": db_url,
+        }
+        response = requests.post(f'{self.url}/CreateDatabaseInstance', json=payload, headers=self.headers)
+        print(response.json())
+        response_data = response.json()
+        return response_data
+
+    def get_database_instance_t(self, project_id):
+        payload = {
+            "ProjectId": project_id,
+        }
+        response = requests.post(f'{self.url}/GetDatabaseInstance', json=payload, headers=self.headers)
+        print(response.json())
+        response_data = response.json()
+        self.assertEqual(response.status_code, 200)
+        return response_data
+
+
 class TestAPI(unittest.TestCase):
 
     def setUp(self):

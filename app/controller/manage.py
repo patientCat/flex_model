@@ -1,5 +1,7 @@
+import sqlalchemy
 from flask_restful import Resource, reqparse
 
+from app.common.error import BizException, ErrorCode
 from app.service.manage import MANAGE_SERVICE
 from app.common.biz_response import BizResponse
 from app.common.param import manage
@@ -84,5 +86,50 @@ class DeleteColumn(Resource):
 
         req = manage.DeleteColumnRequest(**args)
         response = MANAGE_SERVICE.delete_column(req=req)
+        success = BizResponse.success(response)
+        return success.dict_msg(), 200
+
+
+class CreateDatabaseInstance(Resource):
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('ProjectId', type=str, required=True)
+        parser.add_argument('Type', type=str, required=True)
+        parser.add_argument('DatabaseUrl', type=str, required=True)
+        parser.add_argument('DatabaseName', type=str, required=True)
+        args = parser.parse_args()
+
+        req = manage.CreateDatabaseInstanceRequest(**args)
+        response = MANAGE_SERVICE.create_database_instance(req=req)
+        success = BizResponse.success(response)
+        return success.dict_msg(), 200
+
+
+class DeleteDatabaseInstance(Resource):
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('ModelName', type=str, required=True)
+        parser.add_argument('ProjectId', type=str, required=True)
+        parser.add_argument('DatabaseInstanceNameList', type=str, action="append", required=True)
+        args = parser.parse_args()
+
+        req = manage.DeleteDatabaseInstanceRequest(**args)
+        response = MANAGE_SERVICE.delete_database_instance(req=req)
+        success = BizResponse.success(response)
+        return success.dict_msg(), 200
+
+
+class TestDatabaseInstance(Resource):
+    pass
+
+
+class GetDatabaseInstance(Resource):
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('ProjectId', type=str, required=True)
+        args = parser.parse_args()
+
+        req = manage.GetDatabaseInstanceRequest(**args)
+        response = MANAGE_SERVICE.get_database_instance(req=req)
         success = BizResponse.success(response)
         return success.dict_msg(), 200

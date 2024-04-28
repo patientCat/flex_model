@@ -28,6 +28,5 @@ class ProjectContext:
 
     def get_database_info(self, project_id: str) -> Optional[DatabaseInfo]:
         db_instance = self.__db_instance_repo.get_db_instance_by_project_id(project_id=project_id)
-        conn_json = json.loads(db_instance.connection_info)
-        LOGGER.debug(f"Connected to database: {conn_json}, connection_info : {db_instance.connection_info}")
-        return DatabaseInfo(db_url=conn_json.get("db_url"), database_name=conn_json.get("database_name"))
+        LOGGER.debug(f"Connected to database: {db_instance}")
+        return DatabaseInfo(db_url=db_instance.db_url, database_name=db_instance.db_name)

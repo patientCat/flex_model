@@ -32,17 +32,14 @@ class _DatabaseInstancePO(Base, DatabaseInstancePO):
     id = Column(Integer, primary_key=True)
     project_id = Column(String)
     db_type = Column(String)
-    connection_info = Column(String)
+    db_url = Column(String)
+    db_name = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-
-class ConnectionInfoHolder:
-    def __init__(self, connection_info: str):
-        self.info_map = json.loads(connection_info)
-
-    def get_db_url(self):
-        return self.info_map.get('db_url')
+    __table_args__ = (
+        UniqueConstraint('project_id', name='unique_project_id'),
+    )
 
 
 class _ModelPO(Base, ModelPO):
@@ -149,11 +146,11 @@ class SqlDatabaseInstanceRepo(DatabaseInstanceRepo):
 
         return call_on_session(engine=self.engine, func=func)
 
-    def create_db_instance(self, project: DatabaseInstancePO) -> None:
+    def create_db_instance(self, database_instance: DatabaseInstancePO) -> None:
         def func(session: Session):
-            _project = _DatabaseInstancePO()
-            copy_value(project, _project)
-            session.add(_project)
+            _database_instance = _DatabaseInstancePO()
+            copy_value(database_instance, _database_instance)
+            session.add(_database_instance)
             session.commit()
 
         return call_on_session(engine=self.engine, func=func)

@@ -1,10 +1,14 @@
 from typing import List
 
+import sqlalchemy
+
 from app.common.error import BizException, ErrorCode
 from app.common.model_converter import ModelConverter
 from app.common.param.manage import CreateModelRequest, CreateModelResponse, GetModelRequest, GetModelListRequest, \
     GetModelResponse, GetModelListResponse, DeleteModelRequest, DeleteModelResponse, AddColumnRequest, \
-    ModifyColumnRequest, DeleteColumnRequest, AddColumnResponse, ModifyColumnResponse, DeleteColumnResponse
+    ModifyColumnRequest, DeleteColumnRequest, AddColumnResponse, ModifyColumnResponse, DeleteColumnResponse, \
+    CreateDatabaseInstanceRequest, CreateDatabaseInstanceResponse, GetDatabaseInstanceRequest, \
+    GetDatabaseInstanceResponse, DatabaseInstanceVo
 from app.domain.lowcode_model.model_ctx.model import ModelContext, ModelNameContext
 from app.repo.instance import MODEL_REPO, db_instance_repo
 from app.repo.po import DatabaseInstancePO, ModelPO
@@ -20,8 +24,8 @@ class ManageService:
         return ManageService()
 
     def create_model(self, req: CreateModelRequest) -> CreateModelResponse:
-        project: DatabaseInstancePO = self.db_instance_repo.get_db_instance_by_project_id(project_id=req.project_id)
-        if project is None:
+        db_instance: DatabaseInstancePO = self.db_instance_repo.get_db_instance_by_project_id(project_id=req.project_id)
+        if db_instance is None:
             raise BizException(code=ErrorCode.InvalidParameter,
                                message=f"Project with id {req.project_id} is not found")
 
@@ -74,5 +78,29 @@ class ManageService:
         model_context.delete_column(req.column_name_list)
         return DeleteColumnResponse(True)
 
+    def create_database_instance(self, req: CreateDatabaseInstanceRequest) -> CreateDatabaseInstanceResponse:
+        database_instance_po = DatabaseInstancePO()
+        database_instance_po.project_id = req.project_id
+        database_instance_po.db_type = req.type
+        database_instance_po.db_url = req.database_url
+        database_instance_po.db_name = req.database_name
+        try:
+            self.db_instance_repo.create_db_instance(database_instance_po)
+        except Exception as e:
+            if isinstance(e, sqlalchemy.exc.IntegrityError):
+                raise BizException(ErrorCode.InvalidParameter,
+                                   f"project='{req.project_id}' already exists")
+            raise e
+        return CreateDatabaseInstanceResponse(success=True)
 
-MANAGE_SERVICE = ManageService()
+    def get_database_instance(self, req: GetDatabaseInstanceRequest) -> GetDatabaseInstanceResponse:
+
+        db_instance_po: DatabaseInstancePO = self.db_instance_repo.get_db_instance_by_project_id(req.project_id)
+        db_instance_vo = DatabaseInstanceVo(project_id=db_instance_po.project_id,
+                                            db_type=db_instance_po.db_type,
+                                            db_url=db_instance_po.db_url,
+                                            db_name=db_instance_po.db_name)
+        return GetDatabaseInstanceResponse(db_instance_vo)
+
+
+MANAGE_SERVICE: ManageService = ManageService()

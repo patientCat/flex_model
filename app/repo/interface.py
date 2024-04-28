@@ -40,5 +40,5 @@ class DatabaseInstanceRepo(object):
     def get_db_instance_by_project_id(self, project_id) -> Optional[DatabaseInstancePO]:
         pass
 
-    def create_db_instance(self, project: DatabaseInstancePO) -> None:
+    def create_db_instance(self, database_instance: DatabaseInstancePO) -> None:
         pass

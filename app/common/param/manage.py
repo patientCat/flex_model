@@ -4,14 +4,14 @@ from typing import List
 from app.common.error import BizException, ErrorCode
 
 
-class BaseDesignRequest:
+class BaseProjectRequest:
     def __init__(self, **kwargs):
         self.project_id: str = kwargs.get('ProjectId')
         if self.project_id is None:
             raise BizException(ErrorCode.InvalidParameter, 'ProjectId is None')
 
 
-class CreateModelRequest(BaseDesignRequest):
+class CreateModelRequest(BaseProjectRequest):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.description: str = kwargs.get('Description')
@@ -29,7 +29,7 @@ class CreateModelResponse:
         }
 
 
-class GetModelRequest(BaseDesignRequest):
+class GetModelRequest(BaseProjectRequest):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.model_name: str = kwargs.get('ModelName')
@@ -58,7 +58,7 @@ class GetModelResponse:
         }
 
 
-class GetModelListRequest(BaseDesignRequest):
+class GetModelListRequest(BaseProjectRequest):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.page_size: int = kwargs.get('PageSize')
@@ -75,7 +75,7 @@ class GetModelListResponse:
         }
 
 
-class DeleteModelRequest(BaseDesignRequest):
+class DeleteModelRequest(BaseProjectRequest):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.model_name: int = kwargs.get('ModelName')
@@ -91,7 +91,7 @@ class DeleteModelResponse:
         }
 
 
-class AddColumnRequest(BaseDesignRequest):
+class AddColumnRequest(BaseProjectRequest):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.model_name: str = kwargs.get('ModelName')
@@ -108,7 +108,7 @@ class AddColumnResponse:
         }
 
 
-class DeleteColumnRequest(BaseDesignRequest):
+class DeleteColumnRequest(BaseProjectRequest):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.model_name: str = kwargs.get('ModelName')
@@ -125,7 +125,7 @@ class DeleteColumnResponse:
         }
 
 
-class ModifyColumnRequest(BaseDesignRequest):
+class ModifyColumnRequest(BaseProjectRequest):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.model_name: str = kwargs.get('ModelName')
@@ -140,3 +140,51 @@ class ModifyColumnResponse:
         return {
             "Success": self.success
         }
+
+
+class CreateDatabaseInstanceRequest(BaseProjectRequest):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.type: str = kwargs.get('Type')
+        self.database_url: str = kwargs.get('DatabaseUrl')
+        self.database_name: str = kwargs.get('DatabaseName')
+
+
+@dataclass
+class CreateDatabaseInstanceResponse:
+    success: bool
+
+    def dict_msg(self):
+        return {
+            "Success": self.success
+        }
+
+
+class GetDatabaseInstanceRequest(BaseProjectRequest):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+@dataclass
+class DatabaseInstanceVo:
+    project_id: str
+    db_type: str
+    db_url: str
+    db_name: str
+
+    def dict_msg(self):
+        return {
+            "ProjectId": self.project_id,
+            "Type": self.db_type,
+            "DatabaseUrl": self.db_url,
+            "DatabaseName": self.db_name,
+        }
+
+@dataclass
+class GetDatabaseInstanceResponse:
+    db_instance: DatabaseInstanceVo
+
+    def dict_msg(self):
+        return {
+            "Instance": self.db_instance.dict_msg()
+        }
+
