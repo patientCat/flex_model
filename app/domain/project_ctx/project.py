@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from app.common.bizlogger import LOGGER
-from app.repo.interface import ProjectRepo
+from app.repo.interface import DatabaseInstanceRepo
 
 
 class DatabaseInfo:
@@ -23,11 +23,11 @@ class DatabaseInfo:
 
 
 class ProjectContext:
-    def __init__(self, project_repo: ProjectRepo):
-        self.__project_repo = project_repo
+    def __init__(self, db_instance_repo: DatabaseInstanceRepo):
+        self.__db_instance_repo = db_instance_repo
 
     def get_database_info(self, project_id: str) -> Optional[DatabaseInfo]:
-        project = self.__project_repo.get_project_by_project_id(project_id=project_id)
-        conn_json = json.loads(project.connection_info)
-        LOGGER.debug(f"Connected to database: {conn_json}, connection_info : {project.connection_info}")
+        db_instance = self.__db_instance_repo.get_db_instance_by_project_id(project_id=project_id)
+        conn_json = json.loads(db_instance.connection_info)
+        LOGGER.debug(f"Connected to database: {conn_json}, connection_info : {db_instance.connection_info}")
         return DatabaseInfo(db_url=conn_json.get("db_url"), database_name=conn_json.get("database_name"))

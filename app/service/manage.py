@@ -6,21 +6,21 @@ from app.common.param.manage import CreateModelRequest, CreateModelResponse, Get
     GetModelResponse, GetModelListResponse, DeleteModelRequest, DeleteModelResponse, AddColumnRequest, \
     ModifyColumnRequest, DeleteColumnRequest, AddColumnResponse, ModifyColumnResponse, DeleteColumnResponse
 from app.domain.lowcode_model.model_ctx.model import ModelContext, ModelNameContext
-from app.repo.instance import MODEL_REPO, PROJECT_REPO
-from app.repo.po import ProjectPO, ModelPO
+from app.repo.instance import MODEL_REPO, db_instance_repo
+from app.repo.po import DatabaseInstancePO, ModelPO
 
 
 class ManageService:
     def __init__(self):
         self.model_repo = MODEL_REPO
-        self.project_repo = PROJECT_REPO
+        self.db_instance_repo = db_instance_repo
 
     @staticmethod
     def create():
         return ManageService()
 
     def create_model(self, req: CreateModelRequest) -> CreateModelResponse:
-        project: ProjectPO = self.project_repo.get_project_by_project_id(project_id=req.project_id)
+        project: DatabaseInstancePO = self.db_instance_repo.get_db_instance_by_project_id(project_id=req.project_id)
         if project is None:
             raise BizException(code=ErrorCode.InvalidParameter,
                                message=f"Project with id {req.project_id} is not found")

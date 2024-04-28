@@ -10,20 +10,20 @@ from app.common.param.runtime import UpdateOneRequest, UpdateOneResponse, Update
     FindOneRequest, FindOneResponse, FindManyRequest, FindManyResponse, CreateOneRequest, CreateOneResponse, \
     CreateManyResponse, CreateManyRequest, DeleteOneRequest, DeleteOneResponse, DeleteManyRequest, DeleteManyResponse
 from app.repo import instance
-from app.repo.interface import ModelRepo, ProjectRepo
+from app.repo.interface import ModelRepo, DatabaseInstanceRepo
 
 
 class RuntimeService:
-    def __init__(self, context: ContextHolder, project_repo: ProjectRepo, model_repo: ModelRepo):
+    def __init__(self, context: ContextHolder, db_instance_repo: DatabaseInstanceRepo, model_repo: ModelRepo):
         self.context = context
-        self.project_repo: ProjectRepo
+        self.db_instance_repo: DatabaseInstanceRepo
         self.model_context_repo: ModelRepo
 
     @staticmethod
     def create() -> "RuntimeService":
         instance.init()
-        context = ContextHolderImpl(instance.PROJECT_REPO, instance.MODEL_REPO)
-        return RuntimeService(context, instance.PROJECT_REPO, instance.MODEL_REPO)
+        context = ContextHolderImpl(instance.db_instance_repo, instance.MODEL_REPO)
+        return RuntimeService(context, instance.db_instance_repo, instance.MODEL_REPO)
 
     def _get_model_context(self, project_id: str, model_name: str) -> ModelContext:
         model_name_ctx = ModelNameContext(name=model_name, project_id=project_id)

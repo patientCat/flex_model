@@ -1,7 +1,7 @@
 import unittest
 
-from app.repo.po import ModelPO, ProjectPO
-from app.repo.sqlalchemy_impl import SqlModelRepo, SqlProjectRepo
+from app.repo.po import ModelPO, DatabaseInstancePO
+from app.repo.sqlalchemy_impl import SqlModelRepo, SqlDatabaseInstanceRepo
 
 
 class TestModelSqlRepoInterface(unittest.TestCase):
@@ -28,7 +28,7 @@ class TestModelSqlRepoInterface(unittest.TestCase):
 
 class TestProjectSqlRepoInterface(unittest.TestCase):
     def setUp(self):
-        self.repo = SqlProjectRepo()
+        self.repo = SqlDatabaseInstanceRepo()
         self.repo.init()
 
     def test_set_up(self):
@@ -36,29 +36,29 @@ class TestProjectSqlRepoInterface(unittest.TestCase):
 
     def test_create_project(self):
         # 创建一个新的project
-        project = ProjectPO()
+        project = DatabaseInstancePO()
         project.project_id = "test_project_id1"
         project.connection_info = "default"
-        self.repo.create_project(project)
+        self.repo.create_db_instance(project)
 
     def test_get_project(self):
-        rtn_model1 = self.repo.get_project_by_project_id(project_id="test_project_id1")
-        rtn_model2 = self.repo.get_project_by_project_id(project_id="test_project_id2")
+        rtn_model1 = self.repo.get_db_instance_by_project_id(project_id="test_project_id1")
+        rtn_model2 = self.repo.get_db_instance_by_project_id(project_id="test_project_id2")
         print(vars(rtn_model1))
         print(vars(rtn_model2))
 
     def test_cls_var(self):
-        project1 = ProjectPO()
+        project1 = DatabaseInstancePO()
         project1.id = "1"
-        ProjectPO.id = "1"
+        DatabaseInstancePO.id = "1"
 
-        project2 = ProjectPO()
+        project2 = DatabaseInstancePO()
         project2.id = "2"
-        ProjectPO.id = "2"
+        DatabaseInstancePO.id = "2"
 
         print(project1.id)
         print(project2.id)
-        print(ProjectPO.id)
+        print(DatabaseInstancePO.id)
 
 if __name__ == "__main__":
     unittest.main()

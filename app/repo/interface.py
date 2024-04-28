@@ -1,6 +1,6 @@
 from typing import Optional, List
 
-from app.repo.po import ModelPO, ProjectPO
+from app.repo.po import ModelPO, DatabaseInstancePO
 
 """
 定义操作持久化对象接口
@@ -30,15 +30,15 @@ class ModelRepo(object):
         pass
 
 
-class ProjectRepo(object):
+class DatabaseInstanceRepo(object):
     def __init__(self, repo_name) -> None:
         self._repo = repo_name
 
     def init(self) -> None:
         pass
 
-    def get_project_by_project_id(self, project_id) -> Optional[ProjectPO]:
+    def get_db_instance_by_project_id(self, project_id) -> Optional[DatabaseInstancePO]:
         pass
 
-    def create_project(self, project: ProjectPO) -> None:
+    def create_db_instance(self, project: DatabaseInstancePO) -> None:
         pass

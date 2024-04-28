@@ -202,4 +202,5 @@ curl -X POST -H "Content-Type: application/json" 'http://127.0.0.1:8080/FindOne'
 4. [Json和python字典深入学习](/doc/learn/json_and_dict.md)
 5. [使用sqlalchemy进行数据库处理](/doc/learn/learn_repo.md)
 6. [定义数据模型](doc/learn/define_model.md)
+7. [定义开发工程](doc/learn/define_project.md)
 6. [处理日志](/doc/learn/learn_logger.md)

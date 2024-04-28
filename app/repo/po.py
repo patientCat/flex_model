@@ -9,8 +9,8 @@ from app.common.decorator import readable
 """
 
 
-class ProjectPO:
-    __tablename__ = 'project'
+class DatabaseInstancePO:
+    __tablename__ = 'database_instance'
     id: int
     project_id: str
     # mongo, mysql

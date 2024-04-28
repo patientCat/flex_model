@@ -9,8 +9,8 @@ from sqlalchemy import and_
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 
-from app.repo.interface import ProjectRepo, ModelRepo
-from app.repo.po import ModelPO, ProjectPO
+from app.repo.interface import DatabaseInstanceRepo, ModelRepo
+from app.repo.po import ModelPO, DatabaseInstancePO
 
 # 创建基类
 Base = declarative_base()
@@ -27,7 +27,7 @@ def copy_value(from_cls, to_cls):
         setattr(to_cls, k, v)
 
 
-class _ProjectPO(Base, ProjectPO):
+class _DatabaseInstancePO(Base, DatabaseInstancePO):
     __tablename__ = 'project'
     id = Column(Integer, primary_key=True)
     project_id = Column(String)
@@ -131,7 +131,7 @@ class SqlModelRepo(ModelRepo):
         return call_on_session(engine=self.engine, func=func)
 
 
-class SqlProjectRepo(ProjectRepo):
+class SqlDatabaseInstanceRepo(DatabaseInstanceRepo):
     def __init__(self):
         super().__init__("sql")
         self.engine = None
@@ -140,18 +140,18 @@ class SqlProjectRepo(ProjectRepo):
         self.engine = Engine
         Base.metadata.create_all(self.engine)
 
-    def get_project_by_project_id(self, project_id) -> Optional[ProjectPO]:
+    def get_db_instance_by_project_id(self, project_id) -> Optional[DatabaseInstancePO]:
         def func(session: Session):
-            project = (session.query(_ProjectPO)
-                       .filter(_ProjectPO.project_id == project_id)
+            project = (session.query(_DatabaseInstancePO)
+                       .filter(_DatabaseInstancePO.project_id == project_id)
                        .first())
             return project
 
         return call_on_session(engine=self.engine, func=func)
 
-    def create_project(self, project: ProjectPO) -> None:
+    def create_db_instance(self, project: DatabaseInstancePO) -> None:
         def func(session: Session):
-            _project = _ProjectPO()
+            _project = _DatabaseInstancePO()
             copy_value(project, _project)
             session.add(_project)
             session.commit()
