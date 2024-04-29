@@ -29,4 +29,8 @@ class ProjectContext:
     def get_database_info(self, project_id: str) -> Optional[DatabaseInfo]:
         db_instance = self.__db_instance_repo.get_db_instance_by_project_id(project_id=project_id)
         LOGGER.debug(f"Connected to database: {db_instance}")
-        return DatabaseInfo(host=db_instance.db_url, database_name=db_instance.db_name)
+        return DatabaseInfo(host=db_instance.host,
+                            database_name=db_instance.db_name,
+                            user=db_instance.username,
+                            port=db_instance.port,
+                            password=db_instance.password)

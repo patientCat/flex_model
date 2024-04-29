@@ -35,8 +35,8 @@ class MongoDbContext(DbContext):
 
     def create_client(self):
         return MongoClient(
-            host=self.__database_info.db_url,
-            port=self.__database_info.db_port,
+            host=self.__database_info.host,
+            port=self.__database_info.port,
             username=self.__database_info.username,
             password=self.__database_info.password
         )

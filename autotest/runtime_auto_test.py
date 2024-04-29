@@ -1,5 +1,4 @@
 import unittest
-import uuid
 
 import requests
 
@@ -18,7 +17,7 @@ class TestAPI(unittest.TestCase):
             'Content-Type': 'application/json'
         }
         self.manage_client: ManageClient = ManageClient(url=self.url, headers=self.headers)
-        self.project_id = "default"
+        self.mongo_project = "default"
         user_schema = {
             "$schema": "http://json-schema.org/draft-07/schema#",
             "type": "object",
@@ -101,14 +100,16 @@ class TestAPI(unittest.TestCase):
             ]
         }
 
-        self.manage_client.create_database_instance_t(self.project_id, "mongo", "my_database", "mongodb://localhost:27017/")
-        self.manage_client.create_model("user", self.project_id, user_schema)
-        self.manage_client.create_model("profile", self.project_id, profile_schema)
+        mongo_resp = self.manage_client.create_database_instance_t(self.mongo_project, "mongo", "my_database",
+                                                      "localhost", 27017, "admin", "123456")
+        print(mongo_resp)
+        self.manage_client.create_model("user", self.mongo_project, user_schema)
+        self.manage_client.create_model("profile", self.mongo_project, profile_schema)
 
     def tearDown(self):
-        self.manage_client.delete_model("user", self.project_id)
-        self.manage_client.delete_model("profile", self.project_id)
-        self.manage_client.delete_database_instance_t(self.project_id)
+        self.manage_client.delete_model("user", self.mongo_project)
+        self.manage_client.delete_model("profile", self.mongo_project)
+        self.manage_client.delete_database_instance_t(self.mongo_project)
 
     def create_model(self, model_name, project_id, schema: dict):
         payload = {

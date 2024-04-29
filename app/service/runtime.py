@@ -35,12 +35,12 @@ class RuntimeService:
         LOGGER.info("model_context=%s", model_context)
         return model_context
 
-    def _get_database_context(self, model_context: ModelContext, req):
+    def _get_database_context(self, model_context: ModelContext, project_id):
         model_name_ctx = model_context.model_name_ctx
         LOGGER.info("get_database_ctx, model_name_ctx=%s", utils.toJSON(model_name_ctx))
-        database_info = self.context.get_database_info(req.mongo_project, model_context)
+        database_info = self.context.get_database_info(project_id, model_context)
         if database_info is None:
-            LOGGER.error(f"get_database_info_fail_with_project_id={req.mongo_project}")
+            LOGGER.error(f"get_database_info_fail_with_project_id={project_id}")
             raise BizException(ErrorCode.InvalidParameter, "project_id relate database_info is not exist")
         LOGGER.info("get_database_ctx, database_info=%s", database_info.to_json())
         dbcontext = MongoDbContext(database_info, model_name_ctx.collection_name)
@@ -50,7 +50,7 @@ class RuntimeService:
         model_context = self._get_model_context(req.project_id, req.model_name)
 
         # 3. 获取database_info
-        dbcontext = self._get_database_context(model_context, req)
+        dbcontext = self._get_database_context(model_context, req.project_id)
 
         # 4. 获取Factory
         mongo_repo = reposervice.MongoRepoService(dbcontext)
@@ -64,7 +64,7 @@ class RuntimeService:
         model_context = self._get_model_context(req.project_id, req.model_name)
 
         # 3. 获取database_info
-        dbcontext = self._get_database_context(model_context, req)
+        dbcontext = self._get_database_context(model_context, req.project_id)
 
         # 4. 获取Factory
         mongo_repo = reposervice.MongoRepoService(dbcontext)
@@ -88,7 +88,7 @@ class RuntimeService:
         )
 
         # 3. 获取database_info
-        db_context = self._get_database_context(model_context, req)
+        db_context = self._get_database_context(model_context, req.project_id)
 
         # 4. 获取Factory
         mongo_repo = reposervice.MongoRepoService(db_context)
@@ -108,7 +108,7 @@ class RuntimeService:
             param=req.param, metadata_ctx=metadata_ctx
         )
         # 3. 获取database_info
-        db_context = self._get_database_context(model_context, req)
+        db_context = self._get_database_context(model_context, req.project_id)
 
         # 4. 获取Factory
         mongo_repo = reposervice.MongoRepoService(db_context)
@@ -122,7 +122,7 @@ class RuntimeService:
         metadata_ctx.validate_on_update(req.param)
 
         # 3. 获取database_info
-        db_context = self._get_database_context(model_context, req)
+        db_context = self._get_database_context(model_context, req.project_id)
 
         # 4. 获取Factory
         domain = DomainFactory(model_context).update_domain(param=req.param)
@@ -137,7 +137,7 @@ class RuntimeService:
         metadata_ctx.validate_on_update(req.param)
 
         # 3. 获取database_info
-        db_context = self._get_database_context(model_context, req)
+        db_context = self._get_database_context(model_context, req.project_id)
 
         # 4. 获取Factory
         domain = DomainFactory(model_context).update_many_domain(param=req.param)
@@ -150,7 +150,7 @@ class RuntimeService:
         model_context = self._get_model_context(req.project_id, req.model_name)
 
         # 3. 获取database_info
-        db_context = self._get_database_context(model_context, req)
+        db_context = self._get_database_context(model_context, req.project_id)
 
         # 4. 获取Factory
         domain = DomainFactory(model_context).delete_domain(param=req.param)
@@ -163,7 +163,7 @@ class RuntimeService:
         model_context = self._get_model_context(req.project_id, req.model_name)
 
         # 3. 获取database_info
-        db_context = self._get_database_context(model_context, req)
+        db_context = self._get_database_context(model_context, req.project_id)
 
         # 4. 获取Factory
         domain = DomainFactory(model_context).delete_many_domain(param=req.param)
