@@ -22,8 +22,8 @@ class TestAPI(unittest.TestCase):
             "$schema": "http://json-schema.org/draft-07/schema#",
             "type": "object",
             "properties": {
-                "id": {
-                    "name": "id",
+                "_id": {
+                    "name": "_id",
                     "type": "string",
                     "format": "xShortText"
                 },
@@ -50,7 +50,7 @@ class TestAPI(unittest.TestCase):
                     },
                     "format": "xOneToMany",
                     "xRelation": {
-                        "field": "id",
+                        "field": "_id",
                         "relatedField": "userId",
                         "relatedModelName": "profile"
                     }
@@ -66,8 +66,8 @@ class TestAPI(unittest.TestCase):
             "$schema": "http://json-schema.org/draft-07/schema#",
             "type": "object",
             "properties": {
-                "id": {
-                    "name": "id",
+                "_id": {
+                    "name": "_id",
                     "type": "string",
                     "format": "xShortText"
                 },
@@ -90,7 +90,7 @@ class TestAPI(unittest.TestCase):
                     "format": "xManyToOne",
                     "xRelation": {
                         "field": "userId",
-                        "relatedField": "id",
+                        "relatedField": "_id",
                         "relatedModelName": "user"
                     }
                 }
@@ -143,13 +143,13 @@ class TestAPI(unittest.TestCase):
 
         print("step2: update")
         new_age = 30
-        count = self.update_one(model_name=user_model_name, project_id=project_id, where={"id": {"$eq": insert_id}},
+        count = self.update_one(model_name=user_model_name, project_id=project_id, where={"_id": {"$eq": insert_id}},
                                 data={"age": new_age})
         print(f"step2: update success, count: {count}")
-        self.assertEqual(count, 1)
+        self.assertEqual( 1, count)
 
         print("step3: find")
-        record = self.find_one(model_name=user_model_name, project_id=project_id, where={"id": {"$eq": insert_id}})
+        record = self.find_one(model_name=user_model_name, project_id=project_id, where={"_id": {"$eq": insert_id}})
         print(f"step3: find success, record: {record}")
         self.assertTrue(record is not None)
 
@@ -174,13 +174,13 @@ class TestAPI(unittest.TestCase):
 
         print("step2: update")
         new_age = 50
-        count = self.update_many(model_name=user_model_name, project_id=project_id, where={"id": {"$in": insert_id}},
+        count = self.update_many(model_name=user_model_name, project_id=project_id, where={"_id": {"$in": insert_id}},
                                  data={"age": new_age})
         print(f"step2: update success, count: {count}")
         self.assertEqual(count, 2)
 
         print("step3: find")
-        record = self.find_many(model_name=user_model_name, project_id=project_id, where={"id": {"$in": insert_id}})
+        record = self.find_many(model_name=user_model_name, project_id=project_id, where={"_id": {"$in": insert_id}})
         print(f"step3: find success, record: {record}")
         self.assertTrue(record is not None)
 
@@ -219,14 +219,14 @@ class TestAPI(unittest.TestCase):
         print("begin: find and many2one relation")
 
         record = self.find_one(model_name=profile_model_name, project_id=project_id,
-                               where={"id": {"$eq": profile_insert_id_list[0]}}, include={"user": True})
+                               where={"_id": {"$eq": profile_insert_id_list[0]}}, include={"user": True})
         print(f"end: find success, record: {record}")
         self.assertTrue(record is not None)
         self.assertTrue('user' in record)
 
         print("begin: findMany and relation")
         record = self.find_many(model_name=profile_model_name, project_id=project_id,
-                                where={"id": {"$eq": profile_insert_id_list[0]}}, include={"user": True})
+                                where={"_id": {"$eq": profile_insert_id_list[0]}}, include={"user": True})
         print(f"end: find success, record: {record}")
         self.assertTrue(record is not None)
         self.assertTrue('user' in record[0])
@@ -234,20 +234,20 @@ class TestAPI(unittest.TestCase):
         print("begin: find and one2many relation")
 
         record = self.find_one(model_name=user_model_name, project_id=project_id,
-                               where={"id": {"$eq": user_insert_id}}, include={"profileList": True})
+                               where={"_id": {"$eq": user_insert_id}}, include={"profileList": True})
         print(f"end: find success, record: {record}")
         self.assertTrue(record is not None)
         self.assertTrue('profileList' in record)
 
         print(f"begin: delete user with {user_insert_id}")
         count = self.delete_one(model_name=user_model_name, project_id=project_id,
-                                where={"id": {"$eq": user_insert_id}})
+                                where={"_id": {"$eq": user_insert_id}})
         print(f"end: delete success, count: {count}")
         self.assertEqual(count, 1)
 
         print(f"begin: delete profile with {profile_insert_id_list}")
         count = self.delete_many(model_name=profile_model_name, project_id=project_id,
-                                 where={"id": {"$in": profile_insert_id_list}})
+                                 where={"_id": {"$in": profile_insert_id_list}})
         print(f"end: delete success, count: {count}")
         self.assertEqual(count, 2)
 
@@ -266,7 +266,7 @@ class TestAPI(unittest.TestCase):
         print(f"end: create_many success, insert_id: {insert_id}")
 
         print("begin: find_and_orderby = 1")
-        record = self.find_many(model_name=user_model_name, project_id=project_id, where={"id": {"$in": insert_id}},
+        record = self.find_many(model_name=user_model_name, project_id=project_id, where={"_id": {"$in": insert_id}},
                                 orderby=[{"age": 1}])
         print(f"end: find success, record: {record}")
         self.assertTrue(record is not None)
@@ -274,7 +274,7 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(age_list, [20, 30, 40])
 
         print("begin: find_and_orderby = -1")
-        record = self.find_many(model_name=user_model_name, project_id=project_id, where={"id": {"$in": insert_id}},
+        record = self.find_many(model_name=user_model_name, project_id=project_id, where={"_id": {"$in": insert_id}},
                                 orderby=[{"age": -1}])
         print(f"end: find success, record: {record}")
         self.assertTrue(record is not None)
@@ -282,7 +282,7 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(age_list, [40, 30, 20])
 
         print("step4: delete")
-        count = self.delete_many(model_name=user_model_name, project_id=project_id, where={"id": {"$in": insert_id}})
+        count = self.delete_many(model_name=user_model_name, project_id=project_id, where={"_id": {"$in": insert_id}})
         print(f"step4: delete success, count: {count}")
         self.assertEqual(count, 3)
 

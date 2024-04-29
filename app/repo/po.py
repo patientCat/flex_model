@@ -13,7 +13,7 @@ class DatabaseInstancePO:
     __tablename__ = 'database_instance'
     id: int
     project_id: str
-    # mongo, mysql
+    # adaptor, mysql
     db_type: str
     host: str
     port: int

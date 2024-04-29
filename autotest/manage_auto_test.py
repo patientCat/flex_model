@@ -12,7 +12,7 @@ class TestDatabaseInstance(unittest.TestCase):
         self.manage_client = ManageClient(url=self.url, headers=self.headers)
 
     def test_database_instance(self):
-        create_response = self.manage_client.create_database_instance_t(self.project_id, "mongo", "my_database",
+        create_response = self.manage_client.create_database_instance_t(self.project_id, "adaptor", "my_database",
                                                                         "localhost", 27017, "admin", "123456")
         self.assertTrue(TestHelper.check_response(create_response))
 
@@ -29,7 +29,7 @@ class TestMongoModel(unittest.TestCase):
         self.url = 'http://127.0.0.1:8080'
         self.headers = {'Content-Type': 'application/json'}
         self.manage_client = ManageClient(url=self.url, headers=self.headers)
-        self.mongo_project = "mongo"
+        self.mongo_project = "adaptor"
         self.mysql_project = "mysql"
         self.user_schema = {
             "$schema": "http://json-schema.org/draft-07/schema#",
@@ -74,7 +74,7 @@ class TestMongoModel(unittest.TestCase):
                 "age"
             ]
         }
-        mongo_resp = self.manage_client.create_database_instance_t(self.mongo_project, "mongo", "my_database",
+        mongo_resp = self.manage_client.create_database_instance_t(self.mongo_project, "adaptor", "my_database",
                                                       "localhost", 27017, "admin", "123456")
         print(mongo_resp)
         mysql_resp = self.manage_client.create_database_instance_t(self.mysql_project, "mysql", "my_database", "localhost",

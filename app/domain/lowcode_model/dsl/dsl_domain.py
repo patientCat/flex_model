@@ -279,7 +279,7 @@ class DomainFactory:
     def process_sys_fields(self, *, data: dict) -> str:
         if data is None:
             raise BizException(ErrorCode.InvalidParameter, self.ERROR_DATA_VALUE_IS_NONE)
-        if "id" not in data or data["id"] is None:
+        if "_id" not in data or data["_id"] is None:
             insert_id = generate_id()
-            data["id"] = insert_id
+            data["_id"] = insert_id
             return insert_id

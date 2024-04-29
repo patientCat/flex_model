@@ -10,7 +10,8 @@ db = client['my_database']
 collection = db['my_collection']
 
 # 插入一个文档
-result = collection.insert_one({'name': 'John', 'age': 30})
+result = collection.insert_one(
+    {'_id':'12', 'name': 'John', 'age': 30})
 print(result.inserted_id)
 
 # 查询count

@@ -1,9 +1,10 @@
+from app.domain.project_ctx.adaptor.repo import RepoService
+from app.domain.project_ctx.adaptor.repo_factory import RepoFactory
 from app.service.context import ContextHolder, ContextHolderImpl
 from app.common import utils
 from app.common.bizlogger import LOGGER
 from app.common.error import BizException, ErrorCode
 from app.domain.project_ctx.database import MongoDbContext
-from app.domain.project_ctx.mongo import reposervice
 from app.domain.lowcode_model.dsl.dsl_domain import DomainFactory
 from app.domain.lowcode_model.model_ctx.model import ModelNameContext, ModelContext, MetadataContext
 from app.common.param.runtime import UpdateOneRequest, UpdateOneResponse, UpdateManyResponse, UpdateManyRequest, \
@@ -16,8 +17,8 @@ from app.repo.interface import ModelRepo, DatabaseInstanceRepo
 class RuntimeService:
     def __init__(self, context: ContextHolder, db_instance_repo: DatabaseInstanceRepo, model_repo: ModelRepo):
         self.context = context
-        self.db_instance_repo: DatabaseInstanceRepo
-        self.model_context_repo: ModelRepo
+        self.db_instance_repo: DatabaseInstanceRepo = db_instance_repo
+        self.model_context_repo: ModelRepo = model_repo
 
     @staticmethod
     def create() -> "RuntimeService":
@@ -43,39 +44,42 @@ class RuntimeService:
             LOGGER.error(f"get_database_info_fail_with_project_id={project_id}")
             raise BizException(ErrorCode.InvalidParameter, "project_id relate database_info is not exist")
         LOGGER.info("get_database_ctx, database_info=%s", database_info.to_json())
-        dbcontext = MongoDbContext(database_info, model_name_ctx.collection_name)
-        return dbcontext
+        db_context = MongoDbContext(database_info, model_name_ctx.collection_name)
+        return db_context
 
     def find_one(self, req: FindOneRequest) -> FindOneResponse:
         model_context = self._get_model_context(req.project_id, req.model_name)
+        db_instance = self.db_instance_repo.get_db_instance_by_project_id(req.project_id)
 
         # 3. 获取database_info
-        dbcontext = self._get_database_context(model_context, req.project_id)
+        db_context = self._get_database_context(model_context, req.project_id)
 
         # 4. 获取Factory
-        mongo_repo = reposervice.MongoRepoService(dbcontext)
+        repo: RepoService = RepoFactory.create_repo(db_instance.db_type, db_context)
         find_domain = DomainFactory(model_context).find_domain(param=req.param)
-        record, total = mongo_repo.apply_find(find_domain)
+        record, total = repo.apply_find(find_domain)
         LOGGER.info("record={}".format(record))
         resp = FindOneResponse(record=record, total=total)
         return resp
 
     def find_many(self, req: FindManyRequest) -> FindManyResponse:
         model_context = self._get_model_context(req.project_id, req.model_name)
+        db_instance = self.db_instance_repo.get_db_instance_by_project_id(req.project_id)
 
         # 3. 获取database_info
-        dbcontext = self._get_database_context(model_context, req.project_id)
+        db_context = self._get_database_context(model_context, req.project_id)
 
         # 4. 获取Factory
-        mongo_repo = reposervice.MongoRepoService(dbcontext)
+        repo: RepoService = RepoFactory.create_repo(db_instance.db_type, db_context)
         find_many_domain = DomainFactory(model_context).find_many_domain(param=req.param)
-        record, total = mongo_repo.apply_find_many(find_many_domain)
+        record, total = repo.apply_find_many(find_many_domain)
         LOGGER.info("record_list={}, total={}".format(record, total))
         resp = FindManyResponse(record=record, total=total)
         return resp
 
     def create_one(self, req: CreateOneRequest) -> CreateOneResponse:
         model_context: ModelContext = self._get_model_context(req.project_id, req.model_name)
+        db_instance = self.db_instance_repo.get_db_instance_by_project_id(req.project_id)
         metadata_ctx: MetadataContext = model_context.get_master_metadata_ctx()
         if metadata_ctx is None:
             raise BizException(
@@ -91,13 +95,14 @@ class RuntimeService:
         db_context = self._get_database_context(model_context, req.project_id)
 
         # 4. 获取Factory
-        mongo_repo = reposervice.MongoRepoService(db_context)
-        insert_id = mongo_repo.apply_create(domain)
+        repo: RepoService = RepoFactory.create_repo(db_instance.db_type, db_context)
+        insert_id = repo.apply_create(domain)
         resp = CreateOneResponse(id=insert_id)
         return resp
 
     def create_many(self, req: CreateManyRequest) -> CreateManyResponse:
         model_context = self._get_model_context(req.project_id, req.model_name)
+        db_instance = self.db_instance_repo.get_db_instance_by_project_id(req.project_id)
         metadata_ctx: MetadataContext = model_context.get_master_metadata_ctx()
         if metadata_ctx is None:
             raise BizException(
@@ -111,13 +116,14 @@ class RuntimeService:
         db_context = self._get_database_context(model_context, req.project_id)
 
         # 4. 获取Factory
-        mongo_repo = reposervice.MongoRepoService(db_context)
-        insert_id_list = mongo_repo.apply_create_many(create_many_domain)
+        repo: RepoService = RepoFactory.create_repo(db_instance.db_type, db_context)
+        insert_id_list = repo.apply_create_many(create_many_domain)
         resp = CreateManyResponse(id_list=insert_id_list)
         return resp
 
     def update_one(self, req: UpdateOneRequest) -> UpdateOneResponse:
         model_context = self._get_model_context(req.project_id, req.model_name)
+        db_instance = self.db_instance_repo.get_db_instance_by_project_id(req.project_id)
         metadata_ctx: MetadataContext = model_context.get_master_metadata_ctx()
         metadata_ctx.validate_on_update(req.param)
 
@@ -126,13 +132,14 @@ class RuntimeService:
 
         # 4. 获取Factory
         domain = DomainFactory(model_context).update_domain(param=req.param)
-        mongo_repo = reposervice.MongoRepoService(db_context)
-        count = mongo_repo.apply_update(domain)
+        repo: RepoService = RepoFactory.create_repo(db_instance.db_type, db_context)
+        count = repo.apply_update(domain)
         resp = UpdateOneResponse(count=count)
         return resp
 
     def update_many(self, req: UpdateManyRequest) -> UpdateManyResponse:
         model_context = self._get_model_context(req.project_id, req.model_name)
+        db_instance = self.db_instance_repo.get_db_instance_by_project_id(req.project_id)
         metadata_ctx: MetadataContext = model_context.get_master_metadata_ctx()
         metadata_ctx.validate_on_update(req.param)
 
@@ -141,34 +148,36 @@ class RuntimeService:
 
         # 4. 获取Factory
         domain = DomainFactory(model_context).update_many_domain(param=req.param)
-        mongo_repo = reposervice.MongoRepoService(db_context)
-        count = mongo_repo.apply_update_many(domain)
+        repo: RepoService = RepoFactory.create_repo(db_instance.db_type, db_context)
+        count = repo.apply_update_many(domain)
         resp = UpdateManyResponse(count=count)
         return resp
 
     def delete_one(self, req: DeleteOneRequest) -> DeleteOneResponse:
         model_context = self._get_model_context(req.project_id, req.model_name)
+        db_instance = self.db_instance_repo.get_db_instance_by_project_id(req.project_id)
 
         # 3. 获取database_info
         db_context = self._get_database_context(model_context, req.project_id)
 
         # 4. 获取Factory
         domain = DomainFactory(model_context).delete_domain(param=req.param)
-        mongo_repo = reposervice.MongoRepoService(db_context)
-        count = mongo_repo.apply_delete(domain)
+        repo: RepoService = RepoFactory.create_repo(db_instance.db_type, db_context)
+        count = repo.apply_delete(domain)
         resp = DeleteOneResponse(count=count)
         return resp
 
     def delete_many(self, req: DeleteManyRequest) -> DeleteManyResponse:
         model_context = self._get_model_context(req.project_id, req.model_name)
+        db_instance = self.db_instance_repo.get_db_instance_by_project_id(req.project_id)
 
         # 3. 获取database_info
         db_context = self._get_database_context(model_context, req.project_id)
 
         # 4. 获取Factory
         domain = DomainFactory(model_context).delete_many_domain(param=req.param)
-        mongo_repo = reposervice.MongoRepoService(db_context)
-        count = mongo_repo.apply_delete_many(domain)
+        repo: RepoService = RepoFactory.create_repo(db_instance.db_type, db_context)
+        count = repo.apply_delete_many(domain)
         resp = DeleteManyResponse(count=count)
         return resp
 

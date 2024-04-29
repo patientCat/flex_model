@@ -9,6 +9,7 @@ from app.common.error import BizException, ErrorCode
 from app.domain.lowcode_model.dsl.dsl_param import IncludeContext, IncludeParam
 from app.domain.lowcode_model.dsl.dsl_domain import FindDomain, CreateDomain, CreateManyDomain, FindManyDomain, \
     UpdateDomain, UpdateManyDomain, DeleteDomain, DeleteManyDomain
+from app.domain.project_ctx.adaptor.repo import RepoService
 from app.domain.project_ctx.database import DbContext
 
 
@@ -91,7 +92,8 @@ def do_delete(collection, query, unique: bool, delete_many: bool):
     return result.deleted_count
 
 
-class MongoRepoService:
+
+class MongoRepoService(RepoService):
     def __init__(self, db_context: DbContext):
         self.db_context: DbContext = db_context
 
@@ -179,7 +181,7 @@ class MongoRepoService:
         count = do_update(collection, query, data, update_many=True)
         return count
 
-    def apply_delete(self, domain: DeleteDomain):
+    def apply_delete(self, domain: DeleteDomain) -> int:
         client, db, collection = self._connect_to_db()
 
         query = domain.query
@@ -187,7 +189,7 @@ class MongoRepoService:
         count = do_delete(collection, query, unique=unique, delete_many=False)
         return count
 
-    def apply_delete_many(self, domain: DeleteManyDomain):
+    def apply_delete_many(self, domain: DeleteManyDomain) -> int:
         client, db, collection = self._connect_to_db()
 
         query = domain.query

@@ -141,12 +141,12 @@ class MetadataContextDomain:
         if model is None:
             raise BizException(
                 code=ErrorCode.InvalidParameter,
-                message=f"get_model_by_name_is_none_project_id={project_id}_model_name={name}"
+                message=f"get_model_by_name_is_none_project_id='{project_id}'_model_name='{name}'"
             )
         if model.schema is None:
             raise BizException(
                 code=ErrorCode.InvalidParameter,
-                message=f"model_schema_is_none_project_id={project_id}_model_name={name}"
+                message=f"model_schema_is_none_project_id='{project_id}'_model_name='{name}'"
             )
         json_schema = json.loads(model.schema)
         metadata_ctx = MetadataContext(json_schema=json_schema)
@@ -191,7 +191,7 @@ class ModelContext:
     def get_metadata_ctx_by_name(self, model_name: str) -> MetadataContext:
         return self.__metadata_ctx_domain.get_by_name(self.__model_name_ctx.project_id, model_name)
 
-    def create_metadata_ctx(self, *, schema):
+    def create_metadata_ctx(self, *, schema:dict, db_type:str):
         project_id = self.__model_name_ctx.project_id
         model_name = self.__model_name_ctx.name
         json_schema = json.dumps(schema)
@@ -204,6 +204,7 @@ class ModelContext:
         except Exception as e:
             raise BizException(ErrorCode.InvalidParameter, f"{e}")
 
+        # 验证schema的每一列
         column_list = SchemaColumnFactory.create_column_list(schema)
         for column in column_list:
             column_format = ColumnFormat(column.format)
@@ -218,6 +219,10 @@ class ModelContext:
                 raise BizException(ErrorCode.InvalidParameter,
                                    f"project='{project_id}', model_name='{model_name}' already exists")
             raise e
+
+        if db_type == 'mysql':
+            # do_create_table
+            pass
 
     def add_column(self, add_column_list: List[dict]):
 
