@@ -103,8 +103,10 @@ class TestAPI(unittest.TestCase):
         mongo_resp = self.manage_client.create_database_instance_t(self.mongo_project, "mongo", "my_database",
                                                       "localhost", 27017, "admin", "123456")
         print(mongo_resp)
-        self.manage_client.create_model("user", self.mongo_project, user_schema)
-        self.manage_client.create_model("profile", self.mongo_project, profile_schema)
+        user_model_resp = self.manage_client.create_model("user", self.mongo_project, user_schema)
+        print(user_model_resp)
+        profile_model_resp = self.manage_client.create_model("profile", self.mongo_project, profile_schema)
+        print(profile_model_resp)
 
     def tearDown(self):
         self.manage_client.delete_model("user", self.mongo_project)

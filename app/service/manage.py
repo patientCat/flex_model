@@ -31,7 +31,7 @@ class ManageService:
 
         model_name_ctx = ModelNameContext.validate_and_create(name=req.model_name, project_id=req.project_id)
         model_context = ModelContext.create(model_name_ctx=model_name_ctx, model_repo=self.model_repo)
-        model_context.create_metadata_ctx(schema=req.schema, type=db_instance.db_type)
+        model_context.create_metadata_ctx(schema=req.schema, db_type=db_instance.db_type)
         return CreateModelResponse(success=True)
 
     def get_model(self, req: GetModelRequest) -> GetModelResponse:
