@@ -13,7 +13,10 @@ curl -X POST  -H "Content-Type: application/json" 'http://127.0.0.1:8080/CreateD
     "Type": "mongo",
     "ProjectId": "default",
     "DatabaseName": "your_database_name",
-    "DatabaseUrl": "your_db_url",
+    "Host": "your_db_host",
+    "Port": 27017,
+    "Username": "your_db_username",
+    "Password": "your_db_password",
 }'
 ```
 
