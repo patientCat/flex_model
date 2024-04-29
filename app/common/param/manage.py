@@ -146,8 +146,11 @@ class CreateDatabaseInstanceRequest(BaseProjectRequest):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.type: str = kwargs.get('Type')
-        self.database_url: str = kwargs.get('DatabaseUrl')
+        self.host: str = kwargs.get('Host')
+        self.port: int = kwargs.get('Port')
         self.database_name: str = kwargs.get('DatabaseName')
+        self.username: str = kwargs.get('Username')
+        self.password: str = kwargs.get('Password')
 
 
 @dataclass
@@ -164,20 +167,22 @@ class GetDatabaseInstanceRequest(BaseProjectRequest):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+
 @dataclass
 class DatabaseInstanceVo:
     project_id: str
     db_type: str
-    db_url: str
+    host: str
     db_name: str
 
     def dict_msg(self):
         return {
             "ProjectId": self.project_id,
             "Type": self.db_type,
-            "DatabaseUrl": self.db_url,
+            "Host": self.host,
             "DatabaseName": self.db_name,
         }
+
 
 @dataclass
 class GetDatabaseInstanceResponse:
@@ -193,6 +198,7 @@ class DeleteDatabaseInstanceRequest(BaseProjectRequest):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+
 @dataclass
 class DeleteDatabaseInstanceResponse:
     success: bool
@@ -201,5 +207,3 @@ class DeleteDatabaseInstanceResponse:
         return {
             "Success": self.success
         }
-
-

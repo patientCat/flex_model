@@ -35,7 +35,7 @@ class ManageService:
         return CreateModelResponse(success=True)
 
     def get_model(self, req: GetModelRequest) -> GetModelResponse:
-        model_po = self.__get_model(req)
+        model_po = self.__get_model(project_id=req.project_id, model_name=req.model_name)
 
         return GetModelResponse(model=ModelConverter.convert_model_po_2_vo(model_po))
 
@@ -61,14 +61,14 @@ class ManageService:
         return AddColumnResponse(True)
 
     def modify_column(self, req: ModifyColumnRequest) -> ModifyColumnResponse:
-        model_po = self.__get_model(req)
-        pass
+        model_po = self.__get_model(project_id=req.project_id, model_name=req.model_name)
+        return ModifyColumnResponse(success=True)
 
-    def __get_model(self, req) -> ModelPO:
-        model_po: ModelPO = self.model_repo.get_model_by_name(project_id=req.project_id, model_name=req.model_name)
+    def __get_model(self, *, project_id, model_name) -> ModelPO:
+        model_po: ModelPO = self.model_repo.get_model_by_name(project_id=project_id, model_name=model_name)
         if model_po is None:
             raise BizException(code=ErrorCode.InvalidParameter,
-                               message=f"Model with name '{req.model_name}' is not found")
+                               message=f"Model with name '{model_name}' is not found")
         return model_po
 
     def delete_column(self, req: DeleteColumnRequest) -> DeleteColumnResponse:
@@ -79,11 +79,15 @@ class ManageService:
         return DeleteColumnResponse(True)
 
     def create_database_instance(self, req: CreateDatabaseInstanceRequest) -> CreateDatabaseInstanceResponse:
-        database_instance_po = DatabaseInstancePO()
+        database_instance_po: DatabaseInstancePO = DatabaseInstancePO()
         database_instance_po.project_id = req.project_id
         database_instance_po.db_type = req.type
-        database_instance_po.db_url = req.database_url
+        database_instance_po.host = req.host
+        database_instance_po.port = req.port
         database_instance_po.db_name = req.database_name
+        database_instance_po.user_name = req.username
+        database_instance_po.password = req.password
+
         try:
             self.db_instance_repo.create_db_instance(database_instance_po)
         except Exception as e:
@@ -98,7 +102,7 @@ class ManageService:
         db_instance_po: DatabaseInstancePO = self.db_instance_repo.get_db_instance_by_project_id(req.project_id)
         db_instance_vo = DatabaseInstanceVo(project_id=db_instance_po.project_id,
                                             db_type=db_instance_po.db_type,
-                                            db_url=db_instance_po.db_url,
+                                            host=db_instance_po.host,
                                             db_name=db_instance_po.db_name)
         return GetDatabaseInstanceResponse(db_instance_vo)
 

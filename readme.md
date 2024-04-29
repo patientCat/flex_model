@@ -166,7 +166,6 @@ curl -X POST -H "Content-Type: application/json" 'http://127.0.0.1:8080/FindOne'
 ### 详细了解
 [自动化测试用例](/autotest/runtime_auto_test.py)
 
-[](/接入协议)
 
 ## 项目讲解
 低代码项目中的数据模型实现。

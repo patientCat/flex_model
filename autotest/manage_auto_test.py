@@ -13,7 +13,7 @@ class TestDatabaseInstance(unittest.TestCase):
 
     def test_database_instance(self):
         create_response = self.manage_client.create_database_instance_t(self.project_id, "mongo", "my_database",
-                                                                        "mongodb://localhost:27017/")
+                                                                        "localhost", 27017, "admin", "123456")
         self.assertTrue(TestHelper.check_response(create_response))
 
         get_response = self.manage_client.get_database_instance_t(self.project_id)
@@ -23,13 +23,14 @@ class TestDatabaseInstance(unittest.TestCase):
         self.assertTrue(TestHelper.check_response(delete_response))
 
 
-class TestAPI(unittest.TestCase):
+class TestMongoModel(unittest.TestCase):
 
     def setUp(self):
         self.url = 'http://127.0.0.1:8080'
         self.headers = {'Content-Type': 'application/json'}
         self.manage_client = ManageClient(url=self.url, headers=self.headers)
-        self.project_id = "default"
+        self.mongo_project = "mongo"
+        self.mysql_project = "mysql"
         self.user_schema = {
             "$schema": "http://json-schema.org/draft-07/schema#",
             "type": "object",
@@ -73,28 +74,33 @@ class TestAPI(unittest.TestCase):
                 "age"
             ]
         }
-        self.manage_client.create_database_instance_t(self.project_id, "mongo", "my_database",
-                                                      "mongodb://localhost:27017/")
-        self.manage_client.delete_model("user", self.project_id)
+        mongo_resp = self.manage_client.create_database_instance_t(self.mongo_project, "mongo", "my_database",
+                                                      "localhost", 27017, "admin", "123456")
+        print(mongo_resp)
+        mysql_resp = self.manage_client.create_database_instance_t(self.mysql_project, "mysql", "my_database", "localhost",
+                                                      3306, "root", "123456")
+        print(mysql_resp)
+        self.manage_client.delete_model("user", self.mongo_project)
 
     def tearDown(self):
-        self.manage_client.delete_database_instance_t(self.project_id)
+        self.manage_client.delete_database_instance_t(self.mongo_project)
+        self.manage_client.delete_database_instance_t(self.mysql_project)
 
     def test_create(self):
-        self.manage_client.create_model("user", self.project_id, self.user_schema)
-        self.manage_client.delete_model("user", self.project_id)
+        self.manage_client.create_model("user", self.mongo_project, self.user_schema)
+        self.manage_client.delete_model("user", self.mongo_project)
 
     def test_column(self):
-        self.manage_client.create_model("user", self.project_id, self.user_schema)
+        self.manage_client.create_model("user", self.mongo_project, self.user_schema)
         self.manage_client.add_column_list("user",
-                                           self.project_id,
+                                           self.mongo_project,
                                            [
                                                {"name": "delete", "format": "xShortText", "type": "string"},
                                                {"name": "exist", "format": "xShortText", "type": "string"}])
-        self.manage_client.delete_column_list("user", self.project_id, ["delete"])
-        response = self.manage_client.get_model("user", self.project_id)
+        self.manage_client.delete_column_list("user", self.mongo_project, ["delete"])
+        response = self.manage_client.get_model("user", self.mongo_project)
         schema = response['Response']['Model']['Schema']
         json_schema = json.loads(schema)
         properties = json_schema['properties']
         self.assertTrue('exist' in properties)
-        self.manage_client.delete_model("user", self.project_id)
+        self.manage_client.delete_model("user", self.mongo_project)

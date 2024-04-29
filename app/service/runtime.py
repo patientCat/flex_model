@@ -38,9 +38,9 @@ class RuntimeService:
     def _get_database_context(self, model_context: ModelContext, req):
         model_name_ctx = model_context.model_name_ctx
         LOGGER.info("get_database_ctx, model_name_ctx=%s", utils.toJSON(model_name_ctx))
-        database_info = self.context.get_database_info(req.project_id, model_context)
+        database_info = self.context.get_database_info(req.mongo_project, model_context)
         if database_info is None:
-            LOGGER.error(f"get_database_info_fail_with_project_id={req.project_id}")
+            LOGGER.error(f"get_database_info_fail_with_project_id={req.mongo_project}")
             raise BizException(ErrorCode.InvalidParameter, "project_id relate database_info is not exist")
         LOGGER.info("get_database_ctx, database_info=%s", database_info.to_json())
         dbcontext = MongoDbContext(database_info, model_name_ctx.collection_name)

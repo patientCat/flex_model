@@ -34,7 +34,12 @@ class MongoDbContext(DbContext):
         self.__collection_name = collection_name
 
     def create_client(self):
-        return MongoClient(self.__database_info.db_url)
+        return MongoClient(
+            host=self.__database_info.db_url,
+            port=self.__database_info.db_port,
+            username=self.__database_info.username,
+            password=self.__database_info.password
+        )
 
     def database_name(self):
         return self.__database_info.database_name

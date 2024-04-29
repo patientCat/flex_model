@@ -95,8 +95,11 @@ class CreateDatabaseInstance(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('ProjectId', type=str, required=True)
         parser.add_argument('Type', type=str, choices=["mongo", "mysql"], required=True)
-        parser.add_argument('DatabaseUrl', type=str, required=True)
+        parser.add_argument('Host', type=str, required=True)
         parser.add_argument('DatabaseName', type=str, required=True)
+        parser.add_argument('Username', type=str, required=True)
+        parser.add_argument('Port', type=int, required=True)
+        parser.add_argument('Password', type=str, required=True)
         args = parser.parse_args()
 
         req = manage.CreateDatabaseInstanceRequest(**args)

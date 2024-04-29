@@ -32,8 +32,11 @@ class _DatabaseInstancePO(Base, DatabaseInstancePO):
     id = Column(Integer, primary_key=True)
     project_id = Column(String)
     db_type = Column(String)
-    db_url = Column(String)
+    host = Column(String)
+    port = Column(Integer)
     db_name = Column(String)
+    username = Column(String)
+    password = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

@@ -30,13 +30,14 @@
 通过Flask自己定义的2个装饰器可以完成对出入口日志进行打印。同时将业务上下文属性设置进去
 
 注意，每个请求都是一个线程。因此在after_request处，需要将所有的线程局部变量清空
+
 ```python
 @APP.before_request
 def before_request_func():
     BIZ_CONTEXT.set_attr(LogKey.action, request.path)
     BIZ_CONTEXT.set_attr(LogKey.request_id, request.headers.get("x-request-id", ""))
     request_body = request.get_json()
-    BIZ_CONTEXT.set_attr(LogKey.project_id, request_body.get("ProjectId", ""))
+    BIZ_CONTEXT.set_attr(LogKey.mongo_project, request_body.get("ProjectId", ""))
     LOGGER.info(f"Handling request: {request.method} body:{request_body}")
 
 

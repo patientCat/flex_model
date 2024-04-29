@@ -20,12 +20,15 @@ class ManageClient:
         self.url = url
         self.headers = headers
 
-    def create_database_instance_t(self, project_id, db_type, db_name, db_url):
+    def create_database_instance_t(self, project_id, db_type, db_name, host, port, username, password):
         payload = {
             "ProjectId": project_id,
             "Type": db_type,
             "DatabaseName": db_name,
-            "DatabaseUrl": db_url,
+            "Host": host,
+            "Port": port,
+            "Username": username,
+            "Password": password
         }
         response = requests.post(f'{self.url}/CreateDatabaseInstance', json=payload, headers=self.headers)
         response_data = response.json()
