@@ -1,39 +1,26 @@
 import json
 import unittest
 
-import requests
+from autotest.test_helper import ManageClient, TestHelper
 
 
 class TestDatabaseInstance(unittest.TestCase):
     def setUp(self):
         self.url = 'http://127.0.0.1:8080'
         self.headers = {'Content-Type': 'application/json'}
+        self.project_id = "default"
+        self.manage_client = ManageClient(url=self.url, headers=self.headers)
 
     def test_database_instance(self):
-        self.create_database_instance_t("default", "mongo", "mongodb://localhost:27017/", "my_database")
-        self.get_database_instance_t("default")
+        create_response = self.manage_client.create_database_instance_t(self.project_id, "mongo", "my_database",
+                                                                        "mongodb://localhost:27017/")
+        self.assertTrue(TestHelper.check_response(create_response))
 
-    def create_database_instance_t(self, project_id, db_type, db_name, db_url):
-        payload = {
-            "ProjectId": project_id,
-            "Type": db_type,
-            "DatabaseName": db_name,
-            "DatabaseUrl": db_url,
-        }
-        response = requests.post(f'{self.url}/CreateDatabaseInstance', json=payload, headers=self.headers)
-        print(response.json())
-        response_data = response.json()
-        return response_data
+        get_response = self.manage_client.get_database_instance_t(self.project_id)
+        self.assertTrue(TestHelper.check_response(get_response))
 
-    def get_database_instance_t(self, project_id):
-        payload = {
-            "ProjectId": project_id,
-        }
-        response = requests.post(f'{self.url}/GetDatabaseInstance', json=payload, headers=self.headers)
-        print(response.json())
-        response_data = response.json()
-        self.assertEqual(response.status_code, 200)
-        return response_data
+        delete_response = self.manage_client.delete_database_instance_t(self.project_id)
+        self.assertTrue(TestHelper.check_response(delete_response))
 
 
 class TestAPI(unittest.TestCase):
@@ -41,6 +28,8 @@ class TestAPI(unittest.TestCase):
     def setUp(self):
         self.url = 'http://127.0.0.1:8080'
         self.headers = {'Content-Type': 'application/json'}
+        self.manage_client = ManageClient(url=self.url, headers=self.headers)
+        self.project_id = "default"
         self.user_schema = {
             "$schema": "http://json-schema.org/draft-07/schema#",
             "type": "object",
@@ -84,70 +73,28 @@ class TestAPI(unittest.TestCase):
                 "age"
             ]
         }
-        self.delete_model("user", "default")
+        self.manage_client.create_database_instance_t(self.project_id, "mongo", "my_database",
+                                                      "mongodb://localhost:27017/")
+        self.manage_client.delete_model("user", self.project_id)
+
+    def tearDown(self):
+        self.manage_client.delete_database_instance_t(self.project_id)
 
     def test_create(self):
-        self.create_model("user", "default", self.user_schema)
-        self.delete_model("user", "default")
+        self.manage_client.create_model("user", self.project_id, self.user_schema)
+        self.manage_client.delete_model("user", self.project_id)
 
     def test_column(self):
-        self.create_model("user", "default", self.user_schema)
-        self.add_column_list("user",
-                             "default",
-                             [
-                                 {"name": "delete", "format": "xShortText", "type": "string"},
-                                 {"name": "exist", "format": "xShortText", "type": "string"}])
-        self.delete_column_list("user", "default", ["delete"])
-        response = self.get_model("user", "default")
+        self.manage_client.create_model("user", self.project_id, self.user_schema)
+        self.manage_client.add_column_list("user",
+                                           self.project_id,
+                                           [
+                                               {"name": "delete", "format": "xShortText", "type": "string"},
+                                               {"name": "exist", "format": "xShortText", "type": "string"}])
+        self.manage_client.delete_column_list("user", self.project_id, ["delete"])
+        response = self.manage_client.get_model("user", self.project_id)
         schema = response['Response']['Model']['Schema']
         json_schema = json.loads(schema)
         properties = json_schema['properties']
         self.assertTrue('exist' in properties)
-        self.delete_model("user", "default")
-
-    def create_model(self, model_name, project_id, schema: dict):
-        payload = {
-            "ModelName": model_name,
-            "ProjectId": project_id,
-            "ModelSchema": schema,
-        }
-        response = requests.post(f'{self.url}/CreateModel', json=payload, headers=self.headers)
-        print(response.json())
-        self.assertEqual(response.status_code, 200)
-
-    def delete_model(self, model_name, project_id):
-        payload = {
-            "ModelName": model_name,
-            "ProjectId": project_id,
-        }
-        response = requests.post(f'{self.url}/DeleteModel', json=payload, headers=self.headers)
-        print(response.json())
-        self.assertEqual(response.status_code, 200)
-
-    def add_column_list(self, model_name, project_id, column_list):
-        payload = {
-            "ModelName": model_name,
-            "ProjectId": project_id,
-            "ColumnList": column_list
-        }
-        response = requests.post(f'{self.url}/AddColumn', json=payload, headers=self.headers)
-        print(response.json())
-
-    def delete_column_list(self, model_name, project_id, column_name_list):
-        payload = {
-            "ModelName": model_name,
-            "ProjectId": project_id,
-            "ColumnNameList": column_name_list,
-        }
-        response = requests.post(f'{self.url}/DeleteColumn', json=payload, headers=self.headers)
-        print(response.json())
-
-    def get_model(self, model_name, project_id):
-        payload = {
-            "ModelName": model_name,
-            "ProjectId": project_id,
-        }
-        response = requests.post(f'{self.url}/GetModel', json=payload, headers=self.headers)
-        print(response.json())
-        response_data = response.json()
-        return response_data
+        self.manage_client.delete_model("user", self.project_id)

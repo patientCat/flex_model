@@ -94,7 +94,7 @@ class CreateDatabaseInstance(Resource):
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('ProjectId', type=str, required=True)
-        parser.add_argument('Type', type=str, required=True)
+        parser.add_argument('Type', type=str, choices=["mongo", "mysql"], required=True)
         parser.add_argument('DatabaseUrl', type=str, required=True)
         parser.add_argument('DatabaseName', type=str, required=True)
         args = parser.parse_args()
@@ -108,9 +108,7 @@ class CreateDatabaseInstance(Resource):
 class DeleteDatabaseInstance(Resource):
     def post(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('ModelName', type=str, required=True)
         parser.add_argument('ProjectId', type=str, required=True)
-        parser.add_argument('DatabaseInstanceNameList', type=str, action="append", required=True)
         args = parser.parse_args()
 
         req = manage.DeleteDatabaseInstanceRequest(**args)

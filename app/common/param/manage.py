@@ -188,3 +188,18 @@ class GetDatabaseInstanceResponse:
             "Instance": self.db_instance.dict_msg()
         }
 
+
+class DeleteDatabaseInstanceRequest(BaseProjectRequest):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+@dataclass
+class DeleteDatabaseInstanceResponse:
+    success: bool
+
+    def dict_msg(self):
+        return {
+            "Success": self.success
+        }
+
+

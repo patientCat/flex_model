@@ -42,3 +42,6 @@ class DatabaseInstanceRepo(object):
 
     def create_db_instance(self, database_instance: DatabaseInstancePO) -> None:
         pass
+
+    def remove_by_project_id(self, project_id: str):
+        pass

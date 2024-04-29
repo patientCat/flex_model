@@ -5,8 +5,19 @@
 
 基于schema实现。可以通过schema快速生成表单。
 ## quickstart
+1. 初始化项目
+需要一个mongo数据库，后面支持mysql
+```curl
+curl -X POST  -H "Content-Type: application/json" 'http://127.0.0.1:8080/CreateDatabaseInstance' \
+-d '{
+    "Type": "mongo",
+    "ProjectId": "default",
+    "DatabaseName": "your_database_name",
+    "DatabaseUrl": "your_db_url",
+}'
+```
 
-1. 定义schema
+2. 定义schema
 
 数据模型通过json-schema定义通用的表结构。
 
@@ -97,7 +108,7 @@ curl -X POST -H "Content-Type: application/json" 'http://127.0.0.1:8080/CreateMo
 profile模型通过userId关联user模型
 
 
-2. 对模型进行增删查改
+3. 对模型进行增删查改
 
 创建一条数据
 ```curl

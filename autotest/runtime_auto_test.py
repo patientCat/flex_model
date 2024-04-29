@@ -1,5 +1,9 @@
 import unittest
+import uuid
+
 import requests
+
+from autotest.test_helper import ManageClient
 
 """
 项目的标准测试
@@ -10,23 +14,27 @@ class TestAPI(unittest.TestCase):
 
     def setUp(self):
         self.url = 'http://127.0.0.1:8080'
-        self.headers = {'Content-Type': 'application/json'}
+        self.headers = {
+            'Content-Type': 'application/json'
+        }
+        self.manage_client: ManageClient = ManageClient(url=self.url, headers=self.headers)
+        self.project_id = "default"
         user_schema = {
             "$schema": "http://json-schema.org/draft-07/schema#",
             "type": "object",
             "properties": {
                 "id": {
-                    "name":"id",
+                    "name": "id",
                     "type": "string",
                     "format": "xShortText"
                 },
                 "name": {
-                    "name":"name",
+                    "name": "name",
                     "type": "string",
                     "format": "xShortText"
                 },
                 "age": {
-                    "name":"age",
+                    "name": "age",
                     "type": "number",
                     "format": "xNumber"
                 },
@@ -60,12 +68,12 @@ class TestAPI(unittest.TestCase):
             "type": "object",
             "properties": {
                 "id": {
-                    "name":"id",
+                    "name": "id",
                     "type": "string",
                     "format": "xShortText"
                 },
                 "biography": {
-                    "name":"biography",
+                    "name": "biography",
                     "type": "string",
                     "format": "xShortText"
                 },
@@ -93,12 +101,14 @@ class TestAPI(unittest.TestCase):
             ]
         }
 
-        self.create_model("user", "default", user_schema)
-        self.create_model("profile", "default", profile_schema)
+        self.manage_client.create_database_instance_t(self.project_id, "mongo", "my_database", "mongodb://localhost:27017/")
+        self.manage_client.create_model("user", self.project_id, user_schema)
+        self.manage_client.create_model("profile", self.project_id, profile_schema)
 
     def tearDown(self):
-        self.delete_model("user", "default")
-        self.delete_model("profile", "default")
+        self.manage_client.delete_model("user", self.project_id)
+        self.manage_client.delete_model("profile", self.project_id)
+        self.manage_client.delete_database_instance_t(self.project_id)
 
     def create_model(self, model_name, project_id, schema: dict):
         payload = {
@@ -255,14 +265,16 @@ class TestAPI(unittest.TestCase):
         print(f"end: create_many success, insert_id: {insert_id}")
 
         print("begin: find_and_orderby = 1")
-        record = self.find_many(model_name=user_model_name, project_id=project_id, where={"id": {"$in": insert_id}}, orderby=[{"age":1}])
+        record = self.find_many(model_name=user_model_name, project_id=project_id, where={"id": {"$in": insert_id}},
+                                orderby=[{"age": 1}])
         print(f"end: find success, record: {record}")
         self.assertTrue(record is not None)
         age_list = [elem['age'] for elem in record]
         self.assertEqual(age_list, [20, 30, 40])
 
         print("begin: find_and_orderby = -1")
-        record = self.find_many(model_name=user_model_name, project_id=project_id, where={"id": {"$in": insert_id}}, orderby=[{"age":-1}])
+        record = self.find_many(model_name=user_model_name, project_id=project_id, where={"id": {"$in": insert_id}},
+                                orderby=[{"age": -1}])
         print(f"end: find success, record: {record}")
         self.assertTrue(record is not None)
         age_list = [elem['age'] for elem in record]
@@ -383,6 +395,7 @@ class TestAPI(unittest.TestCase):
                 "where": {}
             }
         }
+        self.headers["X-Request-Id"] = "clear_table"
         response = requests.post(f'{self.url}/DeleteMany', json=payload, headers=self.headers)
         self.assertEqual(response.status_code, 201)
         return response.json().get("Response").get("Count")

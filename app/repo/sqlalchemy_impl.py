@@ -120,11 +120,13 @@ class SqlModelRepo(ModelRepo):
     def update_schema(self, project_id, model_name, schema):
         def func(session: Session):
             # 直接更新用户的名字
-            stmt = update(_ModelPO).where(and_(_ModelPO.project_id == project_id, _ModelPO.model_name == model_name)).values(schema=schema)
+            stmt = update(_ModelPO).where(
+                and_(_ModelPO.project_id == project_id, _ModelPO.model_name == model_name)).values(schema=schema)
             session.execute(stmt)
 
             # 提交更改
             session.commit()
+
         return call_on_session(engine=self.engine, func=func)
 
 
@@ -152,5 +154,15 @@ class SqlDatabaseInstanceRepo(DatabaseInstanceRepo):
             copy_value(database_instance, _database_instance)
             session.add(_database_instance)
             session.commit()
+
+        return call_on_session(engine=self.engine, func=func)
+
+    def remove_by_project_id(self, project_id: str):
+        def func(session: Session):
+            db_instance_to_delete = session.query(_DatabaseInstancePO).filter(
+                and_(_DatabaseInstancePO.project_id == project_id)).first()
+            if db_instance_to_delete:
+                session.delete(db_instance_to_delete)
+                session.commit()
 
         return call_on_session(engine=self.engine, func=func)

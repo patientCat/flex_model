@@ -8,7 +8,7 @@ from app.common.param.manage import CreateModelRequest, CreateModelResponse, Get
     GetModelResponse, GetModelListResponse, DeleteModelRequest, DeleteModelResponse, AddColumnRequest, \
     ModifyColumnRequest, DeleteColumnRequest, AddColumnResponse, ModifyColumnResponse, DeleteColumnResponse, \
     CreateDatabaseInstanceRequest, CreateDatabaseInstanceResponse, GetDatabaseInstanceRequest, \
-    GetDatabaseInstanceResponse, DatabaseInstanceVo
+    GetDatabaseInstanceResponse, DatabaseInstanceVo, DeleteDatabaseInstanceRequest, DeleteDatabaseInstanceResponse
 from app.domain.lowcode_model.model_ctx.model import ModelContext, ModelNameContext
 from app.repo.instance import MODEL_REPO, db_instance_repo
 from app.repo.po import DatabaseInstancePO, ModelPO
@@ -101,6 +101,10 @@ class ManageService:
                                             db_url=db_instance_po.db_url,
                                             db_name=db_instance_po.db_name)
         return GetDatabaseInstanceResponse(db_instance_vo)
+
+    def delete_database_instance(self, req: DeleteDatabaseInstanceRequest) -> DeleteDatabaseInstanceResponse:
+        self.db_instance_repo.remove_by_project_id(project_id=req.project_id)
+        return DeleteDatabaseInstanceResponse(success=True)
 
 
 MANAGE_SERVICE: ManageService = ManageService()
