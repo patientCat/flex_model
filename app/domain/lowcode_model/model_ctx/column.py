@@ -172,3 +172,23 @@ class SchemaColumnFactory:
             column = SchemaColumnFactory.create_column(key, json_val)
             column_list.append(column)
         return column_list
+
+    @staticmethod
+    def compose_schema_by_add(*, schema: dict, column_list: List[SchemaColumn]):
+        json_schema = schema
+        properties = json_schema.get("properties")
+        for column in column_list:
+            properties[column.key] = column.json_val
+
+        json_schema["properties"] = properties
+        return json_schema
+
+    @staticmethod
+    def compose_schema_by_remove(*, schema: dict, column_name_list: List[str]):
+        json_schema = schema
+        properties = json_schema.get("properties")
+        for column_name in column_name_list:
+            properties.pop(column_name)
+
+        json_schema["properties"] = properties
+        return json_schema

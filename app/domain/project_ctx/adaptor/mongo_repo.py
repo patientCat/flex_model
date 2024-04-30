@@ -7,7 +7,7 @@ from bson import json_util
 from app.common.bizlogger import LOGGER
 from app.common.error import BizException, ErrorCode
 from app.domain.lowcode_model.dsl.dsl_param import IncludeContext, IncludeParam
-from app.domain.lowcode_model.dsl.dsl_domain import FindDomain, CreateDomain, CreateManyDomain, FindManyDomain, \
+from app.domain.lowcode_model.dsl.dml_domain import FindDomain, CreateDomain, CreateManyDomain, FindManyDomain, \
     UpdateDomain, UpdateManyDomain, DeleteDomain, DeleteManyDomain
 from app.domain.project_ctx.adaptor.repo import RepoService
 from app.domain.project_ctx.database import DbContext

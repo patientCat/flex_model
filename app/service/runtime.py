@@ -5,7 +5,7 @@ from app.common import utils
 from app.common.bizlogger import LOGGER
 from app.common.error import BizException, ErrorCode
 from app.domain.project_ctx.database import MongoDbContext
-from app.domain.lowcode_model.dsl.dsl_domain import DomainFactory
+from app.domain.lowcode_model.dsl.dml_domain import DmlDomainFactory
 from app.domain.lowcode_model.model_ctx.model import ModelNameContext, ModelContext, MetadataContext
 from app.common.param.runtime import UpdateOneRequest, UpdateOneResponse, UpdateManyResponse, UpdateManyRequest, \
     FindOneRequest, FindOneResponse, FindManyRequest, FindManyResponse, CreateOneRequest, CreateOneResponse, \
@@ -56,7 +56,7 @@ class RuntimeService:
 
         # 4. 获取Factory
         repo: RepoService = RepoFactory.create_repo(db_instance.db_type, db_context)
-        find_domain = DomainFactory(model_context).find_domain(param=req.param)
+        find_domain = DmlDomainFactory(model_context).find_domain(param=req.param)
         record, total = repo.apply_find(find_domain)
         LOGGER.info("record={}".format(record))
         resp = FindOneResponse(record=record, total=total)
@@ -71,7 +71,7 @@ class RuntimeService:
 
         # 4. 获取Factory
         repo: RepoService = RepoFactory.create_repo(db_instance.db_type, db_context)
-        find_many_domain = DomainFactory(model_context).find_many_domain(param=req.param)
+        find_many_domain = DmlDomainFactory(model_context).find_many_domain(param=req.param)
         record, total = repo.apply_find_many(find_many_domain)
         LOGGER.info("record_list={}, total={}".format(record, total))
         resp = FindManyResponse(record=record, total=total)
@@ -86,7 +86,7 @@ class RuntimeService:
                 code=ErrorCode.InvalidParameter,
                 message=f"metadata_ctx not exist, model_name={req.model_name}, project_id={req.project_id}"
             )
-        domain = DomainFactory(model_context).create_domain(
+        domain = DmlDomainFactory(model_context).create_domain(
             param=req.param,
             metadata_ctx=metadata_ctx
         )
@@ -109,7 +109,7 @@ class RuntimeService:
                 code=ErrorCode.InvalidParameter,
                 message=f"metadata_ctx not exist, model_name={req.model_name}, project_id={req.project_id}"
             )
-        create_many_domain = DomainFactory(model_context).create_many_domain(
+        create_many_domain = DmlDomainFactory(model_context).create_many_domain(
             param=req.param, metadata_ctx=metadata_ctx
         )
         # 3. 获取database_info
@@ -131,7 +131,7 @@ class RuntimeService:
         db_context = self._get_database_context(model_context, req.project_id)
 
         # 4. 获取Factory
-        domain = DomainFactory(model_context).update_domain(param=req.param)
+        domain = DmlDomainFactory(model_context).update_domain(param=req.param)
         repo: RepoService = RepoFactory.create_repo(db_instance.db_type, db_context)
         count = repo.apply_update(domain)
         resp = UpdateOneResponse(count=count)
@@ -147,7 +147,7 @@ class RuntimeService:
         db_context = self._get_database_context(model_context, req.project_id)
 
         # 4. 获取Factory
-        domain = DomainFactory(model_context).update_many_domain(param=req.param)
+        domain = DmlDomainFactory(model_context).update_many_domain(param=req.param)
         repo: RepoService = RepoFactory.create_repo(db_instance.db_type, db_context)
         count = repo.apply_update_many(domain)
         resp = UpdateManyResponse(count=count)
@@ -161,7 +161,7 @@ class RuntimeService:
         db_context = self._get_database_context(model_context, req.project_id)
 
         # 4. 获取Factory
-        domain = DomainFactory(model_context).delete_domain(param=req.param)
+        domain = DmlDomainFactory(model_context).delete_domain(param=req.param)
         repo: RepoService = RepoFactory.create_repo(db_instance.db_type, db_context)
         count = repo.apply_delete(domain)
         resp = DeleteOneResponse(count=count)
@@ -175,7 +175,7 @@ class RuntimeService:
         db_context = self._get_database_context(model_context, req.project_id)
 
         # 4. 获取Factory
-        domain = DomainFactory(model_context).delete_many_domain(param=req.param)
+        domain = DmlDomainFactory(model_context).delete_many_domain(param=req.param)
         repo: RepoService = RepoFactory.create_repo(db_instance.db_type, db_context)
         count = repo.apply_delete_many(domain)
         resp = DeleteManyResponse(count=count)

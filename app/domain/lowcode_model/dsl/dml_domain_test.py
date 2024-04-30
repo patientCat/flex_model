@@ -5,12 +5,11 @@ import bson
 
 from app.common import utils
 from app.common.error import BizException
-from app.domain.lowcode_model.dsl.dsl_domain import DomainFactory
+from app.domain.lowcode_model.dsl.dml_domain import DmlDomainFactory
 from app.domain.lowcode_model.dsl.dsl_param import SelectorFactory, PaginationFactory
 from app.domain.lowcode_model.dsl.node.factory import NodeFactory
 from app.domain.lowcode_model.model_ctx import model
 from app.domain.lowcode_model.model_ctx.column import SchemaColumn
-from app.domain.lowcode_model.model_ctx.model import ModelContext
 
 
 class TestFindDomain(unittest.TestCase):
@@ -28,7 +27,7 @@ class TestFindDomain(unittest.TestCase):
         self.pagination_factory = Mock(PaginationFactory)
         self.node_factory = Mock(NodeFactory)
 
-        self.domain_factory = DomainFactory(self.model_context)
+        self.domain_factory = DmlDomainFactory(self.model_context)
 
     def test_find_domain(self):
         # Arrange

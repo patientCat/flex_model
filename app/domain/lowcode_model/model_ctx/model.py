@@ -112,22 +112,12 @@ class MetadataContext:
     @staticmethod
     def compose_schema_by_add(*, schema: dict, column_list: List[SchemaColumn]) -> dict:
         json_schema = schema.copy()
-        properties = json_schema.get("properties")
-        for column in column_list:
-            properties[column.key] = column.json_val
-
-        json_schema["properties"] = properties
-        return json_schema
+        return SchemaColumnFactory.compose_schema_by_add(schema=json_schema, column_list=column_list)
 
     @staticmethod
     def compose_schema_by_remove(*, schema: dict, column_name_list: List[str]) -> dict:
         json_schema = schema.copy()
-        properties = json_schema.get("properties")
-        for column_name in column_name_list:
-            properties.pop(column_name)
-
-        json_schema["properties"] = properties
-        return json_schema
+        return SchemaColumnFactory.compose_schema_by_remove(schema=json_schema, column_name_list=column_name_list)
 
 
 class MetadataContextDomain:
@@ -194,25 +184,20 @@ class ModelContext:
     def create_metadata_ctx(self, *, schema: dict, db_type: str):
         project_id = self.__model_name_ctx.project_id
         model_name = self.__model_name_ctx.name
-        json_schema = json.dumps(schema)
-        model_po: ModelPO = ModelPO(model_name=self.__model_name_ctx.name,
-                                    project_id=self.__model_name_ctx.project_id,
-                                    schema=json_schema
-                                    )
+
         try:
             check_schema(schema)
         except Exception as e:
             raise BizException(ErrorCode.InvalidParameter, f"{e}")
 
-        # 验证schema的每一列
-        column_list = SchemaColumnFactory.create_column_list(schema)
-        for column in column_list:
-            column_format: ColumnFormat = column.column_format
-            column_validator = self.__column_validator_factory.create_validator(column_format)
-            if column_validator is not None:
-                column_validator.validate_and_fill(column)
-
+        # 验证schema的每一列，然后重新填充
+        schema = self.validate_and_fill_schema(schema)
         try:
+            str_schema = json.dumps(schema)
+            model_po: ModelPO = ModelPO(model_name=self.__model_name_ctx.name,
+                                        project_id=self.__model_name_ctx.project_id,
+                                        schema=str_schema
+                                        )
             self.__metadata_ctx_domain.create(model_po=model_po)
         except sqlalchemy.exc.IntegrityError as e:
             if isinstance(e, sqlalchemy.exc.IntegrityError):
@@ -223,6 +208,16 @@ class ModelContext:
         if db_type == 'mysql':
             # do_create_table
             pass
+
+    def validate_and_fill_schema(self, schema):
+        column_list = SchemaColumnFactory.create_column_list(schema)
+        for column in column_list:
+            column_format: ColumnFormat = column.column_format
+            column_validator = self.__column_validator_factory.create_validator(column_format)
+            if column_validator is not None:
+                column_validator.validate_and_fill(column)
+        schema = SchemaColumnFactory.compose_schema_by_add(schema=schema, column_list=column_list)
+        return schema
 
     def add_column(self, add_column_list: List[dict]):
 

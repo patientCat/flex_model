@@ -1,7 +1,8 @@
 from typing import Optional
 
-from app.domain.lowcode_model.dsl.dsl_domain import FindDomain, FindManyDomain, CreateDomain, CreateManyDomain, \
+from app.domain.lowcode_model.dsl.dml_domain import FindDomain, FindManyDomain, CreateDomain, CreateManyDomain, \
     UpdateDomain, UpdateManyDomain, DeleteDomain, DeleteManyDomain
+from app.domain.lowcode_model.dsl.dsl_domain import CreateTableDomain
 
 
 class RepoService:
@@ -29,3 +30,5 @@ class RepoService:
     def apply_delete_many(self, domain: DeleteManyDomain):
         raise NotImplementedError
 
+    def create_table(self, domain: CreateTableDomain):
+        raise NotImplementedError
