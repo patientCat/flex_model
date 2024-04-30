@@ -6,6 +6,7 @@ from bson import json_util
 
 from app.common.bizlogger import LOGGER
 from app.common.error import BizException, ErrorCode
+from app.domain.lowcode_model.dsl.dsl_domain import CreateTableDomain
 from app.domain.lowcode_model.dsl.dsl_param import IncludeContext, IncludeParam
 from app.domain.lowcode_model.dsl.dml_domain import FindDomain, CreateDomain, CreateManyDomain, FindManyDomain, \
     UpdateDomain, UpdateManyDomain, DeleteDomain, DeleteManyDomain
@@ -195,3 +196,6 @@ class MongoRepoService(RepoService):
         query = domain.query
         count = do_delete(collection, query, unique=False, delete_many=True)
         return count
+
+    def create_table(self, domain: CreateTableDomain):
+        pass

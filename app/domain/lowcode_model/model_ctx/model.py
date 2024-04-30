@@ -6,9 +6,12 @@ import sqlalchemy
 
 from app.common.bizlogger import LOGGER
 from app.common.error import ErrorCode, BizException, EzErrorCodeEnum
+from app.domain.lowcode_model.dsl.dml_domain import DmlDomainFactory
+from app.domain.lowcode_model.dsl.dsl_domain import DdlDomainFactory
 from app.domain.lowcode_model.model_ctx.column import SchemaColumn, SchemaColumnFactory, ColumnFormat
 from app.domain.lowcode_model.model_ctx.json_schema import JsonSchemaChecker
 from app.domain.lowcode_model.model_ctx.model_validator import ColumnValidatorFactory
+from app.domain.project_ctx.adaptor.repo import RepoService
 from app.repo.interface import ModelRepo
 from app.repo.po import ModelPO
 
@@ -205,9 +208,8 @@ class ModelContext:
                                    f"project='{project_id}', model_name='{model_name}' already exists")
             raise e
 
-        if db_type == 'mysql':
-            # do_create_table
-            pass
+        create_table_domain = DdlDomainFactory(model_name=model_name, db_type=db_type).create_table_domain()
+        RepoService().create_table(domain=create_table_domain)
 
     def validate_and_fill_schema(self, schema):
         column_list = SchemaColumnFactory.create_column_list(schema)
