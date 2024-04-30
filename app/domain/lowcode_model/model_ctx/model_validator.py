@@ -1,6 +1,6 @@
 from abc import abstractmethod
 
-from app.domain.lowcode_model.model_ctx.column import SchemaColumn, ColumnType, ColumnFormat
+from app.domain.lowcode_model.model_ctx.column import SchemaColumn, ColumnType, ColumnFormat, RelationInfo
 
 
 class ColumnValidator:
@@ -90,6 +90,18 @@ class EmailValidator(ColumnValidator):
         return True, ""
 
 
+def check_relation(relation: RelationInfo, curr_format: ColumnFormat):
+    if relation is None:
+        return False, f"{curr_format.value} must has 'xRelation' attr"
+    if "field" not in relation:
+        return False, f"{curr_format.value} 'xRelation' must have 'field' attr"
+    if "relatedField" not in relation:
+        return False, f"{curr_format.value} 'xRelation' must have 'relatedField' attr"
+    if "relatedModelName" not in relation:
+        return False, f"{curr_format.value} 'xRelation' must have 'relatedModelName' attr"
+    return True, ""
+
+
 class ManyToOneValidator(ColumnValidator):
     def get_right_format(self) -> ColumnFormat:
         return ColumnFormat.MANY_TO_ONE
@@ -97,6 +109,10 @@ class ManyToOneValidator(ColumnValidator):
     def do_validate_and_fill(self, column: SchemaColumn, curr_format: ColumnFormat):
         if column.column_type != ColumnType.OBJECT:
             return False, f"{curr_format.value} must be a object type"
+        relation: RelationInfo = column.get_relation()
+        is_ok, err = check_relation(relation, curr_format)
+        if is_ok is False:
+            return False, err
         return True, ""
 
 
@@ -107,6 +123,10 @@ class OneToManyValidator(ColumnValidator):
     def do_validate_and_fill(self, column: SchemaColumn, curr_format: ColumnFormat):
         if column.column_type != ColumnType.OBJECT:
             return False, f"{curr_format.value} must be a object type"
+        relation: RelationInfo = column.get_relation()
+        is_ok, err = check_relation(relation, curr_format)
+        if is_ok is False:
+            return False, err
         return True, ""
 
 
