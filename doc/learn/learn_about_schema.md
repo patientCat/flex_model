@@ -18,6 +18,7 @@ json-schema的校验属性很多。这里只介绍常见的几个。
 
 ### number
 测试最大最小值
+
 ```python
 class NumberOfSchemaTest(unittest.TestCase):
     def setUp(cls) -> None:
@@ -80,6 +81,7 @@ class StringOfSchemaTest(unittest.TestCase):
 ### 校验必填字段
 
 测试必填字段
+
 ```python
 
 class RequiredOfSchemaTest(unittest.TestCase):
@@ -115,6 +117,7 @@ class RequiredOfSchemaTest(unittest.TestCase):
 ### 校验特殊格式
 
 测试format，测试ipv4
+
 ```python
 
 class FormatOfSchemaTest(unittest.TestCase):

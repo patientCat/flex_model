@@ -17,22 +17,21 @@ class TestColumnValidators(unittest.TestCase):
         self.assertIsInstance(validator, ShortTextValidator)
 
         column = self.create_column("test", "string", ColumnFormat.SHORT_TEXT, 256)
-        is_valid, msg = validator.validate(column)
+        is_valid, msg = validator.validate_and_fill(column)
         self.assertTrue(is_valid)
         self.assertEqual(msg, "")
 
         column = self.create_column("test", "number", ColumnFormat.SHORT_TEXT, 256)
-        is_valid, msg = validator.validate(column)
+        is_valid, msg = validator.validate_and_fill(column)
         self.assertFalse(is_valid)
         self.assertEqual(msg, f"{ColumnFormat.SHORT_TEXT.value} must be a string type")
 
         column = self.create_column("test", "string", ColumnFormat.SHORT_TEXT, None)
-        is_valid, msg = validator.validate(column)
-        self.assertFalse(is_valid)
-        self.assertEqual(msg, f"{ColumnFormat.SHORT_TEXT.value} maxLength must be defined")
+        is_valid, msg = validator.validate_and_fill(column)
+        self.assertTrue(is_valid)
 
         column = self.create_column("test", "string", ColumnFormat.SHORT_TEXT, 512)
-        is_valid, msg = validator.validate(column)
+        is_valid, msg = validator.validate_and_fill(column)
         self.assertFalse(is_valid)
         self.assertEqual(msg, f"{ColumnFormat.SHORT_TEXT.value} maxLength must be <= 256")
 
@@ -41,11 +40,11 @@ class TestColumnValidators(unittest.TestCase):
         self.assertIsInstance(validator, LongTextValidator)
 
         column = SchemaColumn(key="test", json_val={
-            "type":"string",
-            "format":"xLongText",
+            "type": "string",
+            "format": "xLongText",
             "maxLength": 64 * 1024
         })
-        is_valid, msg = validator.validate(column)
+        is_valid, msg = validator.validate_and_fill(column)
         print(msg)
         self.assertTrue(is_valid)
         self.assertEqual(msg, "")
@@ -55,7 +54,7 @@ class TestColumnValidators(unittest.TestCase):
             "format": "xLongText",
             "maxLength": 64 * 1024
         })
-        is_valid, msg = validator.validate(column)
+        is_valid, msg = validator.validate_and_fill(column)
         self.assertFalse(is_valid)
         self.assertEqual(msg, f"{ColumnFormat.LONG_TEXT.value} must be a string type")
 
@@ -64,16 +63,15 @@ class TestColumnValidators(unittest.TestCase):
             "format": "xLongText",
             "maxLength": None
         })
-        is_valid, msg = validator.validate(column)
-        self.assertFalse(is_valid)
-        self.assertEqual(msg, f"{ColumnFormat.LONG_TEXT.value} maxLength must be defined")
+        is_valid, msg = validator.validate_and_fill(column)
+        self.assertTrue(is_valid)
 
         column = SchemaColumn(key="test", json_val={
             "type": "string",
             "format": "xLongText",
-            "maxLength":  64 * 1024 + 1
+            "maxLength": 64 * 1024 + 1
         })
-        is_valid, msg = validator.validate(column)
+        is_valid, msg = validator.validate_and_fill(column)
         self.assertFalse(is_valid)
         self.assertEqual(msg, f"{ColumnFormat.LONG_TEXT.value} maxLength must be <= 65536")
 

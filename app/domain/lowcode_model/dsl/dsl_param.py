@@ -256,7 +256,7 @@ class IncludeContextFactory:
             from_col_name=relation_info['relatedModelName'],
             include_as_key=column.name,
             selector=selector,
-            join_one=column.format == ColumnFormat.MANY_TO_ONE.value
+            join_one=column.column_format == ColumnFormat.MANY_TO_ONE
         )
         return include_param
 

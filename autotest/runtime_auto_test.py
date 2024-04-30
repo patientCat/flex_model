@@ -324,6 +324,7 @@ class TestAPI(unittest.TestCase):
             }
         }
         response = requests.post(f'{self.url}/FindOne', json=payload, headers=self.headers)
+        print(response.json())
         self.assertEqual(response.status_code, 200)
         return response.json().get("Response").get("Record")
 

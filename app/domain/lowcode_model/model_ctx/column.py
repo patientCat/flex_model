@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Optional, TypedDict, List
+from typing import Optional, TypedDict, List, Any
 
 from app.common.error import BizException, ErrorCode
 
@@ -10,6 +10,7 @@ class ColumnFormat(Enum):
     xShortText
     maxLength less than 256
     """
+    TIMESTAMP = "xTimestamp"
     SHORT_TEXT = "xShortText"
     """
     xLongText
@@ -41,9 +42,9 @@ class ColumnType(Enum):
 
 COLUMN_TYPE_SET = {column_type.value for column_type in ColumnType.__members__.values()}
 
-RELATION_FORMAT_LIST: List[str] = [ColumnFormat.MANY_TO_ONE.value,
-                                   ColumnFormat.MANY_TO_MANY.value,
-                                   ColumnFormat.ONE_TO_MANY.value]
+RELATION_FORMAT_LIST: List[ColumnFormat] = [ColumnFormat.MANY_TO_ONE,
+                                            ColumnFormat.MANY_TO_MANY,
+                                            ColumnFormat.ONE_TO_MANY]
 
 
 class MetaColumn(ABC):
@@ -52,11 +53,11 @@ class MetaColumn(ABC):
         pass
 
     @abstractmethod
-    def format(self):
+    def column_format(self):
         pass
 
     @abstractmethod
-    def type(self):
+    def column_type(self):
         pass
 
     @abstractmethod
@@ -101,12 +102,12 @@ class SchemaColumn(MetaColumn):
         return self.__json_val.get("name", "")
 
     @property
-    def format(self) -> str:
+    def column_format(self) -> ColumnFormat:
         _format = self.__json_val.get("format", "")
-        return _format
+        return ColumnFormat(_format)
 
     @property
-    def type(self) -> Optional[ColumnType]:
+    def column_type(self) -> Optional[ColumnType]:
         _type = self.__json_val.get("type", "")
         return ColumnType(_type)
 
@@ -118,8 +119,14 @@ class SchemaColumn(MetaColumn):
     def json_val(self) -> JsonSchemaDict:
         return self.__json_val
 
+    def set_attr(self, key: str, value: Any):
+        self.__json_val[key] = value
+
+    def get_attr(self, key: str) -> Any:
+        return self.__json_val.get(key, None)
+
     def is_relation(self) -> bool:
-        if self.format in RELATION_FORMAT_LIST:
+        if self.column_format in RELATION_FORMAT_LIST:
             return True
         else:
             return False

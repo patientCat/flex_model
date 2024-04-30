@@ -74,7 +74,7 @@ class TestMongoModel(unittest.TestCase):
                 "age"
             ]
         }
-        mongo_resp = self.manage_client.create_database_instance_t(self.mongo_project, "adaptor", "my_database",
+        mongo_resp = self.manage_client.create_database_instance_t(self.mongo_project, "mongo", "my_database",
                                                       "localhost", 27017, "admin", "123456")
         print(mongo_resp)
         mysql_resp = self.manage_client.create_database_instance_t(self.mysql_project, "mysql", "my_database", "localhost",
@@ -87,8 +87,14 @@ class TestMongoModel(unittest.TestCase):
         self.manage_client.delete_database_instance_t(self.mysql_project)
 
     def test_create(self):
-        self.manage_client.create_model("user", self.mongo_project, self.user_schema)
-        self.manage_client.delete_model("user", self.mongo_project)
+        create_resp = self.manage_client.create_model("user", self.mongo_project, self.user_schema)
+        print(create_resp)
+
+        response = self.manage_client.get_model("user", self.mongo_project)
+        print(response)
+
+        delete_resp = self.manage_client.delete_model("user", self.mongo_project)
+        print(delete_resp)
 
     def test_column(self):
         self.manage_client.create_model("user", self.mongo_project, self.user_schema)

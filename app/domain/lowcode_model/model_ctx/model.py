@@ -191,7 +191,7 @@ class ModelContext:
     def get_metadata_ctx_by_name(self, model_name: str) -> MetadataContext:
         return self.__metadata_ctx_domain.get_by_name(self.__model_name_ctx.project_id, model_name)
 
-    def create_metadata_ctx(self, *, schema:dict, db_type:str):
+    def create_metadata_ctx(self, *, schema: dict, db_type: str):
         project_id = self.__model_name_ctx.project_id
         model_name = self.__model_name_ctx.name
         json_schema = json.dumps(schema)
@@ -207,10 +207,10 @@ class ModelContext:
         # 验证schema的每一列
         column_list = SchemaColumnFactory.create_column_list(schema)
         for column in column_list:
-            column_format = ColumnFormat(column.format)
+            column_format: ColumnFormat = column.column_format
             column_validator = self.__column_validator_factory.create_validator(column_format)
             if column_validator is not None:
-                column_validator.validate(column)
+                column_validator.validate_and_fill(column)
 
         try:
             self.__metadata_ctx_domain.create(model_po=model_po)
